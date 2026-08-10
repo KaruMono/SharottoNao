@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>会社一览 - Nyantaku</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-zinc-900 text-gray-800 dark:text-gray-100 min-h-full">
+
+  <!-- 浮动顶栏 -->
+  <header class="fixed top-4 inset-x-0 z-50 pointer-events-none">
+    <div class="max-w-6xl mx-auto px-4 pointer-events-auto">
+      <div class="bg-white/90 dark:bg-zinc-800/90 backdrop-blur rounded-2xl shadow-lg border border-gray-200/60 dark:border-zinc-700/60">
+        <div class="flex items-center justify-between px-6 h-14">
+          <!-- 左侧 -->
+          <div class="flex items-center space-x-8">
+            <a href="index.html" class="text-lg font-semibold tracking-wide">Nyantaku</a>
+            <nav class="hidden md:flex space-x-6 text-sm text-gray-600 dark:text-gray-300">
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">游戏</a>
+              <a href="company.html" class="text-gray-900 dark:text-white font-medium">会社</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">文档</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">创建</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">关于</a>
+            </nav>
+          </div>
+
+          <!-- 右侧 -->
+          <div class="flex items-center space-x-3">
+            <input type="text" placeholder="搜索作品 / 会社 / 标签" class="hidden md:block w-56 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+
+            <!-- 日夜模式 -->
+            <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 text-sm">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+
+            <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700">登录</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 内容区 -->
+  <main class="max-w-7xl mx-auto px-6 pt-28 pb-12">
+    
+    <!-- 页面标题与筛选 -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl font-bold">会社一览</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">共收录 <span class="font-medium text-gray-700 dark:text-gray-200">128</span> 家会社</p>
+      </div>
+      
+      <!-- 筛选与排序 -->
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <input type="text" placeholder="搜索会社名..." class="w-48 px-3 py-2 pl-9 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+        </div>
+        <select class="px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none">
+          <option>按作品数排序</option>
+          <option>按名称排序</option>
+          <option>按成立时间</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 字母索引 -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-8">
+      <div class="flex flex-wrap gap-2 text-sm">
+        <span class="text-gray-500 dark:text-gray-400 mr-2">索引：</span>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">全部</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">A</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">B</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">C</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">D</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">E</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">F</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">G</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">H</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">I</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">J</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">K</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">L</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">M</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">N</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">O</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">P</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">Q</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">R</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">S</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">T</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">U</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">V</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">W</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">X</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">Y</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">Z</a>
+        <a href="#" class="px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700">#</a>
+      </div>
+    </div>
+
+    <!-- 会社列表 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      
+      <!-- 会社卡片 -->
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">Key</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">ビジュアルアーツ</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">24</span> 部作品</span>
+            <span>1998</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">TYPE-MOON</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">タイプムーン</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">18</span> 部作品</span>
+            <span>2000</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">Leaf</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">アクアプラス</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">32</span> 部作品</span>
+            <span>1995</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">August</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">オーガスト</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">15</span> 部作品</span>
+            <span>2002</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">minori</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">みのり</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">12</span> 部作品</span>
+            <span>1999</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">Yuzusoft</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">ゆずソフト</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">21</span> 部作品</span>
+            <span>2006</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">FAVORITE</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">フェイバリット</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">9</span> 部作品</span>
+            <span>2006</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">Saga Planets</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">サガプラネッツ</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">14</span> 部作品</span>
+            <span>2007</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">Alcot</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">アルコット</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">17</span> 部作品</span>
+            <span>2003</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">CIRCUS</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">サーカス</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">38</span> 部作品</span>
+            <span>2000</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">Navel</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">ネーブル</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">22</span> 部作品</span>
+            <span>2003</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="flex items-center gap-4 bg-white dark:bg-zinc-800 rounded-xl p-4 shadow hover:shadow-lg hover:scale-[1.01] transition group">
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition">
+          <i class="fa-solid fa-building text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">Nitroplus</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-500 truncate">ニトロプラス</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-zinc-500">
+            <span>共 <span class="font-medium text-gray-700 dark:text-zinc-300">28</span> 部作品</span>
+            <span>2000</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- 分页 -->
+    <div class="flex justify-center items-center gap-2 mt-10">
+      <button class="px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 disabled:opacity-50" disabled>
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="px-3 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm font-medium">1</button>
+      <button class="px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700">2</button>
+      <button class="px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700">3</button>
+      <span class="px-2 text-gray-400">...</span>
+      <button class="px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700">11</button>
+      <button class="px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="text-center text-xs text-gray-500 py-6">
+    © 2026 Nyantaku · Galgame Resource
+  </footer>
+
+</body>
+</html>

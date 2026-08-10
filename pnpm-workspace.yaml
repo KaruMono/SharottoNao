@@ -1,0 +1,12 @@
+overrides:
+  "@tiptap/core": 3.18.0
+  "@tiptap/pm": 3.18.0
+
+onlyBuiltDependencies:
+  - "@parcel/watcher"
+  - "@prisma/client"
+  - "@prisma/engines"
+  - esbuild
+  - prisma
+  - sharp
+  - vue-demi

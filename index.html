@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galgame资源站</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-zinc-900 text-gray-800 dark:text-gray-100 min-h-full">
+
+  <!-- 顶栏 -->
+    <!-- 浮动顶栏 -->
+  <header class="fixed top-4 inset-x-0 z-50 pointer-events-none">
+    <div class="max-w-6xl mx-auto px-4 pointer-events-auto">
+      <div class="bg-white/90 dark:bg-zinc-800/90 backdrop-blur rounded-2xl shadow-lg border border-gray-200/60 dark:border-zinc-700/60">
+        <div class="flex items-center justify-between px-6 h-14">
+          <!-- 左侧 -->
+          <div class="flex items-center space-x-8">
+            <div class="text-lg font-semibold tracking-wide">Nyantaku</div>
+            <nav class="hidden md:flex space-x-6 text-sm text-gray-600 dark:text-gray-300">
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">游戏</a>
+              <a href="company.html" class="hover:text-gray-900 dark:hover:text-white">会社</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">文档</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">创建</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">关于</a>
+            </nav>
+          </div>
+
+          <!-- 右侧 -->
+          <div class="flex items-center space-x-3">
+            <input type="text" placeholder="搜索作品 / 会社 / 标签" class="hidden md:block w-56 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+
+            <!-- 日夜模式 -->
+            <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 text-sm">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+
+            <!-- 通知中心 -->
+            <button class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 text-sm relative">
+              <i class="fa-solid fa-bell"></i>
+              <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-user"></i>登录
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 内容区 -->
+  <main class="max-w-7xl mx-auto px-6 pt-28 pb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10">
+
+      <!-- 主内容区 -->
+      <div class="space-y-12">
+        <section>
+          <h2 class="text-xl font-semibold mb-4">最近发布</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+            <div class="bg-white dark:bg-zinc-800 rounded-xl overflow-hidden shadow hover:scale-105 transition">
+              <img src="https://via.placeholder.com/300x420" class="w-full aspect-[3/4] object-cover" />
+              <div class="p-2 text-sm text-center truncate">游戏标题示例</div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-semibold mb-4">最新上传</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+            <div class="bg-white dark:bg-zinc-800 rounded-xl overflow-hidden shadow hover:scale-105 transition">
+              <img src="https://via.placeholder.com/300x420" class="w-full aspect-[3/4] object-cover" />
+              <div class="p-2 text-sm text-center truncate">最新作品标题</div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-semibold mb-4">热门推荐</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+            <div class="bg-white dark:bg-zinc-800 rounded-xl overflow-hidden shadow hover:scale-105 transition">
+              <img src="https://via.placeholder.com/300x420" class="w-full aspect-[3/4] object-cover" />
+              <div class="p-2 text-sm text-center truncate">人气 Galgame</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 右侧边栏 -->
+      <aside class="space-y-6">
+        <!-- 公告 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <h3 class="font-medium mb-2 flex items-center gap-2"><i class="fa-solid fa-bullhorn"></i>公告</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300">欢迎来到 Nyantaku，本站为 Galgame 条目数据库，支持用户协作编辑。</p>
+        </div>
+
+        <!-- 标签云 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <h3 class="font-medium mb-2 flex items-center gap-2"><i class="fa-solid fa-tags"></i>标签</h3>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700">纯爱</span>
+            <span class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700">NTR</span>
+            <span class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700">催泪</span>
+            <span class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700">校园</span>
+          </div>
+        </div>
+
+        <!-- 最近编辑 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <h3 class="font-medium mb-2 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i>最近编辑</h3>
+          <ul class="text-sm space-y-2 text-gray-600 dark:text-gray-300">
+            <li><span class="font-medium">UserA</span> 修改了 <span class="text-gray-800 dark:text-gray-100">CLANNAD</span>：更新内容</li>
+            <li><span class="font-medium">UserB</span> 创建了条目 <span class="text-gray-800 dark:text-gray-100">AIR</span></li>
+          </ul>
+        </div>
+
+        <!-- 友情链接 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <h3 class="font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-link"></i>友情链接</h3>
+          <div class="flex flex-wrap gap-2 text-sm">
+            <a href="#" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 transition">Bangumi</a>
+            <a href="#" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 transition">VNDB</a>
+            <a href="#" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 transition">2DFan</a>
+            <a href="#" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 transition">ErogeShop</a>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="text-center text-xs text-gray-500 py-6">
+    © 2026 Nyantaku · Galgame Resource
+  </footer>
+
+</body>
+</html>

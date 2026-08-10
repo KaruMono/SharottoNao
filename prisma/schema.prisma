@@ -1,0 +1,1036 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 用户关注相关 ====================
+
+model UserFollow {
+  id          Int      @id @default(autoincrement())
+  followerId  Int // 关注者
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId Int // 被关注者
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+// ==================== 用户相关 ====================
+
+model User {
+  id                Int        @id @default(autoincrement())
+  username          String     @unique @db.VarChar(50)
+  email             String     @unique @db.VarChar(255)
+  password          String     @db.VarChar(255)
+  avatar            String?    @db.VarChar(500)
+  bio               String?    @db.Text
+  role              UserRole   @default(USER)
+  status            UserStatus @default(ACTIVE)
+  nsfwMode          NsfwMode   @default(SFW)
+  emailNotify       Boolean    @default(true) // 邮件通知开关
+  tokenVersion      Int        @default(0) // Token 版本号，用于使旧 token 失效
+  twoFactorSecret   String?    @db.VarChar(255) // TOTP 密钥
+  twoFactorEnabled  Boolean    @default(false)
+  registrationIp    String?    @db.VarChar(50) // 注册时的 IP
+  loginIps          String[]   @default([]) // 最近5次登录 IP（最新在前）
+  unlimitedDownload Boolean    @default(false) // 无限制下载
+  title             String?    @db.VarChar(50)  // 用户头衔
+  titleColor        String?    @db.VarChar(20)  // 头衔颜色（CSS color）
+  lastLoginAt       DateTime? // 最后登录时间
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // 关联
+  favorites               Favorite[]
+  comments                Comment[]
+  commentLikes            CommentLike[]
+  guideLikes              GuideLike[]
+  ratings                 Rating[]
+  createdGames            Game[]                   @relation("GameCreator")
+  resources               Resource[]
+  createdCompanies        Company[]                @relation("CompanyCreator")
+  messages                Message[]                @relation("MessageReceiver")
+  sentMessages            Message[]                @relation("MessageSender")
+  privateConversationsA   PrivateConversation[]    @relation("PrivateConversationParticipantA")
+  privateConversationsB   PrivateConversation[]    @relation("PrivateConversationParticipantB")
+  sentPrivateMessages     PrivateMessage[]         @relation("PrivateMessageSender")
+  receivedPrivateMessages PrivateMessage[]         @relation("PrivateMessageReceiver")
+  downloads               DownloadRecord[]
+  resourceHealthFeedbacks ResourceHealthFeedback[]
+  bumps                   GameBump[] // 顶一下记录
+  guides                  Guide[] // 发布的攻略
+  reports                 Report[]                 @relation("ReportReporter")
+  handledReports          Report[]                 @relation("ReportHandler")
+  editRequests            GameEditRequest[]
+  reviewedEdits           GameEditRequest[]        @relation("EditReviewer")
+  followers               UserFollow[]             @relation("UserFollowing") // 关注我的人
+  following               UserFollow[]             @relation("UserFollowers") // 我关注的人
+  adminLogs               AdminOperationLog[]
+  notificationPreferences NotificationPreference[]
+  contentEdits            ContentEdit[]
+  activities              Activity[]
+  ipBlacklistEntries      IpBlacklist[]            @relation("BlacklistCreator")
+
+  @@index([email])
+  @@index([username])
+}
+
+enum UserRole {
+  USER // 普通用户
+  EDITOR // 编辑员
+  ADMIN // 管理员
+}
+
+enum UserStatus {
+  ACTIVE // 正常
+  BANNED // 封禁
+}
+
+enum NsfwMode {
+  SFW // 仅显示全年龄
+  NSFW // 仅显示NSFW
+  ALL // 显示全部
+}
+
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  email     String   @db.VarChar(255)
+  code      String   @db.VarChar(10)
+  type      CodeType
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email, code])
+}
+
+enum CodeType {
+  REGISTER
+  RESET_PASSWORD
+  CHANGE_EMAIL
+}
+
+// ==================== IP 黑名单 ====================
+
+model IpBlacklist {
+  id        Int      @id @default(autoincrement())
+  ip        String   @unique @db.VarChar(50)
+  reason    String?  @db.VarChar(255)
+  createdAt DateTime @default(now())
+  createdBy Int
+  creator   User     @relation("BlacklistCreator", fields: [createdBy], references: [id])
+
+  @@index([ip])
+}
+
+// ==================== 广告管理 ====================
+
+model Advertisement {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  slot         String   @db.VarChar(50)
+  icon         String?  @db.VarChar(100)
+  imageUrl     String   @db.VarChar(500)
+  linkUrl      String   @db.VarChar(500)
+  enabled      Boolean  @default(true)
+  openInNewTab Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([slot, enabled])
+}
+
+// ==================== 游戏系列相关 ====================
+
+model GameSeries {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(255)
+  nameOriginal String?  @db.VarChar(255)
+  description  String?  @db.Text
+  coverImage   String?  @db.VarChar(500)
+  isNsfw       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  games Game[]
+
+  @@index([name])
+  @@index([isNsfw])
+}
+
+// ==================== 游戏条目相关 ====================
+
+model Game {
+  id Int @id @default(autoincrement())
+
+  // 多语言标题（至少填写一个）
+  titleEn     String? @db.VarChar(255) // 英文标题
+  titleJa     String? @db.VarChar(255) // 日文标题
+  titleZhHans String? @db.VarChar(255) // 简体中文标题
+  titleZhHant String? @db.VarChar(255) // 繁体中文标题
+
+  aliases String[] // 别名列表
+
+  // 多语言简介（至少填写一个）
+  descriptionEn     String? @db.Text // 英文简介
+  descriptionJa     String? @db.Text // 日文简介
+  descriptionZhHans String? @db.Text // 简体中文简介
+  descriptionZhHant String? @db.Text // 繁体中文简介
+
+  coverImage  String?   @db.VarChar(500)
+  bannerImage String?   @db.VarChar(500)
+  releaseDate DateTime?
+  language    String[] // 支持的语言
+  isNsfw      Boolean   @default(false)
+  viewCount   Int       @default(0)
+  deletedAt   DateTime? // 软删除时间戳
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 外部平台关联
+  vndbId    String? @unique @db.VarChar(20) // VNDB ID, 如 v27448
+  bangumiId Int?    @unique // Bangumi ID, 如 297264
+
+  // 购买链接
+  purchaseLinks Json? // [{ name: "Steam", url: "..." }, { name: "DLsite", url: "..." }]
+
+  // VNDB 游戏时长信息（分钟）
+  lengthMinutes Int? // VNDB 获取的游戏时长
+
+  // 游戏系列
+  seriesId Int?
+  series   GameSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  // 关联
+  creatorId Int
+  creator   User @relation("GameCreator", fields: [creatorId], references: [id])
+
+  companies    GameCompany[] // 多对多：一个游戏可以有多个开发商/发行商
+  tags         GameTag[]
+  staff        GameStaff[]
+  screenshots  Screenshot[]
+  resources    Resource[]
+  comments     Comment[]
+  ratings      Rating[]
+  favorites    Favorite[]
+  images       Image[]
+  bumps        GameBump[] // 顶一下记录
+  guides       Guide[] // 攻略
+  editRequests GameEditRequest[] // 修改请求
+
+  @@index([titleEn])
+  @@index([titleJa])
+  @@index([titleZhHans])
+  @@index([titleZhHant])
+  @@index([isNsfw])
+  @@index([createdAt])
+  @@index([viewCount])
+  @@index([vndbId])
+  @@index([bangumiId])
+  @@index([seriesId])
+  // 列表/首页/搜索的主过滤+排序路径：deletedAt IS NULL AND isNsfw = ? ORDER BY ...
+  @@index([deletedAt, isNsfw, createdAt])
+  @@index([deletedAt, isNsfw, viewCount])
+  @@index([deletedAt, isNsfw, releaseDate])
+}
+
+// ==================== 会社相关 ====================
+
+model Company {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(255)
+  nameOriginal String?  @db.VarChar(255)
+  nameIndex    String   @db.VarChar(1) // 首字母索引 A-Z, #
+  aliases      String[] @default([]) // 别名，用于模糊搜索
+  logo         String?  @db.VarChar(500)
+  description  String?  @db.Text
+  foundedYear  Int?
+  website      String?  @db.VarChar(500)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // 父子会社关联
+  parentId Int?
+  parent   Company?  @relation("CompanyChildren", fields: [parentId], references: [id])
+  children Company[] @relation("CompanyChildren")
+
+  // 关联
+  creatorId Int
+  creator   User          @relation("CompanyCreator", fields: [creatorId], references: [id])
+  games     GameCompany[]
+
+  @@index([name])
+  @@index([nameIndex])
+}
+
+// 游戏-会社关联表（多对多）
+model GameCompany {
+  gameId    Int
+  game      Game        @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  companyId Int
+  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  role      CompanyRole @default(DEVELOPER) // 角色：开发商、发行商等
+
+  @@id([gameId, companyId])
+  @@index([companyId])
+}
+
+enum CompanyRole {
+  DEVELOPER // 开发商
+  PUBLISHER // 发行商
+}
+
+enum ResourceStatus {
+  PENDING // 待审核
+  APPROVED // 已通过
+  REJECTED // 已拒绝
+}
+
+// ==================== 标签相关 ====================
+
+model Tag {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  slug        String?  @unique @db.VarChar(100) // 英文/拼音标识
+  description String?  @db.Text
+  color       String?  @db.VarChar(7) // HEX颜色
+  isNsfw      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  games GameTag[]
+
+  @@index([name])
+  @@index([slug])
+  @@index([isNsfw])
+}
+
+model GameTag {
+  gameId Int
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tagId  Int
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, tagId])
+}
+
+// ==================== STAFF相关 ====================
+
+model Staff {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(255)
+  nameOriginal String?  @db.VarChar(255)
+  avatar       String?  @db.VarChar(500)
+  description  String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  games GameStaff[]
+
+  @@index([name])
+}
+
+model GameStaff {
+  gameId        Int
+  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  staffId       Int
+  staff         Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  role          StaffRole
+  characterName String?   @db.VarChar(255) // 声优角色名
+
+  @@id([gameId, staffId, role])
+}
+
+enum StaffRole {
+  ARTIST // 原画
+  WRITER // 剧本
+  COMPOSER // 音乐
+  VOICE_ACTOR // 声优
+  DIRECTOR // 导演
+  OTHER // 其他
+}
+
+// ==================== 下载资源相关 ====================
+
+model ResourceType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  icon      String?  @db.VarChar(50) // FontAwesome图标类名
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  resources Resource[]
+}
+
+model NetDiskType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  icon      String?  @db.VarChar(100)
+  domains   String[] @default([])
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resources Resource[]
+
+  @@index([isActive, sortOrder])
+}
+
+enum ResourceHealthStatus {
+  AVAILABLE // 可用
+  NEEDS_REVIEW // 待复查
+  SUSPECTED_BAD // 疑似失效
+  UNAVAILABLE // 已失效
+}
+
+model Resource {
+  id         Int          @id @default(autoincrement())
+  gameId     Int
+  game       Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  typeId     Int
+  type       ResourceType @relation(fields: [typeId], references: [id])
+  uploaderId Int
+  uploader   User         @relation(fields: [uploaderId], references: [id])
+
+  title               String               @db.VarChar(255)
+  url                 String               @db.VarChar(1000)
+  extractCode         String?              @db.VarChar(50) // 提取密码
+  unzipPassword       String?              @db.VarChar(100) // 解压密码
+  remark              String?              @db.Text // 备注
+  language            String?              @db.VarChar(20) // 游戏语言：ja / en / zh-Hans / zh-Hant / ko
+  platform            String?              @db.VarChar(20) // 资源平台：windows / android / linux / macos / ps4 / steam_deck
+  fileSize            String?              @db.VarChar(20) // 文件大小，如 "1.2G"、"800M"
+  isMachineTranslated Boolean              @default(false) // 是否机翻
+  netDiskTypeId       Int? // 自动识别的网盘平台
+  netDiskType         NetDiskType?         @relation(fields: [netDiskTypeId], references: [id], onDelete: SetNull)
+  downloadCount       Int                  @default(0) // 下载次数
+  healthStatus        ResourceHealthStatus @default(AVAILABLE) // 可用性状态
+  healthNote          String?              @db.Text // 后台可用性备注
+  healthCheckedAt     DateTime? // 最近复查时间
+  issueCount          Int                  @default(0) // 可用性反馈数量
+  status              ResourceStatus       @default(APPROVED) // 审核状态
+  deletedAt           DateTime? // 软删除时间戳
+  createdAt           DateTime             @default(now())
+
+  downloads       DownloadRecord[]
+  reports         Report[]                 @relation("ResourceReports")
+  healthFeedbacks ResourceHealthFeedback[]
+
+  @@index([gameId])
+  @@index([netDiskTypeId])
+  @@index([healthStatus])
+  // 首页「最新上传」：status + deletedAt 过滤后按 createdAt 排序
+  @@index([status, deletedAt, createdAt])
+  @@index([gameId, status, deletedAt])
+}
+
+model ResourceHealthFeedback {
+  id         Int                        @id @default(autoincrement())
+  resourceId Int
+  resource   Resource                   @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  userId     Int
+  user       User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       ResourceHealthFeedbackType
+  detail     String?                    @db.Text
+  createdAt  DateTime                   @default(now())
+
+  @@index([resourceId])
+  @@index([userId])
+  @@index([type])
+}
+
+enum ResourceHealthFeedbackType {
+  LINK_EXPIRED
+  WRONG_PASSWORD
+  VERSION_OUTDATED
+  MALICIOUS
+  OTHER
+}
+
+model DownloadRecord {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId Int
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  sizeMb     Int      @default(0) // 下载时资源大小快照（MB），用于统计流量
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([resourceId])
+  // 首页今日/近一周流量统计：按时间范围聚合 sizeMb
+  @@index([createdAt])
+}
+
+// ==================== 截图相关 ====================
+
+model Screenshot {
+  id        Int      @id @default(autoincrement())
+  gameId    Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  url       String   @db.VarChar(500)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([gameId])
+}
+
+// ==================== 评论相关 ====================
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  gameId    Int
+  game      Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  parentId  Int? // 父评论ID，用于回复功能
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  content   String    @db.Text
+  playTime  Float? // 游玩时长（小时）
+  likeCount Int       @default(0)
+  deletedAt DateTime? // 软删除时间戳
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  likes   CommentLike[]
+  reports Report[]      @relation("CommentReports")
+
+  @@index([gameId])
+  @@index([userId])
+  @@index([parentId])
+  // 游戏评论翻页 / 首页最近评论：过滤后按 createdAt 排序
+  @@index([gameId, parentId, deletedAt, createdAt])
+  @@index([deletedAt, parentId, createdAt])
+}
+
+// 评论点赞
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  commentId Int
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+// ==================== 评分相关 ====================
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  gameId    Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  score     Int // 1-5星
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([gameId, userId])
+  @@index([gameId])
+}
+
+// ==================== 收藏相关 ====================
+
+enum FavoriteStatus {
+  WISHLIST // 想玩
+  PLAYING // 在玩
+  COMPLETED // 玩过
+  ON_HOLD // 搁置
+  DROPPED // 抛弃
+}
+
+model Favorite {
+  id              Int            @id @default(autoincrement())
+  gameId          Int
+  game            Game           @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User           @relation(fields: [userId], references: [id])
+  status          FavoriteStatus @default(COMPLETED)
+  note            String?        @db.Text
+  startedAt       DateTime?
+  completedAt     DateTime?
+  statusUpdatedAt DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+
+  @@unique([gameId, userId])
+  @@index([userId])
+  @@index([userId, status])
+}
+
+// ==================== 通知中心相关 ====================
+
+enum MessageType {
+  SYSTEM // 系统通知
+  COMMENT_REPLY // 评论回复
+  COMMENT_LIKE // 评论点赞
+  MENTION // @提及
+  RESOURCE_APPROVED // 资源审核通过
+  RESOURCE_REJECTED // 资源审核驳回
+  RESOURCE_HEALTH // 资源可用性处理
+  EDIT_APPROVED // 编辑请求通过
+  EDIT_REJECTED // 编辑请求驳回
+  FOLLOWING_ACTIVITY // 关注动态
+  FAVORITE_GAME_UPDATE // 游戏库条目更新
+  OTHER // 其他
+}
+
+model Message {
+  id         Int         @id @default(autoincrement())
+  senderId   Int? // null表示系统消息
+  sender     User?       @relation("MessageSender", fields: [senderId], references: [id])
+  receiverId Int
+  receiver   User        @relation("MessageReceiver", fields: [receiverId], references: [id])
+  type       MessageType @default(SYSTEM)
+  title      String      @db.VarChar(255)
+  content    String      @db.Text
+  relatedUrl String?     @db.VarChar(500) // 相关链接
+  isNsfw     Boolean     @default(false) // NSFW相关的消息
+  isRead     Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+
+  @@index([receiverId, isRead])
+  @@index([receiverId, type])
+}
+
+// ==================== 通知偏好 ====================
+
+model NotificationPreference {
+  id           Int         @id @default(autoincrement())
+  userId       Int
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messageType  MessageType
+  emailEnabled Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([userId, messageType])
+  @@index([userId])
+}
+
+// ==================== 管理员操作日志 ====================
+
+enum PrivateMessageType {
+  TEXT
+  IMAGE
+}
+
+model PrivateConversation {
+  id             Int      @id @default(autoincrement())
+  participantAId Int
+  participantA   User     @relation("PrivateConversationParticipantA", fields: [participantAId], references: [id], onDelete: Cascade)
+  participantBId Int
+  participantB   User     @relation("PrivateConversationParticipantB", fields: [participantBId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  messages PrivateMessage[]
+
+  @@unique([participantAId, participantBId])
+  @@index([participantAId, updatedAt])
+  @@index([participantBId, updatedAt])
+}
+
+model PrivateMessage {
+  id             Int                 @id @default(autoincrement())
+  conversationId Int
+  conversation   PrivateConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       Int
+  sender         User                @relation("PrivateMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId     Int
+  receiver       User                @relation("PrivateMessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  type           PrivateMessageType  @default(TEXT)
+  content        String?             @db.Text
+  imageUrl       String?             @db.VarChar(500)
+  readAt         DateTime?
+  createdAt      DateTime            @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([receiverId, readAt])
+  @@index([senderId, createdAt])
+}
+
+model AdminOperationLog {
+  id         Int      @id @default(autoincrement())
+  adminId    Int
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String   @db.VarChar(100)
+  targetType String?  @db.VarChar(50)
+  targetId   Int?
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
+}
+
+model SystemErrorLog {
+  id        Int      @id @default(autoincrement())
+  type      String   @db.VarChar(50)
+  source    String?  @db.VarChar(100)
+  message   String   @db.Text
+  detail    String?  @db.Text
+  metadata  Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([isRead, createdAt])
+  @@index([type, createdAt])
+}
+
+// ==================== 举报相关 ====================
+
+enum ReportType {
+  COMMENT // 评论举报
+  RESOURCE // 资源举报
+  GUIDE // 攻略举报
+}
+
+enum ReportStatus {
+  PENDING // 待处理
+  RESOLVED // 已处理
+  REJECTED // 已驳回
+}
+
+model Report {
+  id     Int          @id @default(autoincrement())
+  type   ReportType
+  reason String       @db.VarChar(255) // 举报理由
+  detail String?      @db.Text // 详细说明
+  status ReportStatus @default(PENDING)
+
+  // 举报人
+  reporterId Int
+  reporter   User @relation("ReportReporter", fields: [reporterId], references: [id])
+
+  // 被举报的评论（如果是评论举报）
+  commentId Int?
+  comment   Comment? @relation("CommentReports", fields: [commentId], references: [id], onDelete: Cascade)
+
+  // 被举报的资源（如果是资源举报）
+  resourceId Int?
+  resource   Resource? @relation("ResourceReports", fields: [resourceId], references: [id], onDelete: Cascade)
+
+  // 被举报的攻略（如果是攻略举报）
+  guideId Int?
+  guide   Guide? @relation("GuideReports", fields: [guideId], references: [id], onDelete: Cascade)
+
+  // 处理信息
+  handledById Int?
+  handledBy   User?     @relation("ReportHandler", fields: [handledById], references: [id])
+  handledAt   DateTime?
+  handleNote  String?   @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([type, status])
+  @@index([reporterId])
+}
+
+// ==================== 条目修改审核 ====================
+
+enum EditStatus {
+  PENDING // 待审核
+  APPROVED // 已通过
+  REJECTED // 已驳回
+}
+
+model GameEditRequest {
+  id     Int  @id @default(autoincrement())
+  gameId Int
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  // 修改内容（JSON格式存储变更）
+  changes Json // { field: { old: value, new: value } }
+
+  status EditStatus @default(PENDING)
+
+  // 审核信息
+  reviewedById Int?
+  reviewedBy   User?     @relation("EditReviewer", fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+  reviewNote   String?   @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([gameId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ==================== 图片管理相关 ====================
+
+model Image {
+  id           Int      @id @default(autoincrement())
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  path         String   @db.VarChar(500)
+  url          String   @db.VarChar(500)
+  size         Int // 文件大小（字节）
+  mimeType     String   @db.VarChar(100)
+  width        Int?
+  height       Int?
+  isUsed       Boolean  @default(false) // 是否被使用
+  gameId       Int? // 关联的游戏条目
+  game         Game?    @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+
+  @@index([isUsed])
+  @@index([gameId])
+}
+
+// ==================== 系统设置相关 ====================
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(100)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+// 友情链接
+model FriendLink {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  url         String   @db.VarChar(500)
+  logo        String?  @db.VarChar(500)
+  description String?  @db.VarChar(255)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// 公告
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==================== 顶一下功能 ====================
+
+model GameBump {
+  id        Int      @id @default(autoincrement())
+  gameId    Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  bumpDate  DateTime @db.Date // 只存日期，用于唯一约束
+  createdAt DateTime @default(now())
+
+  @@unique([gameId, userId, bumpDate]) // 每天每用户只能顶一次
+  @@index([gameId])
+  @@index([userId])
+  @@index([createdAt])
+  // 按日聚合各游戏的顶数
+  @@index([bumpDate, gameId])
+}
+
+// ==================== 表情包功能 ====================
+
+model EmojiPack {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  emojis Emoji[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Emoji {
+  id        Int       @id @default(autoincrement())
+  packId    Int
+  pack      EmojiPack @relation(fields: [packId], references: [id], onDelete: Cascade)
+  name      String    @db.VarChar(50) // 表情名称/代码，如 :smile:
+  url       String    @db.VarChar(500) // 表情图片URL
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([packId, sortOrder])
+}
+
+// ==================== 攻略功能 ====================
+
+model Guide {
+  id        Int      @id @default(autoincrement())
+  gameId    Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  viewCount Int      @default(0)
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  likes   GuideLike[]
+  reports Report[]    @relation("GuideReports")
+
+  @@index([gameId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model GuideLike {
+  id        Int      @id @default(autoincrement())
+  guideId   Int
+  guide     Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([guideId, userId])
+  @@index([guideId])
+  @@index([userId])
+}
+
+// 注意：SiteConfig 功能已合并到 Setting 表中
+// 如需迁移旧数据，请将 SiteConfig 中的数据迁移到 Setting 表
+// model SiteConfig 已弃用，保留兼容直到数据迁移完成
+model SiteConfig {
+  key       String   @id @db.VarChar(100)
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==================== 编辑历史 ====================
+
+enum ContentEditType {
+  GAME
+  COMPANY
+  GUIDE
+  RESOURCE
+}
+
+model ContentEdit {
+  id            Int             @id @default(autoincrement())
+  targetType    ContentEditType
+  targetId      Int
+  editorId      Int?
+  editor        User?           @relation(fields: [editorId], references: [id], onDelete: SetNull)
+  snapshot      Json // 编辑前的完整字段快照
+  changeSummary String?         @db.VarChar(500)
+  isRevert      Boolean         @default(false) // 是否为撤销操作生成的快照
+  createdAt     DateTime        @default(now())
+
+  @@index([targetType, targetId])
+  @@index([editorId])
+  @@index([createdAt])
+}
+
+// ==================== 活动流 ====================
+
+enum ActivityType {
+  CREATE_GAME
+  EDIT_GAME
+  COMMENT
+  CREATE_GUIDE
+  EDIT_GUIDE
+  RATE_GAME
+  FAVORITE_GAME
+}
+
+model Activity {
+  id         Int          @id @default(autoincrement())
+  userId     Int
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       ActivityType
+  targetType String?      @db.VarChar(50) // "game", "guide", "comment" 等
+  targetId   Int?
+  meta       Json? // 额外信息（游戏名、评论摘要等，避免前端二次查库）
+  createdAt  DateTime     @default(now())
+
+  @@index([userId, createdAt])
+  @@index([targetType, targetId, createdAt])
+  @@index([createdAt])
+}
+
+// ==================== 工具下载相关 ====================
+
+model ToolCategory {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  slug      String   @unique @db.VarChar(50)
+  icon      String?  @db.VarChar(50)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  tools Tool[]
+}
+
+model Tool {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(200)
+  description String?      @db.Text
+  icon        String?      @db.VarChar(500)
+  version     String?      @db.VarChar(50)
+  author      String?      @db.VarChar(100)
+  downloadUrl String       @db.VarChar(1000)
+  githubUrl   String?      @db.VarChar(500)
+  categoryId  Int
+  category    ToolCategory @relation(fields: [categoryId], references: [id])
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([categoryId])
+}
+
+// ==================== IndexNow 相关 ====================
+
+model IndexNowSubmission {
+  id           Int                      @id @default(autoincrement())
+  url          String                   @db.VarChar(500)
+  status       IndexNowSubmissionStatus
+  type         IndexNowSubmissionType
+  errorMessage String?                  @db.Text
+  submittedAt  DateTime                 @default(now())
+
+  @@index([status, submittedAt])
+  @@index([url])
+}
+
+enum IndexNowSubmissionStatus {
+  SUCCESS
+  FAILED
+}
+
+enum IndexNowSubmissionType {
+  ADD
+  UPDATE
+  DELETE
+}
+
+model IndexNowSetting {
+  id                    Int      @id @default(autoincrement())
+  apiKey                String   @db.VarChar(255)
+  autoSubmissionEnabled Boolean  @default(true)
+  dailyLimit            Int      @default(100) // 每日提交限制
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}

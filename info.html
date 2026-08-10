@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLANNAD - Nyantaku</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-zinc-900 text-gray-800 dark:text-gray-100 min-h-full">
+
+  <!-- 浮动顶栏 -->
+  <header class="fixed top-4 inset-x-0 z-50 pointer-events-none">
+    <div class="max-w-6xl mx-auto px-4 pointer-events-auto">
+      <div class="bg-white/90 dark:bg-zinc-800/90 backdrop-blur rounded-2xl shadow-lg border border-gray-200/60 dark:border-zinc-700/60">
+        <div class="flex items-center justify-between px-6 h-14">
+          <!-- 左侧 -->
+          <div class="flex items-center space-x-8">
+            <a href="index.html" class="text-lg font-semibold tracking-wide">Nyantaku</a>
+            <nav class="hidden md:flex space-x-6 text-sm text-gray-600 dark:text-gray-300">
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">游戏</a>
+              <a href="company.html" class="hover:text-gray-900 dark:hover:text-white">会社</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">文档</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">创建</a>
+              <a href="#" class="hover:text-gray-900 dark:hover:text-white">关于</a>
+            </nav>
+          </div>
+
+          <!-- 右侧 -->
+          <div class="flex items-center space-x-3">
+            <input type="text" placeholder="搜索作品 / 会社 / 标签" class="hidden md:block w-56 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+
+            <!-- 日夜模式 -->
+            <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 text-sm">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+
+            <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700">登录</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 作品详情页 -->
+  <main class="max-w-6xl mx-auto px-6 pt-28 pb-16">
+    <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8">
+
+      <!-- 左栏：封面 + 基本信息 -->
+      <aside class="space-y-4">
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
+          <img src="https://via.placeholder.com/300x420" class="w-full aspect-[3/4] object-cover" />
+        </div>
+
+        <!-- 评分区域 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <div class="text-sm font-medium mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-star text-gray-400"></i>评分
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <div class="flex text-xl">
+              <i class="fa-solid fa-star text-gray-800 dark:text-gray-200"></i>
+              <i class="fa-solid fa-star text-gray-800 dark:text-gray-200"></i>
+              <i class="fa-solid fa-star text-gray-800 dark:text-gray-200"></i>
+              <i class="fa-solid fa-star text-gray-800 dark:text-gray-200"></i>
+              <i class="fa-solid fa-star-half-stroke text-gray-800 dark:text-gray-200"></i>
+            </div>
+            <span class="text-xl font-semibold">8.9</span>
+          </div>
+          <div class="text-xs text-gray-500">1234 人评价</div>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 text-sm space-y-2 shadow">
+          <div><span class="text-gray-500">厂商：</span>Key</div>
+          <div><span class="text-gray-500">发行：</span>Visual Arts</div>
+          <div><span class="text-gray-500">发布日：</span>2010-04-28</div>
+          <div><span class="text-gray-500">语言：</span>日语 / 中文</div>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <div class="text-sm font-medium mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-tags text-gray-400"></i>标签
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700">纯爱</span>
+            <span class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700">催泪</span>
+            <span class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700">校园</span>
+          </div>
+        </div>
+
+        <!-- STAFF -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <div class="text-sm font-medium mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-users text-gray-400"></i>STAFF
+          </div>
+          <div class="text-sm space-y-2">
+            <div>
+              <div class="text-xs text-gray-500 mb-1">原画</div>
+              <div class="text-gray-700 dark:text-gray-300">樋上いたる</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-500 mb-1">剧本</div>
+              <div class="text-gray-700 dark:text-gray-300">麻枝准、涼元悠一</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-500 mb-1">声优</div>
+              <div class="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
+                中村悠一、中原麻衣、広橋涼、神田朱未、桑島法子
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 相关作品推荐 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
+          <div class="text-sm font-medium mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-heart text-gray-400"></i>相关推荐
+          </div>
+          <div class="space-y-3">
+            <a href="#" class="flex items-center gap-3 group">
+              <img src="https://via.placeholder.com/60x80" class="w-12 h-16 rounded object-cover" />
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium truncate group-hover:text-gray-600 dark:group-hover:text-gray-300 transition">AIR</div>
+                <div class="text-xs text-gray-500">Key · 2000</div>
+              </div>
+            </a>
+            <a href="#" class="flex items-center gap-3 group">
+              <img src="https://via.placeholder.com/60x80" class="w-12 h-16 rounded object-cover" />
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium truncate group-hover:text-gray-600 dark:group-hover:text-gray-300 transition">Kanon</div>
+                <div class="text-xs text-gray-500">Key · 1999</div>
+              </div>
+            </a>
+            <a href="#" class="flex items-center gap-3 group">
+              <img src="https://via.placeholder.com/60x80" class="w-12 h-16 rounded object-cover" />
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium truncate group-hover:text-gray-600 dark:group-hover:text-gray-300 transition">Little Busters!</div>
+                <div class="text-xs text-gray-500">Key · 2007</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 右栏：主体内容 -->
+      <section class="space-y-8">
+
+        <!-- 标题 + 别名 + 操作按钮 -->
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div class="space-y-2">
+            <h1 class="text-2xl font-semibold">CLANNAD</h1>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+              クラナド / 团子大家族
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="favorite-btn" onclick="toggleFavorite()" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center gap-2">
+              <i class="fa-regular fa-heart"></i>收藏
+            </button>
+            <a href="#" class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center gap-2">
+              <i class="fa-solid fa-cart-shopping"></i>获取正版
+            </a>
+          </div>
+        </div>
+
+        <!-- 简介 & 截图 选项卡 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
+          <!-- 选项卡标题 -->
+          <div class="flex border-b border-gray-200 dark:border-zinc-700">
+            <button id="tab-intro" onclick="switchTab('intro')" class="flex-1 px-5 py-3 text-sm font-medium flex items-center justify-center gap-2 border-b-2 border-gray-800 dark:border-white text-gray-800 dark:text-white">
+              <i class="fa-solid fa-file-lines"></i>游戏简介
+            </button>
+            <button id="tab-screenshots" onclick="switchTab('screenshots')" class="flex-1 px-5 py-3 text-sm font-medium flex items-center justify-center gap-2 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+              <i class="fa-solid fa-images"></i>游戏截图
+            </button>
+          </div>
+          
+          <!-- 简介内容 -->
+          <div id="content-intro" class="p-5">
+            <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+              在小镇相遇的少年与少女们，展开了一段关于家庭、成长与羁绊的故事……
+            </p>
+          </div>
+          
+          <!-- 截图内容 -->
+          <div id="content-screenshots" class="p-5 hidden">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <img src="https://via.placeholder.com/400x225" class="rounded-lg cursor-pointer hover:opacity-80 transition" />
+              <img src="https://via.placeholder.com/400x225" class="rounded-lg cursor-pointer hover:opacity-80 transition" />
+              <img src="https://via.placeholder.com/400x225" class="rounded-lg cursor-pointer hover:opacity-80 transition" />
+              <img src="https://via.placeholder.com/400x225" class="rounded-lg cursor-pointer hover:opacity-80 transition" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 下载资源 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-5 shadow">
+          <h2 class="font-medium mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-download text-gray-400"></i>下载资源
+          </h2>
+
+          <div class="space-y-3">
+            <!-- 资源项 1 -->
+            <div class="border rounded-lg dark:border-zinc-700 overflow-hidden">
+              <div class="p-4 text-sm">
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium">官方原版整合</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">投稿者：User123</div>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm">
+                    <span><span class="text-gray-500">类型：</span>PC</span>
+                    <span><span class="text-gray-500">提取密码：</span>abcd</span>
+                    <span><span class="text-gray-500">解压密码：</span>nyantaku</span>
+                  </div>
+                  <button class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>下载
+                  </button>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-700 text-xs text-gray-500 dark:text-gray-400">
+                  <i class="fa-solid fa-circle-info mr-1"></i>备注：包含本体 + After Story，已整合免安装
+                </div>
+              </div>
+            </div>
+
+            <!-- 资源项 2 -->
+            <div class="border rounded-lg dark:border-zinc-700 overflow-hidden">
+              <div class="p-4 text-sm">
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium">汉化补丁 v2.0</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">投稿者：Translator_A</div>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm">
+                    <span><span class="text-gray-500">类型：</span>补丁</span>
+                    <span><span class="text-gray-500">提取密码：</span>1234</span>
+                    <span><span class="text-gray-500">解压密码：</span>无</span>
+                  </div>
+                  <button class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>下载
+                  </button>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-700 text-xs text-gray-500 dark:text-gray-400">
+                  <i class="fa-solid fa-circle-info mr-1"></i>备注：适用于原版，解压后覆盖即可
+                </div>
+              </div>
+            </div>
+
+            <!-- 资源项 3 -->
+            <div class="border rounded-lg dark:border-zinc-700 overflow-hidden">
+              <div class="p-4 text-sm">
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium">OST 原声集</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">投稿者：MusicFan</div>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm">
+                    <span><span class="text-gray-500">类型：</span>音乐</span>
+                    <span><span class="text-gray-500">提取密码：</span>ost1</span>
+                    <span><span class="text-gray-500">解压密码：</span>无</span>
+                  </div>
+                  <button class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>下载
+                  </button>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-700 text-xs text-gray-500 dark:text-gray-400">
+                  <i class="fa-solid fa-circle-info mr-1"></i>备注：FLAC 无损格式，包含全部 BGM 和主题曲
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 评论 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-5 shadow space-y-4">
+          <h2 class="font-medium flex items-center gap-2">
+            <i class="fa-solid fa-comments text-gray-400"></i>评论
+          </h2>
+
+          <!-- 发表评论 -->
+          <div class="flex items-center gap-3">
+            <!-- 星级评分 -->
+            <div class="flex items-center gap-1 text-lg cursor-pointer" id="rating-stars">
+              <i class="fa-regular fa-star hover:text-gray-600 dark:hover:text-gray-300 transition" data-rating="1"></i>
+              <i class="fa-regular fa-star hover:text-gray-600 dark:hover:text-gray-300 transition" data-rating="2"></i>
+              <i class="fa-regular fa-star hover:text-gray-600 dark:hover:text-gray-300 transition" data-rating="3"></i>
+              <i class="fa-regular fa-star hover:text-gray-600 dark:hover:text-gray-300 transition" data-rating="4"></i>
+              <i class="fa-regular fa-star hover:text-gray-600 dark:hover:text-gray-300 transition" data-rating="5"></i>
+            </div>
+            <input type="text" placeholder="发表你的看法..." class="flex-1 px-3 py-2 rounded-lg border text-sm dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400" />
+            <button class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition">发送</button>
+          </div>
+
+          <!-- 评论列表 -->
+          <div class="space-y-4 pt-2">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-gray-500">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="font-medium">UserA</span>
+                  <div class="flex text-xs text-gray-800 dark:text-gray-200">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                  </div>
+                  <span class="text-xs text-gray-500">2026-01-20</span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">神作，剧情太感人了，特别是After Story部分。</p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-gray-500">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="font-medium">UserB</span>
+                  <div class="flex text-xs text-gray-800 dark:text-gray-200">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-regular fa-star"></i>
+                  </div>
+                  <span class="text-xs text-gray-500">2026-01-18</span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">Key社的经典之作，值得一玩。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 修改历史 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl p-5 shadow">
+          <h2 class="font-medium mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-gray-400"></i>修改历史
+          </h2>
+          <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+            <li class="flex items-center gap-2">
+              <span class="text-gray-400">2026-01-01</span>
+              <span class="text-gray-400">·</span>
+              <span class="font-medium">UserA</span>
+              <span class="text-gray-400">·</span>
+              <span>新建条目</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-gray-400">2026-01-05</span>
+              <span class="text-gray-400">·</span>
+              <span class="font-medium">UserB</span>
+              <span class="text-gray-400">·</span>
+              <span>更新下载资源</span>
+            </li>
+          </ul>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="text-center text-xs text-gray-500 py-6">
+    © 2026 Nyantaku · Galgame Resource
+  </footer>
+
+  <!-- 交互脚本 -->
+  <script>
+    // 选项卡切换
+    function switchTab(tab) {
+      const tabIntro = document.getElementById('tab-intro');
+      const tabScreenshots = document.getElementById('tab-screenshots');
+      const contentIntro = document.getElementById('content-intro');
+      const contentScreenshots = document.getElementById('content-screenshots');
+      
+      if (tab === 'intro') {
+        tabIntro.classList.add('border-gray-800', 'dark:border-white', 'text-gray-800', 'dark:text-white');
+        tabIntro.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        tabScreenshots.classList.remove('border-gray-800', 'dark:border-white', 'text-gray-800', 'dark:text-white');
+        tabScreenshots.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        contentIntro.classList.remove('hidden');
+        contentScreenshots.classList.add('hidden');
+      } else {
+        tabScreenshots.classList.add('border-gray-800', 'dark:border-white', 'text-gray-800', 'dark:text-white');
+        tabScreenshots.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        tabIntro.classList.remove('border-gray-800', 'dark:border-white', 'text-gray-800', 'dark:text-white');
+        tabIntro.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        contentScreenshots.classList.remove('hidden');
+        contentIntro.classList.add('hidden');
+      }
+    }
+
+    // 评分交互
+    const stars = document.querySelectorAll('#rating-stars i');
+    let currentRating = 0;
+
+    stars.forEach((star, index) => {
+      star.addEventListener('click', () => {
+        currentRating = index + 1;
+        updateStars();
+      });
+
+      star.addEventListener('mouseenter', () => {
+        highlightStars(index + 1);
+      });
+    });
+
+    document.getElementById('rating-stars').addEventListener('mouseleave', () => {
+      updateStars();
+    });
+
+    function highlightStars(count) {
+      stars.forEach((star, i) => {
+        if (i < count) {
+          star.classList.remove('fa-regular');
+          star.classList.add('fa-solid');
+        } else {
+          star.classList.remove('fa-solid');
+          star.classList.add('fa-regular');
+        }
+      });
+    }
+
+    function updateStars() {
+      highlightStars(currentRating);
+    }
+
+    // 收藏功能
+    let isFavorited = false;
+    function toggleFavorite() {
+      const btn = document.getElementById('favorite-btn');
+      isFavorited = !isFavorited;
+      if (isFavorited) {
+        btn.innerHTML = '<i class="fa-solid fa-heart text-red-500"></i>已收藏';
+        btn.classList.add('bg-gray-50', 'dark:bg-zinc-700');
+      } else {
+        btn.innerHTML = '<i class="fa-regular fa-heart"></i>收藏';
+        btn.classList.remove('bg-gray-50', 'dark:bg-zinc-700');
+      }
+    }
+  </script>
+
+</body>
+</html>

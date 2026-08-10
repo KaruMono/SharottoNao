@@ -1,0 +1,307 @@
+import { execSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import type { PrismaClient } from '@prisma/client'
+import type { RedisClientType } from 'redis'
+
+type RuntimeGlobal = typeof globalThis & {
+  prisma?: PrismaClient
+  __redisClient?: RedisClientType
+}
+
+function readCommand(command: string) {
+  try {
+    return execSync(command, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+  } catch {
+    return ''
+  }
+}
+
+function resolveBuildId() {
+  if (process.env.NUXT_PUBLIC_BUILD_ID) return process.env.NUXT_PUBLIC_BUILD_ID
+
+  const commit = readCommand('git rev-parse --short=12 HEAD')
+  const diff = readCommand('git diff --no-ext-diff --binary HEAD')
+
+  if (commit && diff) {
+    const diffHash = createHash('sha256').update(diff).digest('hex').slice(0, 8)
+    return `${commit}-${diffHash}`
+  }
+
+  return commit || 'local'
+}
+
+const buildId = resolveBuildId()
+
+// 共享的关闭清理函数（Nuxt build 和 Nitro runtime 均需调用）
+async function disconnectServices() {
+  const runtimeGlobal = globalThis as RuntimeGlobal
+  await runtimeGlobal.prisma?.$disconnect?.()
+  if (runtimeGlobal.__redisClient?.isOpen) {
+    await runtimeGlobal.__redisClient.quit()
+  }
+}
+
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
+
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@nuxtjs/color-mode',
+    '@sidebase/nuxt-auth',
+    '@nuxt/content',
+    '~/modules/ignore-uploads',
+  ],
+
+
+  colorMode: {
+    classSuffix: '',
+    preference: 'system',
+    fallback: 'light',
+  },
+
+  app: {
+    head: {
+      script: [
+        // 在首次绘制前同步应用深色模式 class，防止水合后出现主题闪烁
+        // 读取顺序：localStorage → cookie → 系统媒体查询
+        {
+          id: 'color-mode-script',
+          innerHTML: `(function(){try{var s=localStorage.getItem('nuxt-color-mode');if(!s){var m=document.cookie.match(/(?:^|;\\s*)nuxt-color-mode=([^;]+)/);s=m?m[1]:null}var dark=s==='dark'||((!s||s==='system')&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',dark)}catch(e){}})()`,
+          type: 'text/javascript',
+        },
+      ],
+    },
+  },
+
+  css: [
+    '@fortawesome/fontawesome-free/css/fontawesome.min.css',
+    '@fortawesome/fontawesome-free/css/solid.min.css',
+    '@fortawesome/fontawesome-free/css/regular.min.css',
+    '@fortawesome/fontawesome-free/css/brands.min.css',
+  ],
+
+  auth: {
+    isEnabled: true,
+    originEnvKey: 'NUXT_PUBLIC_SITE_URL',
+    provider: {
+      type: 'local',
+      endpoints: {
+        signIn: { path: '/login', method: 'post' },
+        signOut: { path: '/logout', method: 'post' },
+        signUp: { path: '/register', method: 'post' },
+        getSession: { path: '/session', method: 'get' },
+      },
+      pages: {
+        login: '/login',
+      },
+      token: {
+        signInResponseTokenPointer: '/token',
+        maxAgeInSeconds: 60 * 60 * 24 * 7, // 7 days
+        headerName: 'Authorization',
+        type: 'Bearer',
+      },
+      session: {
+        dataType: {
+          id: 'number',
+          username: 'string',
+          email: 'string',
+          avatar: 'string | null',
+          role: 'string',
+          nsfwMode: 'string',
+        },
+        dataResponsePointer: '/',
+      },
+    },
+    globalAppMiddleware: false,
+  },
+
+  content: {
+    documentDriven: false,
+    highlight: {
+      theme: 'github-dark',
+    },
+    markdown: {
+      toc: {
+        depth: 3,
+        searchDepth: 3,
+      },
+    },
+  },
+
+  runtimeConfig: {
+    // 私有配置（仅服务端可用）
+    authSecret: process.env.NUXT_AUTH_SECRET,
+    // 站间私有 API 密钥，仅服务端读取
+    // 留空作为默认值，生产环境由 NUXT_PRIVATE_API_KEY 在运行时注入，避免构建产物携带密钥
+    privateApiKey: '',
+    // Redis 配置（可选，不配置则使用内存缓存）
+    redisUrl: process.env.REDIS_URL || '',
+    trustProxy: process.env.TRUST_PROXY === 'true',
+    smtp: {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+      from: process.env.SMTP_FROM,
+      fromName: process.env.SMTP_FROM_NAME || '',
+      secure: process.env.SMTP_SECURE || 'auto',
+      ignoreTlsErrors: process.env.SMTP_IGNORE_TLS_ERRORS === 'true',
+    },
+    s3: {
+      enabled: process.env.S3_ENABLED === 'true',
+      endpoint: process.env.S3_ENDPOINT,
+      region: process.env.S3_REGION,
+      bucket: process.env.S3_BUCKET,
+      accessKey: process.env.S3_ACCESS_KEY,
+      secretKey: process.env.S3_SECRET_KEY,
+      publicUrl: process.env.S3_PUBLIC_URL,
+    },
+    localUploadPath: process.env.LOCAL_UPLOAD_PATH || './uploads',
+    indexNowKey: process.env.INDEXNOW_KEY,
+    // 公开配置（客户端可用）
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      cdnUrl: process.env.NUXT_PUBLIC_CDN_URL || '',
+      buildId,
+    },
+  },
+
+  hooks: {
+    // build 完成后断开 Prisma / Redis 连接，防止进程挂起
+    close: disconnectServices,
+  },
+
+  nitro: {
+    // 注意：uploads 目录通过 server/middleware/uploads.ts 提供
+    // 不使用 publicAssets，因为它在开发模式下可能不稳定
+    
+    // 压缩响应
+    compressPublicAssets: true,
+
+    // 将 2FA 相关依赖内联打包，避免被当作 external dependency
+    externals: {
+      inline: [
+        'otplib',
+        '@otplib/core',
+        '@otplib/hotp',
+        '@otplib/totp',
+        '@otplib/uri',
+        '@otplib/plugin-crypto-noble',
+        '@otplib/plugin-base32-scure',
+        'qrcode',
+      ],
+    },
+
+    // 运行时关闭时断开连接
+    hooks: {
+      close: disconnectServices,
+    },
+
+    // 路由缓存规则
+    routeRules: {
+      // 全局安全响应头
+      '/**': {
+        headers: {
+          'X-Frame-Options': 'SAMEORIGIN',
+          'X-Content-Type-Options': 'nosniff',
+          'X-XSS-Protection': '1; mode=block',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        },
+      },
+      // 静态资源缓存
+      '/images/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+      // 上传文件名为 UUID、内容不可变，可长缓存
+      '/uploads/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+      
+      // API 缓存（公开数据）
+      // 注意：swr 按路径缓存、不区分 query string，带 query 参数的接口
+      // （/api/tools?category=、/api/leaderboard?type=）不能放这里，
+      // 改在 handler 内用 cachedFetch 按参数缓存
+      '/api/tags': { swr: 300 },
+      '/api/hot-searches': { swr: 300 },
+      '/api/site-info': { swr: 300 },
+      '/api/nav-config': { swr: 3600 },
+      '/api/tools/categories': { swr: 3600 },
+      '/api/emoji-packs': { swr: 3600 },
+      '/api/resource-types': { swr: 3600 },
+      
+      // robots, rss 缓存（sitemap 的缓存头在 handler 中设置，避免 routeRules 忽略 query string 导致缓存冲突）
+      '/robots.txt': { headers: { 'cache-control': 'public, max-age=86400' } },
+      '/rss.xml': { headers: { 'cache-control': 'public, max-age=1800' } },
+    },
+  },
+
+  // 实验性功能：组件 islands 和 payload 提取
+  experimental: {
+    payloadExtraction: true,
+    componentIslands: true,
+  },
+
+  app: {
+    pageTransition: false,
+
+    head: {
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1',
+      title: 'Charlotte',
+      htmlAttrs: {
+        lang: 'zh-CN',
+      },
+      meta: [
+        { name: 'description', content: 'Galgame 资源数据库' },
+        { name: 'theme-color', content: '#ffffff' },
+        // 允许 Google 在搜索结果中展示大图预览，提升点击率
+        { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' },
+        { property: 'og:site_name', content: 'Charlotte' },
+        { property: 'og:locale', content: 'zh_CN' },
+        { property: 'og:type', content: 'website' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:site', content: 'Charlotte' },
+      ],
+      script: [
+        {
+          innerHTML: '(function(){try{if(typeof structuredClone==="undefined"||typeof globalThis.AbortController==="undefined"||!Array.prototype.at)throw 0}catch(e){document.addEventListener("DOMContentLoaded",function(){document.body.innerHTML=\'<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#f5f5f5;padding:20px"><div style="max-width:460px;text-align:center;background:#fff;border-radius:16px;padding:40px 32px;box-shadow:0 2px 12px rgba(0,0,0,.08)"><div style="font-size:48px;margin-bottom:16px">🌐</div><h1 style="font-size:22px;color:#1a1a1a;margin:0 0 12px">浏览器版本过低</h1><p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 24px">当前浏览器不支持本站所需的技术特性，请升级到以下版本：</p><div style="text-align:left;background:#f9f9f9;border-radius:10px;padding:16px 20px;margin-bottom:24px;font-size:13px;color:#444;line-height:2"><b>Chrome</b> 98+<br><b>Edge</b> 98+<br><b>Firefox</b> 94+<br><b>Safari</b> 15.4+</div><a href="https://www.google.com/chrome/" style="display:inline-block;padding:10px 28px;background:#1a1a1a;color:#fff;border-radius:10px;text-decoration:none;font-size:14px">下载最新 Chrome</a></div></div>\'})}})();',
+          tagPosition: 'head',
+        },
+      ],
+      link: [
+        // favicon 和 touch icon 由 app.vue 动态设置
+        // RSS 订阅
+        { rel: 'alternate', type: 'application/rss+xml', title: '最新游戏', href: '/rss.xml?type=games' },
+        { rel: 'alternate', type: 'application/rss+xml', title: '最新资源', href: '/rss.xml?type=resources' },
+        { rel: 'alternate', type: 'application/rss+xml', title: '最新攻略', href: '/rss.xml?type=guides' },
+        // DNS 预解析常用外部资源
+        { rel: 'dns-prefetch', href: '//fonts.googleapis.com' },
+        { rel: 'dns-prefetch', href: '//fonts.gstatic.com' },
+        { rel: 'dns-prefetch', href: '//cdn.jsdelivr.net' },
+        { rel: 'dns-prefetch', href: '//cdnjs.cloudflare.com' },
+        { rel: 'dns-prefetch', href: '//cdnjs.loli.net' },
+        { rel: 'dns-prefetch', href: '//www.gravatar.com' },
+        { rel: 'dns-prefetch', href: '//cravatar.cn' },
+      ],
+    },
+  },
+
+  compatibilityDate: '2024-11-01',
+
+  vite: {
+    build: {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // 忽略 @sidebase/nuxt-auth 的动态/静态导入混合警告
+          if (
+            warning.code === 'MIXED_EXPORTS' ||
+            (warning.message && warning.message.includes('dynamically imported by') && warning.message.includes('nuxt-auth'))
+          ) {
+            return
+          }
+          warn(warning)
+        },
+      },
+    },
+  },
+})
