@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { requireAuth } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
+import { invalidateGameCaches } from '~/server/utils/redis'
 import { recordActivity } from '~/server/utils/activity'
 import { updateMachineTranslationTag } from '~/server/utils/machine-translation-tag'
 import { detectNetDiskTypeId } from '~/server/utils/net-disk'
@@ -80,6 +81,8 @@ export default defineEventHandler(async (event) => {
       },
     },
   })
+
+  await invalidateGameCaches(gameId)
 
   recordActivity({
     userId: user.id,

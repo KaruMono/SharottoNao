@@ -1,8 +1,9 @@
 import type { Prisma } from '@prisma/client'
 import prisma from '~/server/utils/prisma'
 import { normalizeTagName } from '~/server/utils/tag-normalize'
-import { pickTagColor } from '~/server/utils/tag-color'
-import { generateUniqueSlug } from '~/server/utils/slug'
+import { replaceManualGameTagsInTransaction } from '~/server/utils/game-tag-source'
+import { resolveOrCreateTagByNameInTransaction } from '~/server/utils/tag-name'
+import { ensureGameStaffRelation } from '~/server/utils/game-staff'
 
 /**
  * 条目修改请求（gameEditRequest）的变更计算与应用。
@@ -201,10 +202,7 @@ export async function applyGameEditChanges(
   // 标签
   if ('tagIds' in changes) {
     const newTagIds = (changes.tagIds.new as number[]) || []
-    await tx.gameTag.deleteMany({ where: { gameId } })
-    if (newTagIds.length > 0) {
-      await tx.gameTag.createMany({ data: newTagIds.map(tagId => ({ gameId, tagId })) })
-    }
+    await replaceManualGameTagsInTransaction(tx, gameId, newTagIds)
   }
 
   // 关联会社
@@ -230,7 +228,11 @@ export async function applyGameEditChanges(
       if (!staff) {
         staff = await tx.staff.create({ data: { name: s.name, nameOriginal: s.nameOriginal || null } })
       }
-      await tx.gameStaff.create({ data: { gameId, staffId: staff.id, role: s.role as any } })
+      await ensureGameStaffRelation(tx, {
+        gameId,
+        staffId: staff.id,
+        role: s.role,
+      })
     }
   }
 }
@@ -274,28 +276,13 @@ export async function resolveNewTagNames(
 
   const newIds: number[] = []
   for (const item of pendingItems) {
-    const normalizedName = normalizeTagName(item.name)
-    if (!normalizedName) continue
-
-    let tag = await tx.tag.findFirst({
-      where: { name: { equals: normalizedName, mode: 'insensitive' } },
+    const name = normalizeTagName(item.name)
+    if (!name) continue
+    const { tag } = await resolveOrCreateTagByNameInTransaction(tx, {
+      name,
+      isNsfw: item.isNsfw ?? false,
+      color: item.color,
     })
-
-    if (!tag) {
-      const slug = await generateUniqueSlug(normalizedName, async (s) => {
-        const exists = await tx.tag.findFirst({ where: { slug: s } })
-        return !!exists
-      })
-      tag = await tx.tag.create({
-        data: {
-          name: normalizedName,
-          slug,
-          isNsfw: item.isNsfw ?? false,
-          color: item.color ?? pickTagColor(normalizedName),
-        },
-      })
-    }
-
     newIds.push(tag.id)
   }
 

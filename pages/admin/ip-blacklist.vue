@@ -9,17 +9,16 @@
           v-model="searchQuery"
           type="text"
           placeholder="搜索 IP..."
-          class="w-full px-4 py-2 pl-10 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+          class="admin-input w-full pl-10"
           @keyup.enter="handleSearch"
         />
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
       </div>
-      <button
+      <AdminKumoButton variant="danger"
         @click="openAddModal"
-        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
       >
-        <i class="fa-solid fa-plus mr-2"></i>添加黑名单
-      </button>
+        <Icon name="fa6-solid:plus" />添加黑名单
+      </AdminKumoButton>
     </div>
 
     <!-- 列表 -->
@@ -57,7 +56,7 @@
     </div>
 
     <!-- 分页 -->
-    <Pagination
+    <Pagination admin
       v-if="listData && listData.pagination.totalPages > 1"
       :current-page="currentPage"
       :total-pages="listData.pagination.totalPages"
@@ -77,7 +76,7 @@
             <div class="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h3 class="font-semibold">添加 IP 黑名单</h3>
               <button @click="showAddModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700">
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
             <form @submit.prevent="handleAdd" class="p-4 space-y-4">
@@ -87,7 +86,7 @@
                   v-model="addForm.ip"
                   type="text"
                   placeholder="如：192.168.1.1"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400 font-mono"
+                  class="admin-input w-full font-mono"
                   required
                 />
               </div>
@@ -97,14 +96,14 @@
                   v-model="addForm.reason"
                   type="text"
                   placeholder="请输入原因"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input w-full"
                 />
               </div>
               <div class="flex justify-end gap-3">
-                <button type="button" @click="showAddModal = false" class="px-4 py-2 rounded-lg border dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700">取消</button>
-                <button type="submit" :disabled="addLoading" class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700 disabled:opacity-50">
+                <AdminKumoButton variant="secondary" type="button" @click="showAddModal = false" >取消</AdminKumoButton>
+                <AdminKumoButton variant="danger" type="submit" :disabled="addLoading" >
                   {{ addLoading ? '添加中...' : '确认添加' }}
-                </button>
+                </AdminKumoButton>
               </div>
             </form>
           </div>

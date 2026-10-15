@@ -2,6 +2,7 @@ import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import type { PrismaClient } from '@prisma/client'
 import type { RedisClientType } from 'redis'
+import { ICON_COLLECTIONS, ICON_NAMES } from './lib/icon'
 
 type RuntimeGlobal = typeof globalThis & {
   prisma?: PrismaClient
@@ -20,7 +21,8 @@ function readCommand(command: string) {
 }
 
 function resolveBuildId() {
-  if (process.env.NUXT_PUBLIC_BUILD_ID) return process.env.NUXT_PUBLIC_BUILD_ID
+  const explicit = process.env.NUXT_PUBLIC_BUILD_ID?.trim()
+  if (explicit) return explicit
 
   const commit = readCommand('git rev-parse --short=12 HEAD')
   const diff = readCommand('git diff --no-ext-diff --binary HEAD')
@@ -34,6 +36,62 @@ function resolveBuildId() {
 }
 
 const buildId = resolveBuildId()
+const releaseId = process.env.CHARLOTTE_RELEASE_ID?.trim()
+  || process.env.NUXT_PUBLIC_RELEASE_ID?.trim()
+  || buildId
+
+// Install this before the entry module so a failed first JS/CSS request can
+// get one guarded retry even when the Vue/Nuxt plugins never initialize.
+const resourceRecoveryBootstrap = `(function(){
+  var key='charlotte:resource-recovery-attempts';
+  var timerKey='__charlotteResourceRecoveryTimer';
+  var ttl=300000;
+  var expectedBuildId=${JSON.stringify(buildId)};
+  if(window[timerKey])return;
+  window[timerKey]=true;
+  function isCoreResource(target){
+    if(!target||!target.tagName)return false;
+    var tag=String(target.tagName).toLowerCase();
+    if(tag!=='script'&&tag!=='link')return false;
+    var value=target.src||target.href||'';
+    if(!value)return false;
+    try{
+      var url=new URL(value,location.href);
+      return url.origin===location.origin&&url.pathname.indexOf('/_nuxt/')===0
+    }catch(e){return false}
+  }
+  function recover(){
+    if(navigator.onLine===false)return;
+    var now=Date.now();
+    try{
+      var current=JSON.parse(sessionStorage.getItem(key)||'null');
+      var attempts=Array.isArray(current&&current.attempts)?current.attempts.filter(function(item){return item&&item.expiresAt>now}):[];
+      if(attempts.length)return;
+      attempts.push({path:location.pathname+location.search+location.hash,buildId:'bootstrap',reason:'chunk-error',attemptedAt:now,expiresAt:now+ttl});
+      sessionStorage.setItem(key,JSON.stringify({attempts:attempts.slice(-20)}));
+    }catch(e){return}
+    setTimeout(function(){location.reload()},800);
+  }
+  function checkBuild(){
+    if(navigator.onLine===false||!expectedBuildId)return;
+    fetch('/api/build-id?t='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache',Pragma:'no-cache'}})
+      .then(function(response){return response.ok?response.json():null})
+      .then(function(data){if(data&&data.buildId&&data.buildId!==expectedBuildId)recover()})
+      .catch(function(){});
+  }
+  window.addEventListener('error',function(event){if(isCoreResource(event.target))recover()},true);
+  window.addEventListener('vite:preloadError',function(event){if(event&&event.preventDefault)event.preventDefault();recover()},true);
+  window.addEventListener('unhandledrejection',function(event){
+    var reason=event&&event.reason;var message=String(reason&&reason.message||reason||'').toLowerCase();
+    var staticAsset=message.indexOf('/_nuxt/')>=0;
+    if(message.indexOf('dynamically imported')>=0||message.indexOf('preload css')>=0||message.indexOf('loading chunk')>=0||(staticAsset&&(message.indexOf('err_http2')>=0||message.indexOf('networkerror')>=0||message.indexOf('failed to fetch')>=0)))recover();
+  },true);
+  window.addEventListener('online',checkBuild);
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkBuild()});
+  var timer=window.setInterval(checkBuild,60000);
+  window.addEventListener('pagehide',function(){window.clearInterval(timer)},{once:true});
+  checkBuild();
+})();`
 
 // 共享的关闭清理函数（Nuxt build 和 Nitro runtime 均需调用）
 async function disconnectServices() {
@@ -53,9 +111,10 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@sidebase/nuxt-auth',
     '@nuxt/content',
+    '@nuxt/icon',
+    '@nuxtjs/sitemap',
     '~/modules/ignore-uploads',
   ],
-
 
   colorMode: {
     classSuffix: '',
@@ -63,25 +122,47 @@ export default defineNuxtConfig({
     fallback: 'light',
   },
 
-  app: {
-    head: {
-      script: [
-        // 在首次绘制前同步应用深色模式 class，防止水合后出现主题闪烁
-        // 读取顺序：localStorage → cookie → 系统媒体查询
-        {
-          id: 'color-mode-script',
-          innerHTML: `(function(){try{var s=localStorage.getItem('nuxt-color-mode');if(!s){var m=document.cookie.match(/(?:^|;\\s*)nuxt-color-mode=([^;]+)/);s=m?m[1]:null}var dark=s==='dark'||((!s||s==='system')&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',dark)}catch(e){}})()`,
-          type: 'text/javascript',
-        },
-      ],
+  // 图标配置
+  icon: {
+    serverBundle: 'local',
+    clientBundle: {
+      scan: true,
+      // 生产环境需要足够大的 size limit
+      sizeLimitKb: 512,
+    },
+    fallbackToApi: false,
+  },
+
+  // Sitemap 配置
+  site: {
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+  },
+
+  sitemap: {
+    exclude: [
+      '/admin',
+      '/admin/**',
+      '/login',
+      '/register',
+      '/profile',
+      '/profile/**',
+      '/settings',
+      '/settings/**',
+      '/api/**',
+    ],
+    sources: [
+      '/api/__sitemap__/games',
+      '/api/__sitemap__/guides',
+    ],
+    cacheMaxAgeSeconds: 21600, // 6 小时
+    defaults: {
+      changefreq: 'daily',
+      priority: 0.7,
     },
   },
 
   css: [
-    '@fortawesome/fontawesome-free/css/fontawesome.min.css',
-    '@fortawesome/fontawesome-free/css/solid.min.css',
-    '@fortawesome/fontawesome-free/css/regular.min.css',
-    '@fortawesome/fontawesome-free/css/brands.min.css',
+    '~/assets/css/main.css',
   ],
 
   auth: {
@@ -120,16 +201,19 @@ export default defineNuxtConfig({
   },
 
   content: {
-    documentDriven: false,
-    highlight: {
-      theme: 'github-dark',
+    experimental: {
+      sqliteConnector: 'native',
     },
-    markdown: {
-      toc: {
-        depth: 3,
-        searchDepth: 3,
-      },
-    },
+    // documentDriven: false,  // 不再支持此配置
+    // highlight: {  // 不再支持此配置
+    //   theme: 'github-dark',
+    // },
+    // markdown: {  // 不再支持此配置
+    //   toc: {
+    //     depth: 3,
+    //     searchDepth: 3,
+    //   },
+    // },
   },
 
   runtimeConfig: {
@@ -138,7 +222,12 @@ export default defineNuxtConfig({
     // 站间私有 API 密钥，仅服务端读取
     // 留空作为默认值，生产环境由 NUXT_PRIVATE_API_KEY 在运行时注入，避免构建产物携带密钥
     privateApiKey: '',
-    // Redis 配置（可选，不配置则使用内存缓存）
+    // SearchGal 只读摘要 API：专用密钥与内容范围均在运行时注入
+    searchgalApiKey: '',
+    searchgalIncludeNsfw: false,
+    // NextMoe moyu 补丁 API，运行时通过 NUXT_NEXTMOE_API_KEY 注入
+    nextmoeApiKey: '',
+    // Redis 配置（可选，不配置时 cachedFetch 直接查询数据库）
     redisUrl: process.env.REDIS_URL || '',
     trustProxy: process.env.TRUST_PROXY === 'true',
     smtp: {
@@ -161,6 +250,9 @@ export default defineNuxtConfig({
       publicUrl: process.env.S3_PUBLIC_URL,
     },
     localUploadPath: process.env.LOCAL_UPLOAD_PATH || './uploads',
+    releaseId,
+    staticAssetRoot: process.env.CHARLOTTE_STATIC_ASSET_ROOT || '',
+    distributedLockDir: process.env.CHARLOTTE_LOCK_DIR || '',
     indexNowKey: process.env.INDEXNOW_KEY,
     // 公开配置（客户端可用）
     public: {
@@ -178,9 +270,16 @@ export default defineNuxtConfig({
   nitro: {
     // 注意：uploads 目录通过 server/middleware/uploads.ts 提供
     // 不使用 publicAssets，因为它在开发模式下可能不稳定
-    
+
     // 压缩响应
+    // 启用压缩，在 nginx 端设置 proxy_set_header Accept-Encoding "" 避免双重压缩
     compressPublicAssets: true,
+
+    // HTTP/2 相关配置
+    experimental: {
+      // 禁用 HTTP/2 推送以避免连接状态问题
+      http2Push: false,
+    },
 
     // 将 2FA 相关依赖内联打包，避免被当作 external dependency
     externals: {
@@ -194,6 +293,23 @@ export default defineNuxtConfig({
         '@otplib/plugin-base32-scure',
         'qrcode',
       ],
+    },
+
+    rollupConfig: {
+      onwarn(warning, warn) {
+        const message = warning.message || ''
+        const isKnownUpstreamWarning =
+          ['CIRCULAR_DEPENDENCY', 'EVAL'].includes(warning.code || '')
+          || message.includes('Unsupported source map comment')
+          || (message.includes('@nuxt/nitro-server/dist/runtime/utils/cache-driver.mjs')
+            && message.includes('virtual:#nitro-internal-virtual/storage'))
+          || (warning.code === 'UNUSED_EXTERNAL_IMPORT'
+            && message.includes('@nuxt/nitro-server/dist/h3.mjs'))
+          || (warning.code === 'INVALID_ANNOTATION'
+            && message.includes('node_modules/@scure/base/index.js'))
+
+        if (!isKnownUpstreamWarning) warn(warning)
+      },
     },
 
     // 运行时关闭时断开连接
@@ -221,7 +337,6 @@ export default defineNuxtConfig({
       // 注意：swr 按路径缓存、不区分 query string，带 query 参数的接口
       // （/api/tools?category=、/api/leaderboard?type=）不能放这里，
       // 改在 handler 内用 cachedFetch 按参数缓存
-      '/api/tags': { swr: 300 },
       '/api/hot-searches': { swr: 300 },
       '/api/site-info': { swr: 300 },
       '/api/nav-config': { swr: 3600 },
@@ -232,6 +347,9 @@ export default defineNuxtConfig({
       // robots, rss 缓存（sitemap 的缓存头在 handler 中设置，避免 routeRules 忽略 query string 导致缓存冲突）
       '/robots.txt': { headers: { 'cache-control': 'public, max-age=86400' } },
       '/rss.xml': { headers: { 'cache-control': 'public, max-age=1800' } },
+      '/api/build-id': { headers: { 'cache-control': 'no-store' } },
+      '/api/health': { headers: { 'cache-control': 'no-store' } },
+      '/api/ready': { headers: { 'cache-control': 'no-store' } },
     },
   },
 
@@ -239,6 +357,14 @@ export default defineNuxtConfig({
   experimental: {
     payloadExtraction: true,
     componentIslands: true,
+    // Resource recovery is handled by plugins/version-check.client.ts so every
+    // reload shares the same cross-page loop guard and user-facing fallback.
+    emitRouteChunkError: 'manual',
+    // 自动扫描页面元数据
+    scanPageMeta: true,
+    // Nuxt 4 新特性
+    sharedPrerenderData: true,
+    asyncCallHook: true,
   },
 
   app: {
@@ -264,6 +390,18 @@ export default defineNuxtConfig({
       ],
       script: [
         {
+          id: 'resource-recovery-bootstrap',
+          innerHTML: resourceRecoveryBootstrap,
+          type: 'text/javascript',
+          tagPosition: 'head',
+        },
+        // 在首次绘制前同步应用深色模式 class，防止水合后出现主题闪烁
+        {
+          id: 'color-mode-script',
+          innerHTML: `(function(){try{var s=localStorage.getItem('nuxt-color-mode');if(!s){var m=document.cookie.match(/(?:^|;\\s*)nuxt-color-mode=([^;]+)/);s=m?m[1]:null}var dark=s==='dark'||((!s||s==='system')&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',dark)}catch(e){}})()`,
+          type: 'text/javascript',
+        },
+        {
           innerHTML: '(function(){try{if(typeof structuredClone==="undefined"||typeof globalThis.AbortController==="undefined"||!Array.prototype.at)throw 0}catch(e){document.addEventListener("DOMContentLoaded",function(){document.body.innerHTML=\'<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#f5f5f5;padding:20px"><div style="max-width:460px;text-align:center;background:#fff;border-radius:16px;padding:40px 32px;box-shadow:0 2px 12px rgba(0,0,0,.08)"><div style="font-size:48px;margin-bottom:16px">🌐</div><h1 style="font-size:22px;color:#1a1a1a;margin:0 0 12px">浏览器版本过低</h1><p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 24px">当前浏览器不支持本站所需的技术特性，请升级到以下版本：</p><div style="text-align:left;background:#f9f9f9;border-radius:10px;padding:16px 20px;margin-bottom:24px;font-size:13px;color:#444;line-height:2"><b>Chrome</b> 98+<br><b>Edge</b> 98+<br><b>Firefox</b> 94+<br><b>Safari</b> 15.4+</div><a href="https://www.google.com/chrome/" style="display:inline-block;padding:10px 28px;background:#1a1a1a;color:#fff;border-radius:10px;text-decoration:none;font-size:14px">下载最新 Chrome</a></div></div>\'})}})();',
           tagPosition: 'head',
         },
@@ -274,6 +412,9 @@ export default defineNuxtConfig({
         { rel: 'alternate', type: 'application/rss+xml', title: '最新游戏', href: '/rss.xml?type=games' },
         { rel: 'alternate', type: 'application/rss+xml', title: '最新资源', href: '/rss.xml?type=resources' },
         { rel: 'alternate', type: 'application/rss+xml', title: '最新攻略', href: '/rss.xml?type=guides' },
+        // 预连接到关键外部资源（LCP 图片来源）
+        { rel: 'preconnect', href: 'https://t.vndb.org' },
+        { rel: 'dns-prefetch', href: 'https://t.vndb.org' },
         // DNS 预解析常用外部资源
         { rel: 'dns-prefetch', href: '//fonts.googleapis.com' },
         { rel: 'dns-prefetch', href: '//fonts.gstatic.com' },
@@ -286,22 +427,46 @@ export default defineNuxtConfig({
     },
   },
 
-  compatibilityDate: '2024-11-01',
+  compatibilityDate: '2025-01-01',
+
+  // 保持 Nuxt 3 的目录结构
+  srcDir: '.',
+
+  dir: {
+    app: 'app',
+    pages: 'pages',
+    layouts: 'layouts',
+    middleware: 'middleware',
+    plugins: 'plugins',
+    modules: 'modules',
+    public: 'public',
+  },
 
   vite: {
     build: {
-      rollupOptions: {
-        onwarn(warning, warn) {
-          // 忽略 @sidebase/nuxt-auth 的动态/静态导入混合警告
-          if (
-            warning.code === 'MIXED_EXPORTS' ||
-            (warning.message && warning.message.includes('dynamically imported by') && warning.message.includes('nuxt-auth'))
-          ) {
-            return
+      rolldownOptions: {
+        checks: {
+          pluginTimings: false,
+        },
+        onLog(level, log, handler) {
+          const isKnownNuxtAuthWarning =
+            log.code === 'INEFFECTIVE_DYNAMIC_IMPORT'
+            && log.message.includes('@sidebase/nuxt-auth')
+
+          if (!isKnownNuxtAuthWarning) {
+            handler(level, log)
           }
-          warn(warning)
         },
       },
+      // 设置 chunk 大小警告阈值
+      chunkSizeWarningLimit: 1000, // 1MB
+      // CSS 代码分割优化
+      cssCodeSplit: true,
     },
+  },
+
+  // 优化 CSS 提取和内联
+  features: {
+    inlineStyles: true,
   },
 })

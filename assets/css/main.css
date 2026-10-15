@@ -1,0 +1,32 @@
+@tailwind base;
+
+/*
+ * Tailwind Preflight 会把 svg 设为 display: block，导致图标在普通文本、
+ * 链接和空状态中独占一行。放在 base 与 utilities 之间，既恢复 Iconify
+ * 的行内排版，也允许显式的 block/hidden 等工具类继续覆盖。
+ * 轻微调整基线，让图标视觉中心与相邻文字对齐。
+ */
+.iconify {
+  display: inline-block;
+  vertical-align: -0.04em;
+}
+
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义样式 */
+@layer base {
+  body {
+    @apply font-sans;
+  }
+}
+
+/* 自定义组件样式 */
+@layer components {
+  /* 在这里添加自定义组件样式 */
+}
+
+/* 工具类 */
+@layer utilities {
+  /* 在这里添加自定义工具类 */
+}

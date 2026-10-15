@@ -6,7 +6,7 @@
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-5">
           <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img v-if="userData.user.avatar" :src="userData.user.avatar" class="w-full h-full object-cover" />
-            <i v-else class="fa-solid fa-user text-xl md:text-2xl text-gray-400"></i>
+            <Icon name="fa6-solid:user" class="text-xl md:text-2xl text-gray-400" v-else />
           </div>
           <div class="flex-1 text-center sm:text-left">
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -26,7 +26,7 @@
             </div>
             <p v-if="userData.user.bio" class="text-gray-500 dark:text-gray-400 mt-1 text-sm">{{ userData.user.bio }}</p>
             <p class="text-xs text-gray-400 mt-2">
-              <i class="fa-solid fa-calendar-days mr-1"></i>
+              <Icon name="fa6-solid:calendar-days" class="mr-1" />
               {{ new Date(userData.user.createdAt).toLocaleDateString('zh-CN') }} 加入
             </p>
           </div>
@@ -37,10 +37,10 @@
               @click="goPrivateMessage"
               :disabled="privateMessageLoading || !canPrivateMessage"
               class="px-4 py-2 rounded-lg text-sm transition border border-gray-300 dark:border-zinc-600 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              :title="canPrivateMessage ? '发送私信' : '该用户当前不可私信'"
+              :title="canPrivateMessage ? '发送站内信' : '该用户当前不可发送站内信'"
             >
-              <i class="fa-solid fa-envelope mr-1.5"></i>
-              私信
+              <Icon name="fa6-solid:envelope" class="mr-1.5" />
+              站内信
             </button>
             <button 
               @click="toggleFollow"
@@ -50,7 +50,7 @@
                 ? 'border border-gray-300 dark:border-zinc-600 hover:bg-gray-100 dark:hover:bg-zinc-700' 
                 : 'bg-gray-800 dark:bg-zinc-600 text-white hover:bg-gray-700 dark:hover:bg-zinc-500'"
             >
-              <i :class="isFollowing ? 'fa-solid fa-user-check' : 'fa-solid fa-user-plus'" class="mr-1.5"></i>
+              <Icon :name="isFollowing ? 'fa6-solid:user-check' : 'fa6-solid:user-plus'" class="mr-1.5" />
               {{ isFollowing ? '已关注' : '关注' }}
             </button>
           </div>
@@ -114,21 +114,21 @@
             class="flex-1 px-2 md:px-4 py-3 text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2 transition relative z-10"
             :class="activeTab === 'favorites' ? 'text-gray-800 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
           >
-            <i class="fa-solid fa-heart"></i><span class="hidden sm:inline">收藏</span>
+            <Icon name="fa6-solid:heart" /><span class="hidden sm:inline">收藏</span>
           </button>
           <button 
             @click="activeTab = 'comments'"
             class="flex-1 px-2 md:px-4 py-3 text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2 transition relative z-10"
             :class="activeTab === 'comments' ? 'text-gray-800 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
           >
-            <i class="fa-solid fa-comments"></i><span class="hidden sm:inline">评论</span>
+            <Icon name="fa6-solid:comments" /><span class="hidden sm:inline">评论</span>
           </button>
           <button 
             @click="activeTab = 'created'"
             class="flex-1 px-2 md:px-4 py-3 text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2 transition relative z-10"
             :class="activeTab === 'created' ? 'text-gray-800 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
           >
-            <i class="fa-solid fa-gamepad"></i><span class="hidden sm:inline">创建</span>
+            <Icon name="fa6-solid:gamepad" /><span class="hidden sm:inline">创建</span>
           </button>
         </div>
 
@@ -180,19 +180,19 @@
 
     <!-- 加载中 -->
     <div v-else-if="pending" class="text-center py-20">
-      <i class="fa-solid fa-spinner fa-spin text-3xl text-gray-400"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-3xl text-gray-400" />
     </div>
 
     <!-- 错误 -->
     <div v-else class="text-center py-20">
-      <i class="fa-solid fa-user-slash text-4xl text-gray-400 mb-4"></i>
+      <Icon name="fa6-solid:user-slash" class="text-4xl text-gray-400 mb-4" />
       <p class="text-gray-500">{{ error?.message || '用户不存在' }}</p>
     </div>
     
     <!-- 粉丝列表弹窗 -->
     <Modal v-model="showFollowersModal" title="粉丝">
       <div v-if="followersLoading" class="text-center py-8">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-2xl text-gray-400" />
       </div>
       <div v-else-if="followersList.length" class="space-y-3 max-h-96 overflow-y-auto">
         <NuxtLink 
@@ -204,7 +204,7 @@
         >
           <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
             <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" loading="lazy" />
-            <i v-else class="fa-solid fa-user text-gray-400"></i>
+            <Icon name="fa6-solid:user" class="text-gray-400" v-else />
           </div>
           <div>
             <div class="font-medium">{{ user.username }}</div>
@@ -218,7 +218,7 @@
     <!-- 关注列表弹窗 -->
     <Modal v-model="showFollowingModal" title="关注">
       <div v-if="followingLoading" class="text-center py-8">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-2xl text-gray-400" />
       </div>
       <div v-else-if="followingList.length" class="space-y-3 max-h-96 overflow-y-auto">
         <NuxtLink 
@@ -230,7 +230,7 @@
         >
           <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
             <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" loading="lazy" />
-            <i v-else class="fa-solid fa-user text-gray-400"></i>
+            <Icon name="fa6-solid:user" class="text-gray-400" v-else />
           </div>
           <div>
             <div class="font-medium">{{ user.username }}</div>
@@ -263,7 +263,7 @@ const isLoggedIn = computed(() => {
 })
 const currentUser = computed(() => session.value as any)
 
-const { data: userData, pending, error, refresh } = await useFetch<PublicUserResponse>(`/api/user/${userId.value}`, { key: `user-${userId.value}` })
+const { data: userData, pending, error, refresh } = await (useFetch as any)(`/api/user/${userId.value}`, { key: `user-${userId.value}` })
 
 // 关注状态
 const isFollowing = ref(false)
@@ -282,11 +282,11 @@ const followingLoading = ref(false)
 // 检查是否已关注
 async function checkFollowStatus() {
   if (!isLoggedIn.value || !userData.value) return
-  
+
   try {
-    const following = await $fetch<ListResponse<UserSummary>>(`/api/user/${currentUser.value.id}/following`, {
+    const following: any = await ($fetch as any)(`/api/user/${currentUser.value.id}/following`, {
       params: { limit: 100 },
-    })
+    } as any)
     isFollowing.value = following.items.some(u => u.id === parseInt(userId.value))
   } catch {
     // 忽略错误
@@ -312,7 +312,7 @@ async function checkPrivateMessagePermission() {
 function goPrivateMessage() {
   if (!userData.value) return
   if (!canPrivateMessage.value) {
-    toast.error('当前用户只能私信管理员或编辑')
+    toast.error('当前用户只能给管理员或编辑发送站内信')
     return
   }
   router.push({
@@ -344,7 +344,7 @@ async function toggleFollow() {
 async function loadFollowers() {
   followersLoading.value = true
   try {
-    const data = await $fetch<ListResponse<UserSummary>>(`/api/user/${userId.value}/followers`)
+    const data: any = await ($fetch as any)(`/api/user/${userId.value}/followers`)
     followersList.value = data.items
   } catch {
     followersList.value = []
@@ -357,7 +357,7 @@ async function loadFollowers() {
 async function loadFollowing() {
   followingLoading.value = true
   try {
-    const data = await $fetch<ListResponse<UserSummary>>(`/api/user/${userId.value}/following`)
+    const data: any = await ($fetch as any)(`/api/user/${userId.value}/following`)
     followingList.value = data.items
   } catch {
     followingList.value = []

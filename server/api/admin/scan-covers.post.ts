@@ -1,7 +1,7 @@
 import { requireAdmin } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
 import { promises as fs } from 'fs'
-import path from 'path'
+import { resolveUploadFile } from '~/server/utils/local-storage-path'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -39,7 +39,11 @@ export default defineEventHandler(async (event) => {
     try {
       if (game.coverImage.startsWith('/uploads/')) {
         // 本地文件：检查文件是否存在
-        const localPath = path.join(process.cwd(), config.localUploadPath, game.coverImage.replace('/uploads/', ''))
+        const localPath = resolveUploadFile(game.coverImage.replace('/uploads/', ''), config)
+        if (!localPath) {
+          broken.push({ id: game.id, title, coverImage: game.coverImage, vndbId: game.vndbId, reason: '本地路径非法' })
+          continue
+        }
         try {
           await fs.access(localPath)
         } catch {

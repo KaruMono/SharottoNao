@@ -6,52 +6,50 @@
     <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
       <div class="flex flex-wrap items-center gap-4">
         <div class="relative flex-1 min-w-[200px]">
-          <input 
+          <input
             v-model="searchQuery"
-            type="text" 
-            placeholder="搜索用户名或邮箱..." 
-            class="w-full px-4 py-2 pl-10 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            type="text"
+            placeholder="搜索用户名或邮箱..."
+            class="admin-input w-full pl-10"
             @keyup.enter="handleSearch"
           />
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
         </div>
-        <select 
+        <AdminSelect aria-label="角色"
           v-model="roleFilter"
-          class="px-4 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
           @change="handleFilter"
         >
           <option value="">全部角色</option>
           <option value="USER">普通用户</option>
           <option value="EDITOR">编辑员</option>
           <option value="ADMIN">管理员</option>
-        </select>
-        <select 
+        </AdminSelect>
+        <AdminSelect aria-label="状态"
           v-model="statusFilter"
-          class="px-4 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
           @change="handleFilter"
         >
           <option value="">全部状态</option>
           <option value="ACTIVE">正常</option>
           <option value="BANNED">封禁</option>
-        </select>
+        </AdminSelect>
       </div>
 
       <div class="mt-4 pt-4 border-t dark:border-zinc-700 space-y-3">
         <div class="flex flex-wrap items-center gap-3">
-          <button
+          <AdminKumoButton
             @click="loadAvatarScan"
             :disabled="avatarScanLoading || avatarScanRunning"
-            class="px-4 py-2 bg-gray-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50 transition text-sm"
+            variant="secondary"
           >
-            <i class="fa-solid fa-rotate mr-2"></i>{{ avatarScanLoading ? '扫描中...' : '扫描头像状态' }}
-          </button>
-          <button
+            <Icon name="fa6-solid:rotate" />{{ avatarScanLoading ? '扫描中...' : '扫描头像状态' }}
+          </AdminKumoButton>
+          <AdminKumoButton
             @click="startAvatarScan"
             :disabled="avatarScanRunning || avatarScanCandidates.length === 0"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition text-sm"
+            variant="emphasis"
           >
-            <i class="fa-solid fa-user-check mr-2"></i>{{ avatarScanRunning ? '处理中...' : '重新检测头像' }}
-          </button>
+            <Icon name="fa6-solid:user-check" />{{ avatarScanRunning ? '处理中...' : '重新检测头像' }}
+          </AdminKumoButton>
           <span v-if="avatarScanSummary" class="text-sm text-gray-500 dark:text-gray-400">
             共 {{ avatarScanSummary.total }} 人，可处理 {{ avatarScanSummary.candidates }} 人，已跳过自定义头像 {{ avatarScanSummary.uploadedSkipped }} 人
           </span>
@@ -83,28 +81,27 @@
           </div>
         </div>
       </div>
-      
       <!-- 批量操作栏 -->
       <div v-if="selectedIds.length > 0" class="flex items-center gap-4 mt-4 pt-4 border-t dark:border-zinc-700">
         <span class="text-sm text-gray-500">已选择 {{ selectedIds.length }} 项</span>
-        <button 
+        <AdminKumoButton
           @click="batchBan"
-          class="px-3 py-1.5 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+          variant="danger"
         >
-          <i class="fa-solid fa-ban mr-1"></i>批量封禁
-        </button>
-        <button 
+          <Icon name="fa6-solid:ban" />批量封禁
+        </AdminKumoButton>
+        <AdminKumoButton
           @click="batchUnban"
-          class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+          variant="emphasis"
         >
-          <i class="fa-solid fa-check mr-1"></i>批量解封
-        </button>
-        <button 
+          <Icon name="fa6-solid:check" />批量解封
+        </AdminKumoButton>
+        <AdminKumoButton
           @click="clearSelection"
-          class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition"
+          variant="ghost"
         >
           取消选择
-        </button>
+        </AdminKumoButton>
       </div>
     </div>
 
@@ -143,7 +140,7 @@
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
                   <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
-                  <i v-else class="fa-solid fa-user text-gray-400"></i>
+                  <Icon name="fa6-solid:user" class="text-gray-400" v-else />
                 </div>
                 <div>
                   <div class="font-medium">{{ user.username }}</div>
@@ -152,15 +149,14 @@
               </div>
             </td>
             <td class="px-4 py-3">
-              <select 
+              <AdminSelect aria-label="用户角色"
                 :value="user.role"
                 @change="updateUserRole(user.id, ($event.target as HTMLSelectElement).value)"
-                class="px-2 py-1 rounded text-sm border dark:bg-zinc-700 dark:border-zinc-600"
               >
                 <option value="USER">普通用户</option>
                 <option value="EDITOR">编辑员</option>
                 <option value="ADMIN">管理员</option>
-              </select>
+              </AdminSelect>
             </td>
             <td class="px-4 py-3">
               <span 
@@ -225,7 +221,7 @@
     </div>
 
     <!-- 分页 -->
-    <Pagination 
+    <Pagination admin
       v-if="usersData && usersData.pagination.totalPages > 1"
       :current-page="currentPage"
       :total-pages="usersData.pagination.totalPages"
@@ -245,7 +241,7 @@
             <div class="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h3 class="font-semibold">封禁用户</h3>
               <button @click="showBanModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700">
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
             <div class="p-4 space-y-4">
@@ -263,8 +259,8 @@
                 <p v-if="!banTarget?.registrationIp && !banTarget?.lastLoginIp" class="text-xs text-gray-400">该用户无 IP 记录</p>
               </div>
               <div class="flex justify-end gap-3">
-                <button @click="showBanModal = false" class="px-4 py-2 rounded-lg border dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700">取消</button>
-                <button @click="confirmBan" class="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm hover:bg-orange-600">确认封禁</button>
+                <AdminKumoButton variant="secondary" @click="showBanModal = false" >取消</AdminKumoButton>
+                <AdminKumoButton variant="primary" @click="confirmBan" >确认封禁</AdminKumoButton>
               </div>
             </div>
           </div>
@@ -284,10 +280,9 @@
             <div class="flex items-center justify-between p-4 border-b dark:border-zinc-700 flex-shrink-0">
               <h3 class="font-semibold">编辑用户</h3>
               <button @click="showEditModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
-            
             <form @submit.prevent="handleEditSubmit" class="p-4 space-y-4 overflow-y-auto flex-1">
               <!-- IP 信息（只读） -->
               <div v-if="editForm.registrationIp || editForm.lastLoginIp" class="bg-gray-50 dark:bg-zinc-700/50 rounded-lg p-3 text-xs space-y-1">
@@ -295,14 +290,14 @@
                   <span class="text-gray-500 w-20 shrink-0">注册 IP</span>
                   <span class="font-mono">{{ editForm.registrationIp }}</span>
                   <button type="button" @click="addIpToBlacklist(editForm.registrationIp!)" class="ml-auto text-red-500 hover:text-red-600">
-                    <i class="fa-solid fa-ban"></i> 加黑名单
+                    <Icon name="fa6-solid:ban" /> 加黑名单
                   </button>
                 </div>
                 <div v-if="editForm.lastLoginIp" class="flex items-center gap-2">
                   <span class="text-gray-500 w-20 shrink-0">最近登录 IP</span>
                   <span class="font-mono">{{ editForm.lastLoginIp }}</span>
                   <button type="button" @click="addIpToBlacklist(editForm.lastLoginIp!)" class="ml-auto text-red-500 hover:text-red-600">
-                    <i class="fa-solid fa-ban"></i> 加黑名单
+                    <Icon name="fa6-solid:ban" /> 加黑名单
                   </button>
                 </div>
               </div>
@@ -312,37 +307,34 @@
                 <input 
                   v-model="editForm.username"
                   type="text" 
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input w-full"
                   required
                 />
               </div>
-              
               <div>
                 <label class="block text-sm font-medium mb-1">邮箱</label>
                 <input 
                   v-model="editForm.email"
                   type="email" 
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input w-full"
                   required
                 />
               </div>
-              
               <div>
                 <label class="block text-sm font-medium mb-1">新密码（留空则不修改）</label>
                 <input 
                   v-model="editForm.password"
                   type="password"
                   autocomplete="new-password"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input w-full"
                   placeholder="留空则不修改密码"
                 />
               </div>
-              
               <div>
                 <label class="block text-sm font-medium mb-1">简介</label>
                 <textarea 
                   v-model="editForm.bio"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-textarea w-full"
                   rows="3"
                   placeholder="可选"
                 ></textarea>
@@ -356,7 +348,7 @@
                     v-model="editForm.title"
                     type="text"
                     maxlength="50"
-                    class="flex-1 px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                    class="admin-input flex-1"
                     placeholder="留空则不显示头衔"
                   />
                   <input
@@ -397,40 +389,36 @@
               </div>
 
               <div class="pt-2 border-t dark:border-zinc-700 space-y-2">
-                <button 
+                <AdminKumoButton variant="secondary"
                   type="button"
                   @click="sendResetPasswordEmail"
                   :disabled="editLoading"
-                  class="w-full px-4 py-2 rounded-lg border border-blue-500 text-blue-500 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50"
+                  class="w-full"
                 >
-                  <i class="fa-solid fa-envelope mr-1"></i>发送重置密码邮件
-                </button>
-                
-                <button 
+                  <Icon name="fa6-solid:envelope" />发送重置密码邮件
+                </AdminKumoButton>
+                <AdminKumoButton variant="secondary"
                   type="button"
                   @click="logoutAllSessions"
                   :disabled="editLoading"
-                  class="w-full px-4 py-2 rounded-lg border border-orange-500 text-orange-500 text-sm hover:bg-orange-50 dark:hover:bg-orange-900/20 disabled:opacity-50"
+                  class="w-full"
                 >
-                  <i class="fa-solid fa-right-from-bracket mr-1"></i>注销全部会话
-                </button>
+                  <Icon name="fa6-solid:right-from-bracket" />注销全部会话
+                </AdminKumoButton>
               </div>
-              
               <div class="flex justify-end gap-3 pt-2">
-                <button 
+                <AdminKumoButton variant="secondary"
                   type="button"
                   @click="showEditModal = false"
-                  class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                 >
                   取消
-                </button>
-                <button 
+                </AdminKumoButton>
+                <AdminKumoButton variant="primary"
                   type="submit"
                   :disabled="editLoading"
-                  class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50"
                 >
                   {{ editLoading ? '保存中...' : '保存' }}
-                </button>
+                </AdminKumoButton>
               </div>
             </form>
           </div>

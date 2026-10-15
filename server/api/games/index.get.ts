@@ -1,8 +1,9 @@
 import { z } from 'zod'
 import prisma from '~/server/utils/prisma'
 import { getDisplayTitle } from '~/server/utils/game'
-import { buildNsfwFilterFromUser, getUserNsfwPreference } from '~/server/utils/nsfw'
+import { buildNsfwFilterFromUser, getUserNsfwPreference, type NsfwMode } from '~/server/utils/nsfw'
 import { cachedFetch, CacheKeys, CacheTTL } from '~/server/utils/redis'
+import { buildGameTagVisibilityWhere, buildTagVisibilityWhere } from '~/server/utils/tag-visibility'
 
 // GameBump 表存在性只在进程内探测一次（数据库迁移后才有该表）
 let hasBumpTablePromise: Promise<boolean> | null = null
@@ -52,7 +53,7 @@ export default defineEventHandler(async (event) => {
   return cachedFetch(cacheKey, () => fetchGameList(params, nsfwMode), CacheTTL.SHORT)
 })
 
-async function fetchGameList(params: z.infer<typeof querySchema>, nsfwMode: string) {
+async function fetchGameList(params: z.infer<typeof querySchema>, nsfwMode: NsfwMode) {
   const { page, limit, search, companyId, tagId, tagIds, ratingMin, ratingMax, resourceTypeId, hasResource, hasMachineTranslation, sort, order, year, month } = params
   const skip = (page - 1) * limit
 
@@ -60,6 +61,7 @@ async function fetchGameList(params: z.infer<typeof querySchema>, nsfwMode: stri
   const nsfwFilter = nsfwMode === 'SFW' ? { isNsfw: false }
     : nsfwMode === 'NSFW' ? { isNsfw: true }
     : {}
+  const visibleGameTagWhere = buildGameTagVisibilityWhere(nsfwMode)
 
   // 构建搜索条件（搜索所有语言的标题 + 别名子串模糊匹配）
   let searchFilter: any = {}
@@ -110,18 +112,18 @@ async function fetchGameList(params: z.infer<typeof querySchema>, nsfwMode: stri
     ? tagIds.split(',').map(Number).filter(n => !isNaN(n))
     : tagId ? [tagId] : []
 
-  // 如果按标签筛选，检查标签是否为 NSFW
-  let tagNsfwFilter = {}
-  if (parsedTagIds.length > 0 && nsfwMode === 'SFW') {
-    // 检查所有标签是否有 NSFW 标签
+  // 直接提交的标签 ID 也必须遵循当前公开可见性规则。
+  if (parsedTagIds.length > 0) {
+    // Archived tags are unavailable in every public mode. SFW additionally
+    // rejects adult tags, including IDs supplied directly in the query.
     const tags = await prisma.tag.findMany({
-      where: { id: { in: parsedTagIds } },
+      where: { id: { in: parsedTagIds }, ...buildTagVisibilityWhere(nsfwMode) },
       select: { id: true, isNsfw: true },
     })
     
-    // 如果有任何 NSFW 标签，SFW 模式下不显示结果
-    const hasNsfwTag = tags.some(t => t.isNsfw)
-    if (hasNsfwTag) {
+    const requestedTagCount = new Set(parsedTagIds).size
+    const hasUnavailableTag = tags.length !== requestedTagCount
+    if (hasUnavailableTag) {
       return {
         items: [],
         pagination: { page, limit, total: 0, totalPages: 0 },
@@ -226,6 +228,7 @@ async function fetchGameList(params: z.infer<typeof querySchema>, nsfwMode: stri
             },
           },
           tags: {
+            where: visibleGameTagWhere,
             select: {
               tag: {
                 select: { id: true, name: true, color: true },
@@ -387,6 +390,7 @@ async function fetchGameList(params: z.infer<typeof querySchema>, nsfwMode: stri
               },
             },
             tags: {
+              where: visibleGameTagWhere,
               select: {
                 tag: {
                   select: { id: true, name: true, color: true },
@@ -464,6 +468,7 @@ async function fetchGameList(params: z.infer<typeof querySchema>, nsfwMode: stri
           },
         },
         tags: {
+          where: visibleGameTagWhere,
           select: {
             tag: {
               select: { id: true, name: true, color: true },

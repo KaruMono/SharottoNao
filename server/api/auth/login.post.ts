@@ -7,7 +7,8 @@ import { checkLoginRateLimit, getClientIp } from '~/server/utils/rate-limit'
 import { resolveAvatar } from '~/server/utils/gravatar'
 
 const schema = z.object({
-  email: z.string().email('请输入有效的邮箱地址').transform(v => v.toLowerCase()),
+  // 登录账号同时支持邮箱和用户名；邮箱仍统一转小写，用户名保留原样交给大小写不敏感查询。
+  account: z.string().min(1, '请输入邮箱或用户名').max(255),
   password: z.string().min(1, '请输入密码'),
 })
 
@@ -16,14 +17,21 @@ const DUMMY_PASSWORD_HASH = bcrypt.hashSync('dummy-password-for-timing-safety', 
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { email, password } = schema.parse(body)
+  const { account, password } = schema.parse({ account: body?.account ?? body?.email, password: body?.password })
+  const normalizedAccount = account.trim()
+  const email = normalizedAccount.toLowerCase()
 
   // 登录频率限制
   await checkLoginRateLimit(event, email)
 
   // 查找用户
-  const user = await prisma.user.findUnique({
-    where: { email },
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email },
+        { username: { equals: normalizedAccount, mode: 'insensitive' } },
+      ],
+    },
   })
 
   if (!user) {

@@ -1,27 +1,11 @@
 <template>
   <div class="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-6">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 md:gap-10">
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 md:gap-10">
 
       <!-- 主内容区 -->
-      <div class="space-y-5 md:space-y-7">
+      <div class="min-w-0 space-y-5 md:space-y-7">
         <!-- 顶部广告（仅主内容区，不融入侧边栏） -->
         <AdBanner ad-slot="home_top" />
-        <!-- 本月发布 -->
-        <section>
-          <h2 class="text-lg md:text-xl font-semibold mb-3 md:mb-4">本月发布</h2>
-          <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 md:gap-5">
-            <GameCard 
-              v-for="(game, idx) in homeData?.monthlyReleasedGames" 
-              :key="game.id" 
-              :game="game"
-              :eager="idx < 5"
-            />
-            <div v-if="!homeData?.monthlyReleasedGames?.length" key="empty" class="col-span-full text-center text-gray-500 py-8">
-              暂无数据
-            </div>
-          </div>
-        </section>
-
         <!-- 最新创建 -->
         <section>
           <h2 class="text-lg md:text-xl font-semibold mb-3 md:mb-4">最新创建</h2>
@@ -30,7 +14,7 @@
               v-for="(game, idx) in homeData?.latestGames" 
               :key="game.id" 
               :game="game"
-              :eager="!homeData?.monthlyReleasedGames?.length && idx < 5"
+              :eager="idx < 5"
             />
             <div v-if="!homeData?.latestGames?.length" key="empty" class="col-span-full text-center text-gray-500 py-8">
               暂无数据
@@ -74,7 +58,7 @@
         <!-- 公告 -->
         <div v-if="homeData?.announcement" class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
           <div class="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-700 flex items-center gap-2">
-            <i class="fa-solid fa-bullhorn text-gray-400 text-sm"></i>
+            <Icon name="fa6-solid:bullhorn" class="text-gray-400 text-sm" />
             <h3 class="font-medium text-sm">公告</h3>
           </div>
           <p class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ homeData.announcement }}</p>
@@ -83,7 +67,7 @@
         <!-- 标签云 -->
         <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
           <div class="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-700 flex items-center gap-2">
-            <i class="fa-solid fa-tags text-gray-400 text-sm"></i>
+            <Icon name="fa6-solid:tags" class="text-gray-400 text-sm" />
             <h3 class="font-medium text-sm">标签</h3>
           </div>
           <div class="p-4 flex flex-wrap gap-2 text-xs">
@@ -102,7 +86,7 @@
         <!-- 最近评论 -->
         <div v-if="homeData?.recentComments?.length" class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
           <div class="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-700 flex items-center gap-2">
-            <i class="fa-solid fa-comments text-gray-400 text-sm"></i>
+            <Icon name="fa6-solid:comments" class="text-gray-400 text-sm" />
             <h3 class="font-medium text-sm">最近评论</h3>
           </div>
           <ul>
@@ -117,7 +101,7 @@
                   class="w-6 h-6 rounded-full object-cover flex-shrink-0 mt-0.5"
                 />
                 <div v-else class="w-6 h-6 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <i class="fa-solid fa-user text-[9px] text-gray-400"></i>
+                  <Icon name="fa6-solid:user" class="text-[9px] text-gray-400" />
                 </div>
                 <div class="min-w-0 flex-1">
                   <div class="flex items-baseline justify-between gap-1 mb-0.5">
@@ -128,7 +112,7 @@
                   </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 leading-relaxed">{{ comment.content }}</p>
                   <p class="text-[10px] text-gray-400 dark:text-zinc-500 truncate mt-0.5 group-hover:text-gray-500 dark:group-hover:text-zinc-400 transition">
-                    <i class="fa-solid fa-gamepad mr-1"></i>{{ comment.game.title }}
+                    <Icon name="fa6-solid:gamepad" class="mr-1" />{{ comment.game.title }}
                   </p>
                 </div>
               </NuxtLink>
@@ -142,7 +126,7 @@
         <!-- 最近编辑 -->
         <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
           <div class="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-700 flex items-center gap-2">
-            <i class="fa-solid fa-clock-rotate-left text-gray-400 text-sm"></i>
+            <Icon name="fa6-solid:clock-rotate-left" class="text-gray-400 text-sm" />
             <h3 class="font-medium text-sm">最近编辑</h3>
           </div>
           <ul>
@@ -152,7 +136,7 @@
                 class="flex items-start gap-2 px-4 py-2.5 group hover:bg-gray-50 dark:hover:bg-zinc-700/30 transition"
               >
                 <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <i class="fa-solid fa-pen text-[9px] text-gray-400"></i>
+                  <Icon name="fa6-solid:pen" class="text-[9px] text-gray-400" />
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 leading-relaxed">
@@ -160,7 +144,7 @@
                     {{ edit.action }}
                   </p>
                   <p class="text-[10px] text-gray-400 dark:text-zinc-500 truncate mt-0.5 group-hover:text-gray-500 dark:group-hover:text-zinc-400 transition">
-                    <i class="fa-solid fa-gamepad mr-1"></i>{{ edit.game.title }}
+                    <Icon name="fa6-solid:gamepad" class="mr-1" />{{ edit.game.title }}
                   </p>
                 </div>
               </NuxtLink>
@@ -175,7 +159,7 @@
         <!-- 友情链接 -->
         <div v-if="homeData?.friendLinks?.length" class="bg-white dark:bg-zinc-800 rounded-xl shadow">
           <div class="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-700 flex items-center gap-2">
-            <i class="fa-solid fa-link text-gray-400 text-sm"></i>
+            <Icon name="fa6-solid:link" class="text-gray-400 text-sm" />
             <h3 class="font-medium text-sm">友情链接</h3>
           </div>
           <div class="p-4 flex flex-wrap gap-2 text-sm">
@@ -223,7 +207,7 @@ useHead({
       { property: 'og:type', content: 'website' },
     ]
     // 使用首个游戏封面作为 og:image；同步调整 twitter:card 类型
-    const ogImage = homeData.value?.monthlyReleasedGames?.[0]?.coverImage || homeData.value?.latestGames?.[0]?.coverImage || homeData.value?.favicon
+    const ogImage = homeData.value?.latestGames?.[0]?.coverImage || homeData.value?.favicon
     if (ogImage) {
       metas.push({ property: 'og:image', content: ogImage })
       metas.push({ name: 'twitter:card', content: 'summary_large_image' })

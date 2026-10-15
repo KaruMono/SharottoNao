@@ -1,3 +1,14 @@
 {
-  "extends": "./.nuxt/tsconfig.json"
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": false,
+    "noUncheckedIndexedAccess": false,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "kun-galgame-forum-master/**",
+    "dist/**",
+    ".output/**",
+    ".claude/**"
+  ]
 }

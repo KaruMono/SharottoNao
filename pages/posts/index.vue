@@ -23,11 +23,11 @@
           class="h-24 relative overflow-hidden flex items-center justify-center"
           :style="{ backgroundColor: getCategoryColor(category.name) }"
         >
-          <i :class="getCategoryIcon(category.name)" class="text-white/30 text-5xl"></i>
+          <FaIcon :icon="getCategoryIcon(category.name)" class="text-white/30 text-5xl" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
           <div class="absolute bottom-0 left-0 right-0 p-4">
             <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <i :class="getCategoryIcon(category.name)" class="text-sm"></i>
+              <FaIcon :icon="getCategoryIcon(category.name)" class="text-sm" />
               {{ getCategoryDisplayName(category.name) }}
             </h2>
             <p class="text-white/70 text-xs">{{ category.posts.length }} 篇文档</p>
@@ -43,7 +43,7 @@
             class="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition group/item"
           >
             <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-              <i class="fa-solid fa-file-lines text-gray-400 text-sm"></i>
+              <Icon name="fa6-solid:file-lines" class="text-gray-400 text-sm" />
             </div>
             <div class="flex-1 min-w-0">
               <h3 class="text-sm font-medium truncate group-hover/item:text-gray-900 dark:group-hover/item:text-white">
@@ -51,7 +51,7 @@
               </h3>
               <p v-if="post.date" class="text-xs text-gray-400">{{ formatDate(post.date) }}</p>
             </div>
-            <i class="fa-solid fa-chevron-right text-gray-300 dark:text-zinc-600 text-xs group-hover/item:text-gray-500 transition"></i>
+            <Icon name="fa6-solid:chevron-right" class="text-gray-300 dark:text-zinc-600 text-xs group-hover/item:text-gray-500 transition" />
           </NuxtLink>
           
           <NuxtLink 
@@ -68,7 +68,7 @@
     <!-- 最新文档 -->
     <div class="mb-12">
       <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-        <i class="fa-solid fa-clock text-gray-400"></i>
+        <Icon name="fa6-solid:clock" class="text-gray-400" />
         最新文档
       </h2>
       <div class="space-y-4">
@@ -88,7 +88,7 @@
                 :src="post.banner" 
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <i v-else class="fa-solid fa-file-lines text-gray-300 dark:text-zinc-500 text-2xl"></i>
+              <Icon name="fa6-solid:file-lines" class="text-gray-300 dark:text-zinc-500 text-2xl" v-else />
             </div>
             
             <div class="flex-1 min-w-0">
@@ -114,18 +114,21 @@
     </div>
 
     <div v-if="!categories.length" class="text-center text-gray-500 py-16">
-      <i class="fa-solid fa-file-lines text-4xl mb-4"></i>
+      <Icon name="fa6-solid:file-lines" class="text-4xl mb-4" />
       <p>暂无文档</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+// @ts-ignore - queryContent 是 Nuxt 自动导入的
+const queryContent = (globalThis as any).queryContent
+
 const { formatDate } = useFormatDate()
 
 // 获取所有文章
-const { data: posts } = await useAsyncData('posts', () => 
-  queryContent('/posts').find()
+const { data: posts } = await useAsyncData('posts', () =>
+  (queryContent as any)('/posts').find()
 )
 
 // 分类颜色映射（统一灰色）
@@ -177,10 +180,10 @@ function getCategoryFromPath(path?: string): string {
 // 按分类分组
 const categories = computed(() => {
   if (!posts.value) return []
-  
+
   const grouped: Record<string, any[]> = {}
-  
-  for (const post of posts.value) {
+
+  for (const post of posts.value as any[]) {
     const category = getCategoryFromPath(post._path)
     
     if (!grouped[category]) {
@@ -203,7 +206,7 @@ const categories = computed(() => {
 // 最新文档
 const recentPosts = computed(() => {
   if (!posts.value) return []
-  return [...posts.value]
+  return [...(posts.value as any[])]
     .sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0
       const dateB = b.date ? new Date(b.date).getTime() : 0

@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center gap-3 mb-6">
       <NuxtLink to="/admin/companies" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-        <i class="fa-solid fa-arrow-left"></i>
+        <Icon name="fa6-solid:arrow-left" />
       </NuxtLink>
       <h1 class="text-2xl font-bold">创建会社</h1>
     </div>
@@ -19,7 +19,7 @@
             >
               <img v-if="form.logo" :src="form.logo" class="w-full h-full object-cover" />
               <div v-else class="text-center text-gray-400">
-                <i class="fa-solid fa-building text-2xl mb-1"></i>
+                <Icon name="fa6-solid:building" class="text-2xl mb-1" />
                 <p class="text-xs">点击上传</p>
               </div>
             </div>
@@ -33,7 +33,7 @@
                 @click="form.logo = ''"
                 class="mt-2 text-red-500 hover:text-red-600"
               >
-                <i class="fa-solid fa-trash mr-1"></i>移除 Logo
+                <Icon name="fa6-solid:trash" class="mr-1" />移除 Logo
               </button>
             </div>
           </div>
@@ -52,7 +52,7 @@
             <input 
               v-model="form.name"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：Key"
               required
             />
@@ -63,7 +63,7 @@
             <input 
               v-model="form.nameOriginal"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：株式会社ビジュアルアーツ"
             />
           </div>
@@ -73,7 +73,7 @@
           <label class="block text-sm font-medium mb-2">别名</label>
           <textarea 
             v-model="aliasesText"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-textarea w-full"
             rows="3"
             placeholder="每行一个别名，用于模糊搜索&#10;如：&#10;Visual Arts&#10;VA&#10;ビジュアルアーツ"
           ></textarea>
@@ -86,7 +86,7 @@
           <div v-if="form.parentId" class="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-zinc-700 rounded-lg text-sm">
             <NuxtLink :to="`/companies/${form.parentId}`" target="_blank" class="font-medium flex-1 text-blue-500 hover:underline">{{ form.parentName }}</NuxtLink>
             <button type="button" @click="clearParent" class="text-gray-400 hover:text-red-500 transition">
-              <i class="fa-solid fa-xmark"></i>
+              <Icon name="fa6-solid:xmark" />
             </button>
           </div>
           <div v-else class="relative">
@@ -94,7 +94,7 @@
               v-model="parentSearch"
               type="text"
               placeholder="搜索母会社名称..."
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               @input="searchParent"
               @focus="showParentDropdown = true"
               @blur="hideParentDropdown"
@@ -123,7 +123,7 @@
               type="number" 
               min="1900"
               max="2100"
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：1998"
             />
           </div>
@@ -133,7 +133,7 @@
             <input 
               v-model="form.website"
               type="url" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="https://..."
             />
           </div>
@@ -143,26 +143,24 @@
           <label class="block text-sm font-medium mb-2">简介</label>
           <textarea 
             v-model="form.description"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-textarea w-full"
             rows="4"
             placeholder="会社简介..."
           ></textarea>
         </div>
 
         <div class="flex justify-end gap-3 pt-4">
-          <NuxtLink 
+          <AdminKumoButton variant="secondary"
             to="/admin/companies"
-            class="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
           >
             取消
-          </NuxtLink>
-          <button 
+          </AdminKumoButton>
+          <AdminKumoButton variant="primary"
             type="submit"
             :disabled="loading"
-            class="px-6 py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50"
           >
             {{ loading ? '创建中...' : '创建会社' }}
-          </button>
+          </AdminKumoButton>
         </div>
       </form>
     </div>
@@ -211,7 +209,7 @@ function searchParent() {
   if (!q) { parentResults.value = []; return }
   parentTimer = setTimeout(async () => {
     try {
-      const data = await $fetch<any>('/api/companies', { query: { search: q, limit: 10 } })
+      const data: any = await $fetch('/api/companies', { query: { search: q, limit: 10 } } as any)
       parentResults.value = data.items || []
     } catch { parentResults.value = [] }
   }, 300)

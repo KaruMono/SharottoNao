@@ -11,14 +11,14 @@
             @click="showMobileSidebar = !showMobileSidebar"
             class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-700"
           >
-            <i :class="showMobileSidebar ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
+            <Icon :name="showMobileSidebar ? 'fa6-solid:xmark' : 'fa6-solid:bars'" />
           </button>
           <NuxtLink to="/" class="text-lg font-semibold">{{ siteName }}</NuxtLink>
           <span class="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">管理后台</span>
         </div>
         <div class="flex items-center gap-4">
           <NuxtLink :to="frontendReturnPath" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-            <i class="fa-solid fa-arrow-left mr-1"></i><span class="hidden sm:inline">返回前台</span>
+            <Icon name="fa6-solid:arrow-left" class="mr-1" /><span class="hidden sm:inline">返回前台</span>
           </NuxtLink>
         </div>
       </div>
@@ -42,14 +42,14 @@
         <nav class="p-4 space-y-1">
           <template v-for="item in navItems" :key="item.to || item.separator">
             <div v-if="item.separator" class="pt-4 pb-2 px-4 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ item.separator }}</div>
-            <a 
+            <a
               v-else
               :href="item.to"
               class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition cursor-pointer"
               :class="isNavActive(item) ? 'bg-gray-100 dark:bg-zinc-700 font-medium' : 'hover:bg-gray-50 dark:hover:bg-zinc-700/50'"
               @click.prevent="item.to && handleNavClick(item.to)"
             >
-              <i :class="[item.icon, 'w-4']"></i>
+              <Icon v-if="item.icon" :name="item.icon" class="w-4 h-4 flex-shrink-0" />
               <span class="flex-1">{{ item.label }}</span>
               <span v-if="item.badge && item.badge > 0" class="px-1.5 py-0.5 text-xs bg-orange-500 text-white rounded-full min-w-[20px] text-center">{{ item.badge }}</span>
             </a>
@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import '~/assets/css/admin-controls.css'
 import type { PendingCounts } from '~/types/api'
 
 // 检查管理员权限
@@ -115,39 +116,39 @@ interface NavItem {
 
 const navItems = computed<NavItem[]>(() => {
   const items: NavItem[] = [
-    { to: '/admin', icon: 'fa-solid fa-chart-line', label: '仪表盘', exact: true },
+    { to: '/admin', icon: 'fa6-solid:chart-line', label: '仪表盘', exact: true },
     { separator: '内容管理' },
-    { to: '/admin/games', icon: 'fa-solid fa-gamepad', label: '游戏条目' },
-    { to: '/admin/companies', icon: 'fa-solid fa-building', label: '会社管理' },
-    { to: '/admin/series', icon: 'fa-solid fa-layer-group', label: '系列管理' },
-    { to: '/admin/tags', icon: 'fa-solid fa-tags', label: '标签管理' },
-    { to: '/admin/resource-types', icon: 'fa-solid fa-download', label: '资源类型', adminOnly: true },
-    { to: '/admin/net-disks', icon: 'fa-solid fa-cloud', label: '网盘类型', adminOnly: true },
-    { to: '/admin/images', icon: 'fa-solid fa-image', label: '图片管理' },
-    { to: '/admin/emoji-packs', icon: 'fa-solid fa-face-smile', label: '表情包管理' },
-    { to: '/admin/tools', icon: 'fa-solid fa-wrench', label: '工具管理', adminOnly: true },
+    { to: '/admin/games', icon: 'fa6-solid:gamepad', label: '游戏条目' },
+    { to: '/admin/companies', icon: 'fa6-solid:building', label: '会社管理' },
+    { to: '/admin/series', icon: 'fa6-solid:layer-group', label: '系列管理' },
+    { to: '/admin/tags', icon: 'fa6-solid:tags', label: '标签管理' },
+    { to: '/admin/vndb-tags', icon: 'fa6-solid:language', label: '标签映射' },
+    { to: '/admin/resource-types', icon: 'fa6-solid:download', label: '资源类型', adminOnly: true },
+    { to: '/admin/net-disks', icon: 'fa6-solid:cloud', label: '网盘类型', adminOnly: true },
+    { to: '/admin/images', icon: 'fa6-solid:image', label: '图片管理' },
+    { to: '/admin/emoji-packs', icon: 'fa6-solid:face-smile', label: '表情包管理' },
+    { to: '/admin/tools', icon: 'fa6-solid:wrench', label: '工具管理', adminOnly: true },
     { separator: '用户管理' },
-    { to: '/admin/users', icon: 'fa-solid fa-users', label: '用户列表', adminOnly: true },
-    { to: '/admin/reports', icon: 'fa-solid fa-flag', label: '举报处理', badge: reportPending.value },
-    { to: '/admin/operation-logs', icon: 'fa-solid fa-file-lines', label: '操作日志' },
-    { to: '/admin/system-error-logs', icon: 'fa-solid fa-triangle-exclamation', label: '错误日志', badge: systemErrorPending.value, adminOnly: true },
+    { to: '/admin/users', icon: 'fa6-solid:users', label: '用户列表', adminOnly: true },
+    { to: '/admin/reports', icon: 'fa6-solid:flag', label: '举报处理', badge: reportPending.value },
+    { to: '/admin/operation-logs', icon: 'fa6-solid:file-lines', label: '操作日志' },
+    { to: '/admin/system-error-logs', icon: 'fa6-solid:triangle-exclamation', label: '错误日志', badge: systemErrorPending.value, adminOnly: true },
     { separator: '审核管理' },
-    { to: '/admin/edit-requests', icon: 'fa-solid fa-pen-to-square', label: '条目修改审核', badge: editRequestPending.value },
-    { to: '/admin/resource-reviews', icon: 'fa-solid fa-file-circle-check', label: '资源审核', badge: resourcePending.value },
+    { to: '/admin/edit-requests', icon: 'fa6-solid:pen-to-square', label: '条目修改审核', badge: editRequestPending.value },
+    { to: '/admin/resource-reviews', icon: 'fa6-solid:file-circle-check', label: '资源审核', badge: resourcePending.value },
     { separator: '系统设置', adminOnly: true },
-    { to: '/admin/settings', icon: 'fa-solid fa-gear', label: '网站设置', exact: true, adminOnly: true },
-    { to: '/admin/navbar', icon: 'fa-solid fa-bars', label: '导航栏设置', adminOnly: true },
-    { to: '/admin/announcements', icon: 'fa-solid fa-bullhorn', label: '公告管理', adminOnly: true },
-    { to: '/admin/link-whitelist', icon: 'fa-solid fa-shield-halved', label: '链接白名单', adminOnly: true },
-    { to: '/admin/indexnow', icon: 'fa-solid fa-bolt', label: 'IndexNow', adminOnly: true },
-    { to: '/admin/scheduled-tasks', icon: 'fa-solid fa-clock', label: '计划任务', adminOnly: true },
-    { to: '/admin/ads', icon: 'fa-solid fa-rectangle-ad', label: '广告管理', adminOnly: true },
-    { to: '/admin/ip-blacklist', icon: 'fa-solid fa-ban', label: 'IP 黑名单', adminOnly: true },
-    { to: '/admin/fill-info', icon: 'fa-solid fa-wand-magic-sparkles', label: '批量补全信息', adminOnly: true },
-    { to: '/admin/scan-covers', icon: 'fa-solid fa-image', label: '封面扫描', adminOnly: true },
-    { to: '/admin/scan-alist', icon: 'fa-solid fa-hard-drive', label: 'Alist 资源扫描', adminOnly: true },
-    { to: '/admin/friend-links', icon: 'fa-solid fa-link', label: '友情链接', adminOnly: true },
-    { to: '/admin/maintenance', icon: 'fa-solid fa-screwdriver-wrench', label: '系统维护', adminOnly: true },
+    { to: '/admin/settings', icon: 'fa6-solid:gear', label: '网站设置', exact: true, adminOnly: true },
+    { to: '/admin/navbar', icon: 'fa6-solid:bars', label: '导航栏设置', adminOnly: true },
+    { to: '/admin/announcements', icon: 'fa6-solid:bullhorn', label: '公告管理', adminOnly: true },
+    { to: '/admin/link-whitelist', icon: 'fa6-solid:shield-halved', label: '链接白名单', adminOnly: true },
+    { to: '/admin/indexnow', icon: 'fa6-solid:bolt', label: 'IndexNow', adminOnly: true },
+    { to: '/admin/scheduled-tasks', icon: 'fa6-solid:clock', label: '计划任务', adminOnly: true },
+    { to: '/admin/ads', icon: 'fa6-solid:rectangle-ad', label: '广告管理', adminOnly: true },
+    { to: '/admin/ip-blacklist', icon: 'fa6-solid:ban', label: 'IP 黑名单', adminOnly: true },
+    { to: '/admin/fill-info', icon: 'fa6-solid:wand-magic-sparkles', label: '批量补全信息', adminOnly: true },
+    { to: '/admin/scan-covers', icon: 'fa6-solid:image', label: '封面扫描', adminOnly: true },
+    { to: '/admin/friend-links', icon: 'fa6-solid:link', label: '友情链接', adminOnly: true },
+    { to: '/admin/maintenance', icon: 'fa6-solid:screwdriver-wrench', label: '系统维护', adminOnly: true },
   ]
   return isAdmin.value ? items : items.filter(item => !item.adminOnly)
 })

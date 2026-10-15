@@ -1,7 +1,10 @@
 import { z } from 'zod'
 import { requireEditor, requireAdmin } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
+import { invalidateGameCaches } from '~/server/utils/redis'
 import { logAdminOperation } from '~/server/utils/admin-operation-log'
+import { lockExistingGameTagStatesInTransaction } from '~/server/utils/game-tag-source'
+import { lockVndbTagSyncInTransaction } from '~/server/utils/vndb-tag-sync'
 
 const schema = z.object({
   ids: z.array(z.number()).min(1),
@@ -14,15 +17,20 @@ export default defineEventHandler(async (event) => {
 
   if (action === 'purge') {
     const admin = await requireAdmin(event)
+    let purgedCount = 0
 
     for (const id of ids) {
-      const game = await prisma.game.findUnique({
-        where: { id },
-        select: { deletedAt: true },
-      })
-      if (!game?.deletedAt) continue
+      const purged = await prisma.$transaction(async (tx) => {
+        await lockVndbTagSyncInTransaction(tx)
+        const lockedIds = await lockExistingGameTagStatesInTransaction(tx, [id])
+        if (lockedIds.length === 0) return false
 
-      await prisma.$transaction(async (tx) => {
+        const game = await tx.game.findUnique({
+          where: { id },
+          select: { deletedAt: true },
+        })
+        if (!game?.deletedAt) return false
+
         await tx.gameTag.deleteMany({ where: { gameId: id } })
         await tx.gameCompany.deleteMany({ where: { gameId: id } })
         await tx.gameStaff.deleteMany({ where: { gameId: id } })
@@ -38,17 +46,22 @@ export default defineEventHandler(async (event) => {
         await tx.contentEdit.deleteMany({ where: { targetType: 'GAME', targetId: id } })
         await tx.activity.deleteMany({ where: { targetType: 'game', targetId: id } })
         await tx.game.delete({ where: { id } })
+        return true
       })
+      if (purged) {
+        purgedCount += 1
+        await invalidateGameCaches(id)
+      }
     }
 
     await logAdminOperation({
       adminId: admin.id,
       action: 'BATCH_PURGE_GAMES',
       targetType: 'Game',
-      content: `批量彻底删除 ${ids.length} 个游戏 ids=${ids.join(',')}`,
+      content: `批量彻底删除 ${purgedCount} 个游戏 ids=${ids.join(',')}`,
     })
 
-    return { success: true, message: `已彻底删除 ${ids.length} 个游戏` }
+    return { success: true, message: `已彻底删除 ${purgedCount} 个游戏` }
   }
 
   const admin = await requireEditor(event)
@@ -57,6 +70,8 @@ export default defineEventHandler(async (event) => {
     where: { id: { in: ids }, deletedAt: { not: null } },
     data: { deletedAt: null },
   })
+
+  await invalidateGameCaches()
 
   await logAdminOperation({
     adminId: admin.id,

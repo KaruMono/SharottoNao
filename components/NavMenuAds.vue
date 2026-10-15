@@ -17,7 +17,7 @@
         :class="props.mobile ? 'mobile-nav-ad-link' : 'nav-menu-ad-link'"
       >
         <template v-if="props.mobile">
-          <i :class="[ad.icon || 'fa-solid fa-rectangle-ad', 'w-5 text-center text-gray-400']"></i>
+          <FaIcon :icon="ad.icon || 'fa6-solid:rectangle-ad'" class="w-5 text-center text-gray-400" />
           <span class="min-w-0 flex-1 truncate">{{ ad.name || '广告' }}</span>
         </template>
         <template v-else>
@@ -47,7 +47,7 @@
                 <img
                   :src="activeAdItem.imageUrl"
                   :alt="activeAdItem.name || '广告'"
-                  class="block max-w-[280px] max-h-56 object-contain"
+                  class="block w-full max-h-56 object-contain"
                   loading="lazy"
                 />
               </a>
@@ -60,6 +60,8 @@
 </template>
 
 <script setup lang="ts">
+import { useEventListener } from '@vueuse/core'
+
 interface Ad {
   id: number
   name?: string
@@ -67,6 +69,7 @@ interface Ad {
   imageUrl: string
   linkUrl: string
   openInNewTab: boolean
+  showOnMobile?: boolean
 }
 
 const props = withDefaults(defineProps<{
@@ -78,7 +81,7 @@ const props = withDefaults(defineProps<{
 })
 
 const activeAd = ref<number | null>(null)
-const ads = computed(() => props.ads)
+const ads = computed(() => props.ads.filter(ad => !props.mobile || ad.showOnMobile !== false))
 const activeAdItem = computed(() => ads.value.find(ad => ad.id === activeAd.value) || null)
 const previewStyle = ref<Record<string, string>>({})
 let hideTimer: ReturnType<typeof setTimeout> | null = null
@@ -98,7 +101,7 @@ function showAdPreview(ad: Ad, event: MouseEvent) {
 
   const trigger = event.currentTarget as HTMLElement
   const rect = trigger.getBoundingClientRect()
-  const bubbleWidth = Math.min(280, window.innerWidth - 24)
+  const bubbleWidth = Math.min(298, window.innerWidth - 24)
   const center = rect.left + rect.width / 2
   const left = Math.min(
     Math.max(center, 12 + bubbleWidth / 2),
@@ -108,6 +111,7 @@ function showAdPreview(ad: Ad, event: MouseEvent) {
   previewStyle.value = {
     top: `${rect.bottom + 8}px`,
     left: `${left}px`,
+    width: `${bubbleWidth}px`,
     transform: 'translateX(-50%)',
   }
 }
@@ -128,6 +132,9 @@ function scheduleHidePreview() {
 onUnmounted(() => {
   cancelHidePreview()
 })
+
+useEventListener('resize', hidePreview)
+useEventListener('scroll', hidePreview, { capture: true, passive: true })
 </script>
 
 <style scoped>
@@ -168,11 +175,11 @@ onUnmounted(() => {
   opacity: 0.85;
 }
 
-:global(.dark) .nav-menu-ad-link {
+.dark .nav-menu-ad-link {
   color: rgb(212, 212, 216);
 }
 
-:global(.dark) .nav-menu-ad-link:hover {
+.dark .nav-menu-ad-link:hover {
   background: transparent;
   box-shadow: none;
   opacity: 0.85;
@@ -196,7 +203,7 @@ onUnmounted(() => {
 .nav-menu-ad-bubble {
   transform-origin: top center;
   --ad-slide-transform: translateX(-50%);
-  max-width: min(280px, calc(100vw - 24px));
+  max-width: min(298px, calc(100vw - 24px));
 }
 
 .nav-menu-ad-arrow {
@@ -209,7 +216,7 @@ onUnmounted(() => {
   border-top: 1px solid rgba(229, 231, 235, 0.8);
 }
 
-:global(.dark) .nav-menu-ad-arrow {
+.dark .nav-menu-ad-arrow {
   background: rgb(39, 39, 42);
   border-color: rgb(63, 63, 70);
 }
@@ -232,18 +239,18 @@ onUnmounted(() => {
   transform: var(--ad-slide-transform, none) translateY(-8px);
 }
 
-:global(.mobile-menu-ad-list) .nav-menu-ad-item {
+.mobile-menu-ad-list .nav-menu-ad-item {
   width: 100%;
   display: block;
 }
 
-:global(.mobile-menu-ad-list) .nav-menu-ad-list {
+.mobile-menu-ad-list .nav-menu-ad-list {
   display: block;
   width: 100%;
   overflow: visible;
 }
 
-:global(.mobile-menu-ad-list) .mobile-nav-ad-link {
+.mobile-menu-ad-list .mobile-nav-ad-link {
   display: flex;
   width: 100%;
 }
@@ -288,7 +295,7 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-:global(.dark) .mobile-nav-ad-link:hover {
+.dark .mobile-nav-ad-link:hover {
   background: rgb(63, 63, 70);
   box-shadow: none;
 }

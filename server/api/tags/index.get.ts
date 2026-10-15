@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import prisma from '~/server/utils/prisma'
 import { getUserNsfwPreference } from '~/server/utils/nsfw'
+import { buildTagVisibilityWhere } from '~/server/utils/tag-visibility'
 
 const querySchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -16,17 +17,25 @@ export default defineEventHandler(async (event) => {
   const nsfwMode = await getUserNsfwPreference(event)
 
   const searchFilter = search ? {
-    name: { contains: search, mode: 'insensitive' as const },
+    OR: [
+      { name: { contains: search, mode: 'insensitive' as const } },
+      { slug: { contains: search, mode: 'insensitive' as const } },
+      { aliases: { some: { name: { contains: search, mode: 'insensitive' as const } } } },
+      { vndbTags: { some: { nameEn: { contains: search, mode: 'insensitive' as const } } } },
+      { vndbTags: { some: { id: { contains: search, mode: 'insensitive' as const } } } },
+    ],
   } : {}
 
-  // SFW 模式下过滤 NSFW 标签
-  const nsfwFilter = nsfwMode === 'SFW' ? { isNsfw: false } : {}
+  const visibilityFilter = buildTagVisibilityWhere(nsfwMode)
+  const gameNsfwFilter = nsfwMode === 'SFW' ? { isNsfw: false }
+    : nsfwMode === 'NSFW' ? { isNsfw: true }
+    : {}
 
   const [tags, total] = await Promise.all([
     prisma.tag.findMany({
       where: {
         ...searchFilter,
-        ...nsfwFilter,
+        ...visibilityFilter,
       },
       select: {
         id: true,
@@ -40,7 +49,7 @@ export default defineEventHandler(async (event) => {
               where: {
                 game: {
                   deletedAt: null,
-                  ...nsfwFilter,
+                  ...gameNsfwFilter,
                 },
               },
             },
@@ -54,7 +63,7 @@ export default defineEventHandler(async (event) => {
     prisma.tag.count({ 
       where: {
         ...searchFilter,
-        ...nsfwFilter,
+        ...visibilityFilter,
       },
     }),
   ])

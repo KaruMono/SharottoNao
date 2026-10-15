@@ -60,10 +60,24 @@ curl "https://your-charlotte.example/api/integration/games/v27448" \
     "isNsfw": false,
     "purchaseLinks": [],
     "lengthMinutes": 1200,
+    "vndbTagsSyncedAt": "2026-08-16T00:00:00.000Z",
     "series": null,
     "creator": { "id": 1, "username": "admin", "avatar": null },
     "companies": [],
-    "tags": [],
+    "tags": [
+      {
+        "id": 7,
+        "name": "校园",
+        "slug": "xiaoyuan",
+        "description": null,
+        "color": "#22c55e",
+        "isNsfw": false,
+        "isSystem": false,
+        "archivedAt": null,
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-08-16T00:00:00.000Z"
+      }
+    ],
     "staff": [],
     "screenshots": [],
     "resources": [
@@ -99,6 +113,8 @@ curl "https://your-charlotte.example/api/integration/games/v27448" \
 ```
 
 `game` 中保留游戏的多语言字段和关联数据，并额外提供按站内固定优先级（简中 > 繁中 > 日文 > 英文）选择的 `title`、`description`。`resources` 包含所有未软删除资源（包括审核状态），其中 `url`、`extractCode` 和 `unzipPassword` 会原样返回；已软删除的游戏或资源不会返回。
+
+`vndbTagsSyncedAt` 是该游戏最近一次成功保存 VNDB 原始标签快照的时间，尚未同步时为 `null`。`tags` 返回去重后的站内中文规范标签。同一个标签可以同时来自人工编辑、VNDB 映射或系统规则，但此接口不暴露来源明细，也不返回 VNDB 的英文标签、gID、相关度或剧透等级。调用方应检查 `isNsfw` 和 `archivedAt`；这是受信任的私有接口，当前会原样返回游戏仍有关联的 NSFW 或已归档标签。
 
 ## 错误响应
 

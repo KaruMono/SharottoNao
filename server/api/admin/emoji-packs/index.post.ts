@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   const data = schema.parse(body)
 
   const pack = await prisma.emojiPack.create({
-    data,
+    data: data as any,
   })
 
   return pack

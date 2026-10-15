@@ -5,7 +5,7 @@
       :disabled="currentPage <= 1"
       @click="emitPageChange(currentPage - 1)"
     >
-      <i class="fa-solid fa-chevron-left"></i>
+      <Icon name="fa6-solid:chevron-left" />
     </button>
     
     <template v-for="page in displayedPages" :key="page">
@@ -27,7 +27,7 @@
       :disabled="currentPage >= totalPages"
       @click="emitPageChange(currentPage + 1)"
     >
-      <i class="fa-solid fa-chevron-right"></i>
+      <Icon name="fa6-solid:chevron-right" />
     </button>
 
     <!-- 跳转输入 -->
@@ -36,7 +36,7 @@
         v-model="jumpInput"
         type="text"
         inputmode="numeric"
-        class="w-12 px-2 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-center focus:outline-none focus:ring-1 focus:ring-gray-400"
+        :class="admin ? 'admin-input w-12 text-center' : 'w-12 px-2 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-center focus:outline-none focus:ring-1 focus:ring-gray-400'"
         :placeholder="String(currentPage)"
         @keyup.enter="handleJump"
       />
@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
+  admin?: boolean
   currentPage?: number
   totalPages?: number
   current?: number

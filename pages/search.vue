@@ -11,7 +11,7 @@
       <!-- 游戏结果 -->
       <section v-if="searchData.games?.items?.length">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-gamepad text-gray-400"></i>游戏
+          <Icon name="fa6-solid:gamepad" class="text-gray-400" />游戏
         </h2>
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-5">
           <GameCard 
@@ -32,7 +32,7 @@
       <!-- 会社结果 -->
       <section v-if="searchData.companies?.items?.length">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-building text-gray-400"></i>会社
+          <Icon name="fa6-solid:building" class="text-gray-400" />会社
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <NuxtLink 
@@ -43,7 +43,7 @@
           >
             <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center">
               <img v-if="company.logo" :src="company.logo" class="w-full h-full rounded-lg object-cover" />
-              <i v-else class="fa-solid fa-building text-gray-400"></i>
+              <Icon name="fa6-solid:building" class="text-gray-400" v-else />
             </div>
             <div>
               <div class="font-medium">{{ company.name }}</div>
@@ -63,7 +63,7 @@
       <!-- 标签结果 -->
       <section v-if="searchData.tags?.items?.length">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-tags text-gray-400"></i>标签
+          <Icon name="fa6-solid:tags" class="text-gray-400" />标签
         </h2>
         <div class="flex flex-wrap gap-3">
           <NuxtLink 
@@ -91,7 +91,7 @@
         v-if="!searchData.games?.items?.length && !searchData.companies?.items?.length && !searchData.tags?.items?.length"
         class="text-center text-gray-500 py-16"
       >
-        <i class="fa-solid fa-magnifying-glass text-4xl mb-4"></i>
+        <Icon name="fa6-solid:magnifying-glass" class="text-4xl mb-4" />
         <p>没有找到相关结果</p>
         <p v-if="isLoggedInSfw" class="mt-2 text-sm">
           部分内容仅在开启 NSFW 过滤后可见，请在顶栏设置中切换过滤模式后再试

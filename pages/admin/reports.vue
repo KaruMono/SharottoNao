@@ -1,33 +1,30 @@
 <template>
   <div>
     <h1 class="text-2xl font-bold mb-6">举报管理</h1>
-      
       <!-- 筛选栏 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500">类型：</span>
-            <select 
+            <AdminSelect aria-label="举报类型"
               v-model="filterType"
-              class="px-3 py-1.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
             >
               <option value="">全部</option>
               <option value="COMMENT">评论举报</option>
               <option value="RESOURCE">资源举报</option>
               <option value="GUIDE">攻略举报</option>
-            </select>
+            </AdminSelect>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500">状态：</span>
-            <select 
+            <AdminSelect aria-label="状态筛选"
               v-model="filterStatus"
-              class="px-3 py-1.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
             >
               <option value="">全部</option>
               <option value="PENDING">待处理</option>
               <option value="RESOLVED">已处理</option>
               <option value="REJECTED">已驳回</option>
-            </select>
+            </AdminSelect>
           </div>
         </div>
       </div>
@@ -35,13 +32,11 @@
       <!-- 举报列表 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
         <div v-if="pending" class="text-center py-12">
-          <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+          <Icon name="fa6-solid:spinner" class="fa-spin text-2xl text-gray-400" />
         </div>
-        
         <div v-else-if="!reports?.length" class="text-center py-12 text-gray-500">
           暂无举报
         </div>
-        
         <div v-else class="divide-y dark:divide-zinc-700">
           <div 
             v-for="report in reports"
@@ -76,19 +71,16 @@
                     {{ formatDate(report.createdAt) }}
                   </span>
                 </div>
-                
                 <!-- 举报理由 -->
                 <div class="text-sm mb-2">
                   <span class="text-gray-500">举报理由：</span>
                   <span class="font-medium">{{ report.reason }}</span>
                   <span v-if="report.detail" class="text-gray-500 ml-2">- {{ report.detail }}</span>
                 </div>
-                
                 <!-- 举报人 -->
                 <div class="text-xs text-gray-500 mb-2">
                   举报人：{{ report.reporter?.username }}
                 </div>
-                
                 <!-- 被举报内容 -->
                 <div class="bg-gray-50 dark:bg-zinc-700/50 rounded-lg p-3 text-sm">
                   <template v-if="report.type === 'COMMENT' && report.comment">
@@ -138,35 +130,30 @@
                   </template>
                   <div v-else class="text-gray-500">内容已被删除</div>
                 </div>
-                
                 <!-- 处理信息 -->
                 <div v-if="report.handledBy" class="mt-2 text-xs text-gray-500">
                   处理人：{{ report.handledBy.username }}
                   <span v-if="report.handleNote" class="ml-2">备注：{{ report.handleNote }}</span>
                 </div>
               </div>
-              
               <!-- 操作按钮 -->
               <div v-if="report.status === 'PENDING'" class="flex flex-col gap-2">
-                <button 
+                <AdminKumoButton variant="danger" size="sm"
                   @click="handleReport(report, 'delete')"
-                  class="px-3 py-1.5 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                 >
                   删除内容
-                </button>
-                <button 
+                </AdminKumoButton>
+                <AdminKumoButton variant="primary" size="sm"
                   v-if="report.type === 'RESOURCE'"
                   @click="openEditModal(report)"
-                  class="px-3 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
                 >
                   修改资源
-                </button>
-                <button 
+                </AdminKumoButton>
+                <AdminKumoButton variant="secondary" size="sm"
                   @click="handleReport(report, 'reject')"
-                  class="px-3 py-1.5 text-xs border border-gray-300 dark:border-zinc-600 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
                 >
                   驳回举报
-                </button>
+                </AdminKumoButton>
               </div>
             </div>
           </div>
@@ -202,53 +189,51 @@
                 <label class="block text-sm text-gray-500 mb-1">资源标题</label>
                 <input 
                   v-model="editForm.title"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+                  class="admin-input w-full"
                 />
               </div>
               <div>
                 <label class="block text-sm text-gray-500 mb-1">资源链接</label>
                 <input 
                   v-model="editForm.url"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+                  class="admin-input w-full"
                 />
               </div>
               <div>
                 <label class="block text-sm text-gray-500 mb-1">提取密码</label>
                 <input 
                   v-model="editForm.extractCode"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+                  class="admin-input w-full"
                 />
               </div>
               <div>
                 <label class="block text-sm text-gray-500 mb-1">解压密码</label>
                 <input 
                   v-model="editForm.unzipPassword"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+                  class="admin-input w-full"
                 />
               </div>
               <div>
                 <label class="block text-sm text-gray-500 mb-1">处理备注</label>
                 <textarea 
                   v-model="editForm.handleNote"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+                  class="admin-textarea w-full"
                   rows="2"
                 ></textarea>
               </div>
             </div>
             <div class="flex justify-end gap-2 mt-6">
-              <button 
+              <AdminKumoButton variant="ghost"
                 @click="showEditModal = false"
-                class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 取消
-              </button>
-              <button 
+              </AdminKumoButton>
+              <AdminKumoButton variant="primary"
                 @click="submitEdit"
                 :disabled="editSubmitting"
-                class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
               >
                 {{ editSubmitting ? '保存中...' : '保存修改' }}
-              </button>
+              </AdminKumoButton>
             </div>
           </div>
         </div>

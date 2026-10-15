@@ -7,8 +7,18 @@ import { invalidateCache } from '~/server/utils/redis'
 import { recordActivity } from '~/server/utils/activity'
 import { submitGameToIndexNow } from '~/server/utils/indexnow'
 import { normalizeTagNames } from '~/server/utils/tag-normalize'
-import { pickTagColor } from '~/server/utils/tag-color'
-import { generateUniqueSlug } from '~/server/utils/slug'
+import {
+  isPrismaUniqueConstraintError,
+  resolveOrCreateTagByNameInTransaction,
+  TagNameConflictError,
+} from '~/server/utils/tag-name'
+import { fetchVndbGame, type VndbGameData } from '~/server/utils/vndb-client'
+import { replaceManualGameTagsInTransaction } from '~/server/utils/game-tag-source'
+import { ensureGameStaffRelation } from '~/server/utils/game-staff'
+import {
+  lockVndbTagSyncInTransaction,
+  syncVndbTagsForGameInTransaction,
+} from '~/server/utils/vndb-tag-sync'
 
 const schema = z.object({
   // 多语言标题（至少填写一个）
@@ -54,6 +64,11 @@ const schema = z.object({
   bangumiId: z.number().optional(),
   // 管理员跳过外部 ID 验证的标记
   skipExternalId: z.boolean().optional(),
+  // 从 VNDB 获取的厂商信息（前端传递，后端自动匹配）
+  vndbDevelopers: z.array(z.object({
+    name: z.string(),
+    nameOriginal: z.string().nullable().optional(),
+  })).optional(),
 })
 
 // getDisplayTitle 已从 ~/server/utils/game 导入
@@ -132,10 +147,20 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // 服务端重新读取 VNDB，避免信任浏览器提交的标签快照。
+  let vndbData: VndbGameData | null = null
+  if (data.vndbId) {
+    vndbData = await fetchVndbGame(data.vndbId)
+  }
+
   // 创建游戏条目（与会社/标签关联放在同一事务中，避免部分写入）
   let game: Awaited<ReturnType<typeof prisma.game.create>>
   try {
     game = await prisma.$transaction(async (tx) => {
+      if (vndbData) {
+        await lockVndbTagSyncInTransaction(tx)
+      }
+
       const created = await tx.game.create({
         data: {
           titleEn: data.titleEn ?? null,
@@ -151,7 +176,9 @@ export default defineEventHandler(async (event) => {
           bannerImage: data.bannerImage,
           releaseDate: data.releaseDate ? new Date(data.releaseDate) : null,
           language: data.language ?? [],
-          isNsfw: data.isNsfw,
+          // VNDB is fetched again on the server, so a client cannot suppress
+          // an upstream adult signal by tampering with the submitted form.
+          isNsfw: data.isNsfw || Boolean(vndbData?.isNsfw),
           purchaseLinks: data.purchaseLinks ?? [],
           creatorId: user.id,
           vndbId: data.vndbId,
@@ -179,31 +206,23 @@ export default defineEventHandler(async (event) => {
           const normalized = normalizeTagNames(data.newTagNames)
           const newIds: number[] = []
           for (const name of normalized) {
-            let tag = await tx.tag.findFirst({
-              where: { name: { equals: name, mode: 'insensitive' } },
+            const { tag } = await resolveOrCreateTagByNameInTransaction(tx, {
+              name,
+              isNsfw: false,
             })
-            if (!tag) {
-              const slug = await generateUniqueSlug(name, async (s) => {
-                const exists = await tx.tag.findFirst({ where: { slug: s } })
-                return !!exists
-              })
-              tag = await tx.tag.create({
-                data: { name, slug, isNsfw: false, color: pickTagColor(name) },
-              })
-            }
             newIds.push(tag.id)
           }
           finalTagIds = [...new Set([...finalTagIds, ...newIds])]
         }
 
-        if (finalTagIds.length > 0) {
-          await tx.gameTag.createMany({
-            data: finalTagIds.map(tagId => ({
-              gameId: created.id,
-              tagId,
-            })),
-          })
-        }
+        await replaceManualGameTagsInTransaction(tx, created.id, finalTagIds)
+      }
+
+      if (vndbData) {
+        await syncVndbTagsForGameInTransaction(tx, {
+          gameId: created.id,
+          tags: vndbData.tags,
+        })
       }
 
       return created
@@ -212,6 +231,12 @@ export default defineEventHandler(async (event) => {
     if (e?.code === 'P2002' && (e?.meta?.target?.includes('vndbId') || e?.meta?.target?.includes('bangumiId'))) {
       const field = e?.meta?.target?.includes('vndbId') ? 'VNDB ID' : 'Bangumi ID'
       throw createError({ statusCode: 400, message: `${field} 已被其他条目占用，请检查是否重复` })
+    }
+    if (isPrismaUniqueConstraintError(e)) {
+      throw createError({ statusCode: 409, message: '标签名称、别名或标识已被占用' })
+    }
+    if (e instanceof TagNameConflictError) {
+      throw createError({ statusCode: 409, message: e.message })
     }
     throw e
   }
@@ -238,24 +263,18 @@ export default defineEventHandler(async (event) => {
         }
       }
       if (staffId) {
-        await prisma.gameStaff.create({
-          data: {
-            gameId: game.id,
-            staffId,
-            role: s.role as any,
-          },
-        }).catch(() => {
-          // 忽略重复关联
+        await ensureGameStaffRelation(prisma, {
+          gameId: game.id,
+          staffId,
+          role: s.role,
         })
       }
     }
   }
 
   // 自动从 VNDB 补全 Staff 和会社（若提供了 VNDB ID）
-  if (data.vndbId) {
+  if (vndbData) {
     try {
-      const vndbData = await $fetch<any>(`/api/vndb/${data.vndbId}`)
-
       // 补全 Staff（不覆盖管理员已手动设置的，重复条目数据库会忽略）
       for (const s of (vndbData.staff || [])) {
         if (!s.name) continue
@@ -266,14 +285,12 @@ export default defineEventHandler(async (event) => {
               data: { name: s.name, nameOriginal: s.nameOriginal || null },
             })
           }
-          await prisma.gameStaff.create({
-            data: {
-              gameId: game.id,
-              staffId: staffRecord.id,
-              role: s.role as any,
-              characterName: s.characterName || null,
-            },
-          }).catch(() => {})
+          await ensureGameStaffRelation(prisma, {
+            gameId: game.id,
+            staffId: staffRecord.id,
+            role: s.role,
+            characterName: s.characterName,
+          })
         } catch {}
       }
 
@@ -300,6 +317,33 @@ export default defineEventHandler(async (event) => {
               update: {},
             }).catch(() => {})
           }
+        }
+      }
+    } catch {}
+  }
+
+  // 如果前端传递了 vndbDevelopers（即使没有 vndbId，也可能是之前获取过的数据）
+  if (!vndbData && data.vndbDevelopers && data.vndbDevelopers.length > 0) {
+    try {
+      const allCompanies = await prisma.company.findMany({
+        select: { id: true, name: true, nameOriginal: true, aliases: true },
+      })
+      for (const dev of data.vndbDevelopers) {
+        const devNames = [dev.name, dev.nameOriginal]
+          .filter((n): n is string => !!n)
+          .map(n => n.toLowerCase().trim())
+        const matched = allCompanies.find(c => {
+          const siteNames = [c.name, c.nameOriginal, ...c.aliases]
+            .filter((n): n is string => !!n)
+            .map(n => n.toLowerCase().trim())
+          return devNames.some(dn => siteNames.includes(dn))
+        })
+        if (matched) {
+          await prisma.gameCompany.upsert({
+            where: { gameId_companyId: { gameId: game.id, companyId: matched.id } },
+            create: { gameId: game.id, companyId: matched.id, role: 'DEVELOPER' },
+            update: {},
+          }).catch(() => {})
         }
       }
     } catch {}

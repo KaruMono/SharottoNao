@@ -24,6 +24,7 @@ export async function invalidateNavConfigCache() {
 export async function invalidateAdsCache(slot?: string) {
   await Promise.all([
     invalidateCache(slot ? `ads:${slot}` : 'ads:*'),
+    ...(slot ? [invalidateCache('ads:all')] : []),
     invalidateNitroCache(['ads']),
   ])
 }

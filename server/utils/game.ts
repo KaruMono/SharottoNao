@@ -1,5 +1,5 @@
 import type { User } from '@prisma/client'
-import { resolveNsfwMode } from './nsfw'
+import { resolveNsfwMode, type NsfwMode } from './nsfw'
 
 /**
  * 获取显示标题（优先级：简中 > 繁中 > 日文 > 英文）
@@ -28,6 +28,6 @@ export function getDisplayDescription(game: {
 /**
  * 获取 NSFW 模式字符串（用于缓存键）
  */
-export function getNsfwMode(user: User | null): string {
+export function getNsfwMode(user: User | null): NsfwMode {
   return resolveNsfwMode(user)
 }

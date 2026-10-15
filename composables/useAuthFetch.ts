@@ -1,6 +1,6 @@
 import type { NitroFetchRequest } from 'nitropack'
 
-type AuthRequestOptions = Parameters<typeof $fetch>[1]
+type AuthRequestOptions = any
 
 type AuthRequest = <T = unknown>(url: string, options?: AuthRequestOptions) => Promise<T>
 
@@ -9,13 +9,13 @@ type AuthRequest = <T = unknown>(url: string, options?: AuthRequestOptions) => P
  * 自动在请求头中添加 Authorization token
  */
 export function useAuthFetch<T = unknown>(
-  url: NitroFetchRequest | (() => NitroFetchRequest),
-  options: Parameters<typeof useFetch<T>>[1] = {}
-) {
+  url: any,
+  options: any = {}
+): any {
   const { token } = useAuth()
 
-  return useFetch<T>(url, {
-    ...options,
+  return (useFetch as any)(url as any, {
+    ...(options as any),
     onRequest({ options: reqOptions }) {
       if (token.value) {
         const headers = new Headers(reqOptions.headers as HeadersInit)
@@ -23,7 +23,7 @@ export function useAuthFetch<T = unknown>(
         reqOptions.headers = headers
       }
     },
-  } as Parameters<typeof useFetch<T>>[1])
+  } as any)
 }
 
 /**
@@ -55,7 +55,7 @@ export function useAuthRequest() {
       if (token.value) {
         headers.set('Authorization', token.value)
       }
-      return $fetch<T>(url, {
+      return ($fetch as any)(url, {
         ...options,
         headers,
       }) as Promise<T>
@@ -84,8 +84,8 @@ export function useAuthRequest() {
     if (token.value) {
       headers.Authorization = token.value
     }
-    
-    return $fetch<T>(url, {
+
+    return ($fetch as any)(url, {
       ...options,
       headers,
     }) as Promise<T>

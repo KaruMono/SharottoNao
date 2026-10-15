@@ -1,4 +1,5 @@
 import prisma from '~/server/utils/prisma'
+import { withDistributedLock } from '~/server/utils/distributed-lock'
 import { isPrimaryInstance } from '~/server/utils/instance'
 
 /**
@@ -10,7 +11,7 @@ export default defineNitroPlugin((nitroApp) => {
 
   const INTERVAL = 60 * 60 * 1000 // 1 小时
 
-  async function cleanup() {
+  async function cleanupLocked() {
     try {
       const result = await prisma.verificationCode.deleteMany({
         where: {
@@ -22,6 +23,16 @@ export default defineNitroPlugin((nitroApp) => {
       }
     } catch (error) {
       console.error('[Cleanup] Failed to clean expired codes:', error)
+    }
+  }
+
+  async function cleanup() {
+    try {
+      await withDistributedLock('cleanup-verification-codes', cleanupLocked, {
+        ttlMs: 10 * 60 * 1000,
+      })
+    } catch (error) {
+      console.error('[Cleanup] Distributed lock failed:', error)
     }
   }
 

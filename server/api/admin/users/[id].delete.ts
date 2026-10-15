@@ -1,5 +1,6 @@
 import { requireAdmin, invalidateUserTokens } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
+import { invalidateGameCaches } from '~/server/utils/redis'
 import { logAdminOperation } from '~/server/utils/admin-operation-log'
 
 export default defineEventHandler(async (event) => {
@@ -72,6 +73,7 @@ export default defineEventHandler(async (event) => {
     })
   })
 
+  await invalidateGameCaches()
   await invalidateUserTokens(id)
 
   await logAdminOperation({

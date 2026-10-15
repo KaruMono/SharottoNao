@@ -16,14 +16,14 @@
       <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
         <!-- 搜索框：手机端满宽独占一行，桌面端定宽 -->
         <div class="relative w-full md:w-auto md:flex-1 md:min-w-[140px] md:max-w-[200px]">
-          <input 
+          <input
             v-model="searchQuery"
-            type="text" 
-            placeholder="搜索游戏..." 
-            class="w-full h-9 px-3 py-2 pl-9 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+            type="text"
+            placeholder="搜索游戏..."
+            class="w-full h-9 px-3 pl-9 rounded-lg bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:focus-visible:ring-zinc-600 text-sm shadow-sm placeholder:text-gray-400 dark:placeholder:text-gray-500"
             @keyup.enter="handleSearch"
           />
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xs" />
         </div>
 
         <!-- 按钮组：手机端第二行，桌面端和搜索框同一行 -->
@@ -31,10 +31,10 @@
         <!-- 高级筛选按钮 -->
         <button
           @click="showAdvancedFilter = !showAdvancedFilter"
-          class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center gap-2"
-          :class="{ 'border-gray-800 dark:border-zinc-400': hasActiveFilters }"
+          class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 ring-1 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700/70 transition flex items-center gap-2 shadow-sm"
+          :class="hasActiveFilters ? 'ring-gray-800 dark:ring-zinc-400' : 'ring-gray-200 dark:ring-zinc-700'"
         >
-          <i class="fa-solid fa-filter text-gray-400"></i>
+          <Icon name="fa6-solid:filter" class="text-gray-400" />
           <span class="hidden sm:inline">筛选</span>
           <span v-if="hasActiveFilters" class="w-2 h-2 bg-gray-800 dark:bg-white rounded-full"></span>
         </button>
@@ -43,12 +43,12 @@
         <div class="relative" ref="yearMenuRef">
           <button
             @click="showYearMenu = !showYearMenu"
-            class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center gap-2"
+            class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 ring-1 ring-gray-200 dark:ring-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700/70 transition flex items-center gap-2 shadow-sm"
           >
-            <i class="fa-solid fa-calendar text-gray-400"></i>
+            <Icon name="fa6-solid:calendar" class="text-gray-400" />
             <span class="hidden sm:inline">{{ filterYear || '全部年份' }}</span>
             <span class="sm:hidden">{{ filterYear || '年份' }}</span>
-            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+            <Icon name="fa6-solid:chevron-down" class="text-xs text-gray-400" />
           </button>
           <Transition name="dropdown">
             <div 
@@ -61,7 +61,7 @@
                 :class="{ 'text-gray-900 dark:text-white font-medium': !filterYear }"
               >
                 全部年份
-                <i v-if="!filterYear" class="fa-solid fa-check ml-auto text-green-500"></i>
+                <Icon name="fa6-solid:check" class="ml-auto text-green-500" v-if="!filterYear" />
               </button>
               <button
                 v-for="year in yearOptions"
@@ -71,7 +71,7 @@
                 :class="{ 'text-gray-900 dark:text-white font-medium': filterYear === year }"
               >
                 {{ year }}年
-                <i v-if="filterYear === year" class="fa-solid fa-check ml-auto text-green-500"></i>
+                <Icon name="fa6-solid:check" class="ml-auto text-green-500" v-if="filterYear === year" />
               </button>
             </div>
           </Transition>
@@ -81,11 +81,11 @@
         <div class="relative hidden sm:block" ref="monthMenuRef">
           <button
             @click="showMonthMenu = !showMonthMenu"
-            class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center gap-2"
+            class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 ring-1 ring-gray-200 dark:ring-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700/70 transition flex items-center gap-2 shadow-sm"
           >
-            <i class="fa-regular fa-calendar text-gray-400"></i>
+            <Icon name="fa6-regular:calendar" class="text-gray-400" />
             <span>{{ filterMonth ? filterMonth + '月' : '全部月份' }}</span>
-            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+            <Icon name="fa6-solid:chevron-down" class="text-xs text-gray-400" />
           </button>
           <Transition name="dropdown">
             <div 
@@ -116,11 +116,11 @@
         <div class="relative" ref="sortMenuRef">
           <button
             @click="showSortMenu = !showSortMenu"
-            class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center gap-2"
+            class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 ring-1 ring-gray-200 dark:ring-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700/70 transition flex items-center gap-2 shadow-sm"
           >
-            <i :class="sortOptions.find(o => o.value === sortBy)?.icon || 'fa-solid fa-sort'" class="text-gray-400"></i>
+            <Icon :name="sortOptions.find(o => o.value === sortBy)?.icon || 'fa6-solid:sort'" class="text-gray-400" />
             <span class="hidden sm:inline">{{ sortOptions.find(o => o.value === sortBy)?.label || '排序' }}</span>
-            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+            <Icon name="fa6-solid:chevron-down" class="text-xs text-gray-400" />
           </button>
           <Transition name="dropdown">
             <div 
@@ -134,9 +134,9 @@
                 class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center gap-2 transition-colors"
                 :class="{ 'text-gray-900 dark:text-white font-medium': sortBy === option.value }"
               >
-                <i :class="option.icon" class="w-4 text-gray-400"></i>
+                <FaIcon :icon="option.icon" class="w-4 text-gray-400" />
                 {{ option.label }}
-                <i v-if="sortBy === option.value" class="fa-solid fa-check ml-auto text-green-500"></i>
+                <Icon name="fa6-solid:check" class="ml-auto text-green-500" v-if="sortBy === option.value" />
               </button>
             </div>
           </Transition>
@@ -145,13 +145,13 @@
         <!-- 排序方向切换 -->
         <button
           @click="toggleSortOrder"
-          class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center gap-2"
+          class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 ring-1 ring-gray-200 dark:ring-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700/70 transition flex items-center gap-2 shadow-sm"
           :title="sortOrder === 'desc' ? '倒序' : '正序'"
         >
-          <i 
-            class="fa-solid text-gray-400 transition-transform"
-            :class="sortOrder === 'desc' ? 'fa-arrow-down-wide-short' : 'fa-arrow-up-wide-short'"
-          ></i>
+          <Icon
+            :name="sortOrder === 'desc' ? 'fa6-solid:arrow-down-wide-short' : 'fa6-solid:arrow-up-wide-short'"
+            class="text-gray-400 transition-transform"
+          />
         </button>
         </div>
       </div>
@@ -167,19 +167,19 @@
             <div v-if="selectedCompany" class="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-zinc-700 rounded-lg">
               <span class="text-sm font-medium flex-1">{{ selectedCompany.name }}</span>
               <button @click="clearCompanyFilter" class="text-gray-400 hover:text-red-500">
-                <i class="fa-solid fa-times text-xs"></i>
+                <Icon name="fa6-solid:xmark" class="text-xs" />
               </button>
             </div>
             <div v-else class="relative" ref="companyDropdownRef">
-              <input 
+              <input
                 v-model="companySearchQuery"
-                type="text" 
+                type="text"
                 placeholder="搜索会社名称..."
-                class="w-full px-3 py-2 pl-8 rounded-lg bg-gray-100 dark:bg-zinc-700 border-0 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="w-full h-9 px-3 pl-8 rounded-lg bg-gray-50 dark:bg-zinc-700 ring-1 ring-gray-200 dark:ring-zinc-600 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:focus-visible:ring-zinc-500 shadow-sm placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 @input="searchFilterCompanies"
                 @focus="showCompanyDropdown = true"
               />
-              <i class="fa-solid fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+              <Icon name="fa6-solid:magnifying-glass" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
               <div 
                 v-if="showCompanyDropdown && filterCompanyResults.length"
                 class="absolute z-20 w-full mt-1 bg-white dark:bg-zinc-700 border dark:border-zinc-600 rounded-lg shadow-lg max-h-48 overflow-auto"
@@ -200,7 +200,7 @@
           <div>
             <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 block">评分区间</label>
             <div class="flex items-center gap-2">
-              <select v-model="filterRatingMin" class="px-2 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 border-0 text-sm focus:ring-1 focus:ring-gray-400">
+              <select v-model="filterRatingMin" class="h-9 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700 ring-1 ring-gray-200 dark:ring-zinc-600 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:focus-visible:ring-zinc-500 shadow-sm cursor-pointer">
                 <option value="">不限</option>
                 <option v-for="i in 5" :key="i" :value="i">{{ i }} 星以上</option>
               </select>
@@ -253,12 +253,12 @@
                   ? 'bg-gray-800 dark:bg-zinc-500 text-white'
                   : 'bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-600'"
               >
-                <i class="fa-solid fa-language mr-1"></i>有机翻资源
+                <Icon name="fa6-solid:language" class="mr-1" />有机翻资源
               </button>
             </div>
             <select
               v-model="filterResourceTypeId"
-              class="mt-2 w-full px-2 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 border-0 text-sm focus:ring-1 focus:ring-gray-400"
+              class="mt-2 w-full h-9 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700 ring-1 ring-gray-200 dark:ring-zinc-600 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:focus-visible:ring-zinc-500 shadow-sm cursor-pointer"
             >
               <option value="">全部资源类型</option>
               <option v-for="type in resourceTypes || []" :key="type.id" :value="String(type.id)">
@@ -268,8 +268,12 @@
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2 border-t dark:border-zinc-700">
-          <button @click="clearAdvancedFilters" class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">清除筛选</button>
-          <button @click="applyAdvancedFilters" class="px-3 py-1.5 text-sm bg-gray-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-gray-700">应用</button>
+          <KumoButton @click="clearAdvancedFilters" variant="ghost">
+            清除筛选
+          </KumoButton>
+          <KumoButton @click="applyAdvancedFilters" variant="emphasis">
+            应用
+          </KumoButton>
         </div>
       </div>
     </Transition>
@@ -285,7 +289,7 @@
 
     <!-- 空状态 -->
     <div v-if="!gamesData?.items?.length" class="text-center text-gray-500 py-16">
-      <i class="fa-solid fa-gamepad text-4xl mb-4"></i>
+      <Icon name="fa6-solid:gamepad" class="text-4xl mb-4" />
       <p>暂无游戏条目</p>
     </div>
 
@@ -333,9 +337,9 @@ const filterHasMachineTranslation = ref(route.query.hasMachineTranslation as str
 const filterCompanyId = ref(route.query.companyId as string || '')
 
 // 标签与资源类型数据
-const { data: rawTagsData } = await useFetch<ListResponse<TagItem>>('/api/tags', { key: 'games-filter-tags', query: { limit: 100 } })
+const { data: rawTagsData } = await useAuthFetch<ListResponse<TagItem>>('/api/tags', { key: 'games-filter-tags', query: { limit: 100 } })
 const tagsData = computed(() => rawTagsData.value?.items || [])
-const { data: resourceTypes } = await useFetch<ResourceTypeItem[]>('/api/resource-types', { key: 'games-filter-resource-types' })
+const { data: resourceTypes } = await (useFetch as any)('/api/resource-types', { key: 'games-filter-resource-types' })
 
 // 会社搜索筛选
 const companySearchQuery = ref('')
@@ -347,7 +351,7 @@ let companyFilterTimer: ReturnType<typeof setTimeout>
 
 onMounted(() => {
   if (filterCompanyId.value) {
-    $fetch<CompanyItem>(`/api/companies/${filterCompanyId.value}`).then(data => {
+    ($fetch as any)(`/api/companies/${filterCompanyId.value}`).then((data: any) => {
       if (data) selectedCompany.value = { id: data.id, name: data.name }
     }).catch(() => {})
   }
@@ -362,7 +366,7 @@ function searchFilterCompanies() {
   }
   companyFilterTimer = setTimeout(async () => {
     try {
-      const data = await $fetch<ListResponse<CompanyItem>>('/api/companies', { query: { search: q, limit: 10 } })
+      const data: any = await ($fetch as any)('/api/companies', { query: { search: q, limit: 10 } } as any)
       filterCompanyResults.value = data.items || []
     } catch {
       filterCompanyResults.value = []
@@ -426,12 +430,12 @@ onMounted(() => { currentYear.value = new Date().getFullYear() })
 
 // 排序选项
 const sortOptions = [
-  { value: 'bump', label: '按热度', icon: 'fa-solid fa-fire' },
-  { value: 'latest', label: '最新创建', icon: 'fa-solid fa-clock' },
-  { value: 'updated', label: '最近更新', icon: 'fa-solid fa-rotate' },
-  { value: 'popular', label: '最多浏览', icon: 'fa-solid fa-eye' },
-  { value: 'rating', label: '评分最高', icon: 'fa-solid fa-star' },
-  { value: 'release', label: '发售日期', icon: 'fa-solid fa-calendar' },
+  { value: 'bump', label: '按热度', icon: 'fa6-solid:fire' },
+  { value: 'latest', label: '最新创建', icon: 'fa6-solid:clock' },
+  { value: 'updated', label: '最近更新', icon: 'fa6-solid:rotate' },
+  { value: 'popular', label: '最多浏览', icon: 'fa6-solid:eye' },
+  { value: 'rating', label: '评分最高', icon: 'fa6-solid:star' },
+  { value: 'release', label: '发售日期', icon: 'fa6-solid:calendar' },
 ]
 
 // 点击外部关闭菜单

@@ -39,7 +39,7 @@ async function getEmojiMap(): Promise<Map<string, string>> {
   // SSR 环境下不缓存，避免请求间状态污染
   if (import.meta.server) {
     try {
-      const packs = await $fetch<EmojiPack[]>('/api/emoji-packs')
+      const packs: any = await ($fetch as any)('/api/emoji-packs')
       const map = new Map<string, string>()
       for (const pack of packs) {
         for (const emoji of pack.emojis) {
@@ -58,9 +58,9 @@ async function getEmojiMap(): Promise<Map<string, string>> {
 
   emojiCachePromise = (async () => {
     try {
-      const packs = await $fetch<EmojiPack[]>('/api/emoji-packs')
+      const packs: any = await ($fetch as any)('/api/emoji-packs')
       const map = new Map<string, string>()
-      
+
       for (const pack of packs) {
         for (const emoji of pack.emojis) {
           // 使用 包名:表情名 作为key

@@ -1,19 +1,21 @@
 <template>
-  <div class="fixed inset-0 flex items-center justify-center px-4">
-    <div class="max-w-md w-full space-y-4">
+  <div class="fixed inset-x-0 top-14 md:top-24 bottom-0 overflow-y-auto px-4 py-6 flex flex-col">
+    <div class="w-full max-w-6xl mx-auto my-auto space-y-4 lg:space-y-6">
     <AdBanner ad-slot="download_top" />
-    <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-8 text-center">
+    <div class="download-layout">
+    <AdBanner ad-slot="download_left" class="download-ad-left" />
+    <div class="download-card min-w-0 w-full max-w-md mx-auto bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-6 sm:p-8 text-center break-words">
       <!-- 加载中 -->
       <div v-if="pending" class="py-8">
-        <i class="fa-solid fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-4xl text-gray-400 mb-4" />
         <p class="text-gray-500">正在验证...</p>
       </div>
 
       <!-- 错误 -->
       <div v-else-if="error" class="py-8">
-        <i class="fa-solid fa-circle-exclamation text-4xl text-red-500 mb-4"></i>
+        <Icon name="fa6-solid:circle-exclamation" class="text-4xl text-red-500 mb-4" />
         <h2 class="text-xl font-semibold mb-2">获取失败</h2>
-        <p class="text-gray-500 mb-6">{{ error.data?.message || '资源不存在或已被删除' }}</p>
+        <p class="text-gray-500 mb-6">{{ (error as any).data?.message || '资源不存在或已被删除' }}</p>
         <NuxtLink to="/" class="px-6 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white hover:bg-gray-700 dark:hover:bg-zinc-500 transition">
           返回首页
         </NuxtLink>
@@ -21,7 +23,7 @@
 
       <!-- 下载限制 -->
       <div v-else-if="limitReached" class="py-8">
-        <i class="fa-solid fa-hand text-4xl text-amber-500 mb-4"></i>
+        <Icon name="fa6-solid:hand" class="text-4xl text-amber-500 mb-4" />
         <h2 class="text-xl font-semibold mb-2">今日下载已达上限</h2>
         <p class="text-gray-500 mb-2">您今天已下载 {{ dailyLimit }} 个资源</p>
         <p class="text-sm text-gray-400 mb-6">请明天再来，或提升权限组获取更多下载次数</p>
@@ -33,7 +35,7 @@
       <!-- 下载确认 -->
       <div v-else-if="resource" class="py-4">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center">
-          <i :class="resource.netDiskType?.icon || 'fa-solid fa-cloud-arrow-down'" class="text-2xl text-gray-600 dark:text-gray-300"></i>
+          <FaIcon :icon="resource.netDiskType?.icon || 'fa6-solid:cloud-arrow-down'" class="text-2xl text-gray-600 dark:text-gray-300" />
         </div>
         <h2 class="text-xl font-semibold mb-2">{{ resource.title }}</h2>
         <p class="text-sm text-gray-500 mb-1">
@@ -41,21 +43,11 @@
         </p>
         <p class="text-xs text-gray-400 mb-3">
           <span v-if="resource.netDiskType?.name" class="inline-flex items-center gap-1 mr-2">
-            <i :class="resource.netDiskType.icon || 'fa-solid fa-cloud'"></i>{{ resource.netDiskType.name }}
+            <FaIcon :icon="resource.netDiskType.icon || 'fa6-solid:cloud'" />{{ resource.netDiskType.name }}
           </span>
           类型：{{ resource.type?.name || '未知' }}
           <span v-if="resource.extractCode" class="ml-2">提取密码：{{ resource.extractCode }}</span>
         </p>
-        <div
-          v-if="resource.healthStatus && resource.healthStatus !== 'AVAILABLE'"
-          class="mb-6 px-3 py-2 rounded-lg text-xs"
-          :class="resourceHealthClass(resource.healthStatus)"
-        >
-          <i class="fa-solid fa-triangle-exclamation mr-1"></i>
-          该资源状态：{{ resourceHealthLabel(resource.healthStatus) }}
-          <template v-if="resource.issueCount">，已有 {{ resource.issueCount }} 次可用性反馈</template>
-        </div>
-
         <div class="space-y-3">
           <!-- 未登录访客（always_show 模式）：显示登录按钮 -->
           <template v-if="downloadData?.requireLogin">
@@ -64,11 +56,14 @@
               :to="`/login?redirect=${encodeURIComponent(route.fullPath)}`"
               class="w-full px-6 py-3 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white font-medium hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center justify-center gap-2"
             >
-              <i class="fa-solid fa-right-to-bracket"></i>
+              <Icon name="fa6-solid:right-to-bracket" />
               登录后下载
             </NuxtLink>
           </template>
           <template v-else>
+            <p class="text-xs text-gray-400 mb-1">
+              今日剩余下载次数：{{ isUnlimited ? '不限' : remainingDownloads }}
+            </p>
             <div v-if="countdown > 0" class="text-gray-500">
               <span class="text-2xl font-bold text-gray-800 dark:text-white">{{ countdown }}</span>
               <span class="text-sm ml-1">秒后可下载</span>
@@ -79,7 +74,7 @@
               :disabled="downloading"
               class="w-full px-6 py-3 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white font-medium hover:bg-gray-700 dark:hover:bg-zinc-500 transition disabled:opacity-50"
             >
-              <i class="fa-solid fa-download mr-2"></i>
+              <Icon name="fa6-solid:download" class="mr-2" />
               {{ downloading ? '跳转中...' : '立即下载' }}
             </button>
           </template>
@@ -90,6 +85,9 @@
         </p>
       </div>
     </div>
+    <AdBanner ad-slot="download_right" class="download-ad-right" />
+    </div>
+    <AdBanner ad-slot="download_bottom" />
     </div>
 
   </div>
@@ -219,3 +217,34 @@ useHead({
   ),
 })
 </script>
+
+<style scoped>
+.download-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.download-card { order: 1; }
+.download-ad-left { order: 2; }
+.download-ad-right { order: 3; }
+
+.download-ad-left,
+.download-ad-right {
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .download-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 28rem) minmax(0, 1fr);
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .download-ad-left { grid-column: 1; grid-row: 1; }
+  .download-card { grid-column: 2; grid-row: 1; }
+  .download-ad-right { grid-column: 3; grid-row: 1; }
+}
+</style>

@@ -39,5 +39,5 @@ export default defineEventHandler(async (event) => {
   const payload = schema.parse(body)
   const uploaderId = parseInt(await getSetting('resource_sync_uploader_id') || '') || undefined
 
-  return syncPublishedResource(payload, { uploaderId })
+  return syncPublishedResource(payload as any, { uploaderId })
 })

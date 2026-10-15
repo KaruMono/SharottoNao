@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visibleAds.length && !dismissedToday" class="w-full relative"
+  <div v-if="visibleAds.length && !dismissedToday" class="w-full min-w-0 max-w-full relative"
     @mouseenter="adHovered = true"
     @mouseleave="adHovered = false"
   >
@@ -10,8 +10,10 @@
             v-for="ad in visibleAds"
             :key="ad.id"
             class="relative header-strip-ad-item"
-            @mouseenter="activeStripAd = ad.id"
-            @mouseleave="activeStripAd = null"
+            @mouseenter="showStripPreview(ad, $event)"
+            @mouseleave="scheduleHideStripPreview"
+            @focusin="showStripPreview(ad, $event)"
+            @focusout="scheduleHideStripPreview"
           >
             <a
               :href="ad.linkUrl"
@@ -22,33 +24,37 @@
               <span class="header-strip-ad-icon">AD</span>
               <span class="truncate">{{ ad.name || '广告' }}</span>
             </a>
-
-            <Transition name="ad-slide">
-              <div
-                v-if="activeStripAd === ad.id"
-                class="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 hover-ad-bubble"
-              >
-                <div class="hover-ad-arrow"></div>
-                <div class="rounded-xl bg-white dark:bg-zinc-800 shadow-xl border border-gray-200 dark:border-zinc-700 p-2">
-                  <a
-                    :href="ad.linkUrl"
-                    :target="ad.openInNewTab ? '_blank' : '_self'"
-                    rel="noopener noreferrer sponsored"
-                    class="block rounded-lg overflow-hidden"
-                  >
-                    <img
-                      :src="ad.imageUrl"
-                      :alt="ad.name || '广告'"
-                      class="block max-w-[280px] max-h-56 object-contain"
-                      loading="lazy"
-                    />
-                  </a>
-                </div>
-              </div>
-            </Transition>
           </div>
         </div>
       </div>
+      <Teleport to="body">
+        <Transition name="ad-slide">
+          <div
+            v-if="activeStripAdItem && isDesktop"
+            class="fixed z-[90] hover-ad-bubble"
+            :style="stripPreviewStyle"
+            @mouseenter="cancelHideStripPreview"
+            @mouseleave="hideStripPreview"
+          >
+            <div class="hover-ad-arrow"></div>
+            <div class="rounded-xl bg-white dark:bg-zinc-800 shadow-xl border border-gray-200 dark:border-zinc-700 p-2">
+              <a
+                :href="activeStripAdItem.linkUrl"
+                :target="activeStripAdItem.openInNewTab ? '_blank' : '_self'"
+                rel="noopener noreferrer sponsored"
+                class="block rounded-lg overflow-hidden"
+              >
+                <img
+                  :src="activeStripAdItem.imageUrl"
+                  :alt="activeStripAdItem.name || '广告'"
+                  class="block w-full max-h-56 object-contain"
+                  loading="lazy"
+                />
+              </a>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </template>
 
     <template v-else>
@@ -68,12 +74,12 @@
             :href="ad.linkUrl"
             :target="ad.openInNewTab ? '_blank' : '_self'"
             rel="noopener noreferrer sponsored"
-            :class="slideLinkClass"
+            class="flex-shrink-0 min-w-0 w-full h-full block"
           >
             <img
               :src="ad.imageUrl"
               alt="广告"
-              :class="imageElementClass"
+              class="block w-full h-full object-cover"
               loading="lazy"
             />
           </a>
@@ -86,14 +92,14 @@
             class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover/ad:opacity-100"
             aria-label="上一张"
           >
-            <i class="fa-solid fa-chevron-left text-xs"></i>
+            <Icon name="fa6-solid:chevron-left" class="text-xs" />
           </button>
           <button
             @click.prevent="next"
             class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover/ad:opacity-100"
             aria-label="下一张"
           >
-            <i class="fa-solid fa-chevron-right text-xs"></i>
+            <Icon name="fa6-solid:chevron-right" class="text-xs" />
           </button>
 
           <!-- 小点指示器 -->
@@ -118,7 +124,7 @@
             class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/40 backdrop-blur-sm cursor-pointer hover:bg-black/60 transition-colors select-none"
             @click.stop="showInfo = !showInfo"
           >
-            <i class="fa-solid fa-rectangle-ad text-white/80 text-[10px] flex-shrink-0"></i>
+            <Icon name="fa6-solid:rectangle-ad" class="text-white/80 text-[10px] flex-shrink-0" />
             <span class="inline-flex text-white/80 text-[9px] font-medium leading-none">
               <span
                 class="badge-text-item"
@@ -139,7 +145,7 @@
               @click.stop
             >
               <div class="px-4 py-3 border-b dark:border-zinc-700 flex items-center gap-2">
-                <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
+                <Icon name="fa6-solid:circle-info" class="text-gray-400 text-xs" />
                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">关于本广告</span>
               </div>
               <div class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -150,7 +156,7 @@
                   @click.stop="dismissForToday"
                   class="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 text-xs text-gray-600 dark:text-gray-300 transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <i class="fa-solid fa-eye-slash text-[10px]"></i>
+                  <Icon name="fa6-solid:eye-slash" class="text-[10px]" />
                   关闭全部广告（今日）
                 </button>
               </div>
@@ -163,7 +169,7 @@
 </template>
 
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside, useEventListener, useMediaQuery } from '@vueuse/core'
 
 interface Ad {
   id: number
@@ -172,39 +178,31 @@ interface Ad {
   imageUrl: string
   linkUrl: string
   openInNewTab: boolean
+  showOnMobile?: boolean
 }
 
 const props = defineProps<{
   adSlot: string
 }>()
 
+const isDesktop = useMediaQuery('(min-width: 768px)')
 const runtimeConfig = useRuntimeConfig()
 const buildId = runtimeConfig.public?.buildId as string | undefined
-const { data: ads } = await useAsyncData<Ad[]>(
+const { data: ads } = await useAsyncData(
   `ads-${props.adSlot}-${buildId || 'local'}`,
-  () => $fetch<Ad[]>('/api/ads', { query: { slot: props.adSlot, v: buildId } }),
+  () => $fetch('/api/ads', { query: { slot: props.adSlot, v: buildId } } as any) as Promise<any>,
   { default: () => [], server: false }
 )
 
-const visibleAds = computed(() => ads.value ?? [])
+const visibleAds = computed(() => ((ads.value ?? []) as Ad[]).filter(ad => isDesktop.value || ad.showOnMobile !== false))
 
 const isHeaderStrip = computed(() => props.adSlot === 'home_header_strip')
-const isAutoHeight = computed(() => props.adSlot === 'home_top')
-
 const isBanner = computed(() =>
-  !isHeaderStrip.value && !isAutoHeight.value && props.adSlot !== 'download_top' && (props.adSlot.endsWith('_top') || props.adSlot.endsWith('_bottom'))
+  !isHeaderStrip.value && (props.adSlot.endsWith('_top') || props.adSlot.endsWith('_bottom'))
 )
 
 const imageClass = computed(() =>
-  isAutoHeight.value ? '' : (isBanner.value ? 'aspect-[6/1] md:aspect-[8/1]' : 'aspect-[4/3]')
-)
-
-const slideLinkClass = computed(() =>
-  isAutoHeight.value ? 'flex-shrink-0 w-full block' : 'flex-shrink-0 w-full h-full block'
-)
-
-const imageElementClass = computed(() =>
-  isAutoHeight.value ? 'block w-full h-auto object-contain' : 'w-full h-full object-cover'
+  isBanner.value ? 'aspect-[6/1] md:aspect-[8/1]' : 'aspect-[4/3]'
 )
 
 // 轮播状态
@@ -212,11 +210,13 @@ const currentIndex = ref(0)
 let autoplayTimer: ReturnType<typeof setInterval> | null = null
 
 function prev() {
+  if (!visibleAds.value.length) return
   currentIndex.value = (currentIndex.value - 1 + visibleAds.value.length) % visibleAds.value.length
   resetTimer()
 }
 
 function next() {
+  if (!visibleAds.value.length) return
   currentIndex.value = (currentIndex.value + 1) % visibleAds.value.length
   resetTimer()
 }
@@ -227,7 +227,7 @@ function goTo(i: number) {
 }
 
 function startTimer() {
-  if (visibleAds.value.length <= 1) return
+  if (autoplayTimer || visibleAds.value.length <= 1 || dismissedToday.value) return
   autoplayTimer = setInterval(() => {
     currentIndex.value = (currentIndex.value + 1) % visibleAds.value.length
   }, 5000)
@@ -237,11 +237,6 @@ function resetTimer() {
   if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null }
   startTimer()
 }
-
-// ads 是客户端异步加载的，可能晚于 mount 才到达；广告数量变化时重启定时器
-watch(() => visibleAds.value.length, () => {
-  if (import.meta.client) resetTimer()
-})
 
 onUnmounted(() => {
   if (autoplayTimer) clearInterval(autoplayTimer)
@@ -253,7 +248,52 @@ const dismissedToday = useState('adsDismissedToday', () => false)
 const adHovered = ref(false)
 const showInfo = ref(false)
 const activeStripAd = ref<number | null>(null)
+const activeStripAdItem = computed(() => visibleAds.value.find(ad => ad.id === activeStripAd.value))
+const stripPreviewStyle = ref<Record<string, string>>({})
+let stripPreviewTimer: ReturnType<typeof setTimeout> | null = null
 const adInfoRef = ref<HTMLElement | null>(null)
+
+function cancelHideStripPreview() {
+  if (stripPreviewTimer) clearTimeout(stripPreviewTimer)
+  stripPreviewTimer = null
+}
+
+function hideStripPreview() {
+  cancelHideStripPreview()
+  activeStripAd.value = null
+}
+
+function scheduleHideStripPreview() {
+  cancelHideStripPreview()
+  stripPreviewTimer = setTimeout(hideStripPreview, 120)
+}
+
+function showStripPreview(ad: Ad, event: MouseEvent | FocusEvent) {
+  if (!import.meta.client || !isDesktop.value) return
+  cancelHideStripPreview()
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  const width = Math.min(298, window.innerWidth - 24)
+  const center = Math.min(Math.max(rect.left + rect.width / 2, 12 + width / 2), window.innerWidth - 12 - width / 2)
+  stripPreviewStyle.value = {
+    top: `${rect.bottom + 8}px`,
+    left: `${center}px`,
+    width: `${width}px`,
+    transform: 'translateX(-50%)',
+  }
+  activeStripAd.value = ad.id
+}
+
+useEventListener('resize', hideStripPreview)
+useEventListener('scroll', hideStripPreview, { capture: true, passive: true })
+onUnmounted(cancelHideStripPreview)
+
+// 切换设备宽度或重新加载广告后重置轮播，避免索引落在已隐藏的广告上。
+watch([visibleAds, dismissedToday], () => {
+  currentIndex.value = 0
+  hideStripPreview()
+  showInfo.value = false
+  if (import.meta.client) resetTimer()
+})
 
 function getTodayStr() {
   const d = new Date()
@@ -306,6 +346,7 @@ onClickOutside(adInfoRef, () => { showInfo.value = false })
 .header-strip-ad-bar {
   min-height: 40px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: clamp(0.5rem, 2vw, 1rem);
@@ -318,7 +359,7 @@ onClickOutside(adInfoRef, () => { showInfo.value = false })
   backdrop-filter: blur(12px);
 }
 
-:global(.dark) .header-strip-ad-bar {
+.dark .header-strip-ad-bar {
   border-color: rgb(63, 63, 70);
   background: rgba(39, 39, 42, 0.86);
 }
@@ -343,7 +384,7 @@ onClickOutside(adInfoRef, () => { showInfo.value = false })
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-:global(.dark) .header-strip-ad-link {
+.dark .header-strip-ad-link {
   color: rgb(212, 212, 216);
 }
 
@@ -352,7 +393,7 @@ onClickOutside(adInfoRef, () => { showInfo.value = false })
   background: rgb(243, 244, 246);
 }
 
-:global(.dark) .header-strip-ad-link:hover {
+.dark .header-strip-ad-link:hover {
   color: white;
   background: rgb(63, 63, 70);
 }
@@ -374,7 +415,7 @@ onClickOutside(adInfoRef, () => { showInfo.value = false })
   letter-spacing: 0.04em;
 }
 
-:global(.dark) .header-strip-ad-icon {
+.dark .header-strip-ad-icon {
   border-color: rgb(82, 82, 91);
   color: rgb(161, 161, 170);
   background: rgb(39, 39, 42);
@@ -395,7 +436,7 @@ onClickOutside(adInfoRef, () => { showInfo.value = false })
   border-top: 1px solid rgba(229, 231, 235, 0.8);
 }
 
-:global(.dark) .hover-ad-arrow {
+.dark .hover-ad-arrow {
   background: rgb(39, 39, 42);
   border-color: rgb(63, 63, 70);
 }
@@ -403,13 +444,7 @@ onClickOutside(adInfoRef, () => { showInfo.value = false })
 @media (max-width: 767px) {
   .header-strip-ad-bar {
     justify-content: flex-start;
-    overflow-x: auto;
     gap: 0.25rem;
-    scrollbar-width: none;
-  }
-
-  .header-strip-ad-bar::-webkit-scrollbar {
-    display: none;
   }
 
   .header-strip-ad-link {

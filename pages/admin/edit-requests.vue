@@ -1,62 +1,54 @@
 <template>
   <div>
     <h1 class="text-2xl font-bold mb-6">条目修改审核</h1>
-    
     <!-- 筛选栏 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
           <span class="text-sm text-gray-500">状态：</span>
-          <select 
+          <AdminSelect aria-label="状态筛选"
             v-model="filterStatus"
-            class="px-3 py-1.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
           >
             <option value="">全部</option>
             <option value="PENDING">待审核</option>
             <option value="APPROVED">已通过</option>
             <option value="REJECTED">已驳回</option>
-          </select>
+          </AdminSelect>
         </div>
         <div v-if="pendingCount > 0" class="text-sm text-orange-500">
-          <i class="fa-solid fa-circle-exclamation mr-1"></i>
+          <Icon name="fa6-solid:circle-exclamation" class="mr-1" />
           {{ pendingCount }} 条待审核
         </div>
       </div>
-      
       <!-- 批量操作栏 -->
       <div v-if="selectedIds.length > 0" class="flex items-center gap-4 mt-4 pt-4 border-t dark:border-zinc-700">
         <span class="text-sm text-gray-500">已选择 {{ selectedIds.length }} 项</span>
-        <button 
+        <AdminKumoButton variant="primary" size="toolbar"
           @click="batchApprove"
-          class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
         >
-          <i class="fa-solid fa-check mr-1"></i>批量通过
-        </button>
-        <button 
+          <Icon name="fa6-solid:check" />批量通过
+        </AdminKumoButton>
+        <AdminKumoButton variant="danger" size="toolbar"
           @click="batchReject"
-          class="px-3 py-1.5 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
         >
-          <i class="fa-solid fa-xmark mr-1"></i>批量驳回
-        </button>
-        <button 
+          <Icon name="fa6-solid:xmark" />批量驳回
+        </AdminKumoButton>
+        <AdminKumoButton variant="ghost" size="toolbar"
           @click="clearSelection"
-          class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition"
         >
           取消选择
-        </button>
+        </AdminKumoButton>
       </div>
     </div>
 
     <!-- 请求列表 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
       <div v-if="pending" class="text-center py-12">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-2xl text-gray-400" />
       </div>
-      
       <div v-else-if="!requests?.length" class="text-center py-12 text-gray-500">
         暂无审核请求
       </div>
-      
       <div v-else class="divide-y dark:divide-zinc-700">
         <!-- 全选复选框 -->
         <div v-if="pendingRequests.length > 0" class="px-4 py-2 bg-gray-50 dark:bg-zinc-700/50 flex items-center gap-2">
@@ -68,7 +60,6 @@
           />
           <span class="text-sm text-gray-500">全选待审核项</span>
         </div>
-        
         <div 
           v-for="request in requests"
           :key="request.id"
@@ -108,34 +99,30 @@
                 </div>
               </div>
             </div>
-            
             <div v-if="request.status === 'PENDING'" class="flex gap-2">
-              <button 
+              <AdminKumoButton variant="primary" size="sm"
                 @click="showReviewModal(request, 'approve')"
-                class="px-3 py-1.5 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
               >
-                <i class="fa-solid fa-check mr-1"></i>通过
-              </button>
-              <button 
+                <Icon name="fa6-solid:check" />通过
+              </AdminKumoButton>
+              <AdminKumoButton variant="danger" size="sm"
                 @click="showReviewModal(request, 'reject')"
-                class="px-3 py-1.5 text-xs bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
               >
-                <i class="fa-solid fa-xmark mr-1"></i>驳回
-              </button>
+                <Icon name="fa6-solid:xmark" />驳回
+              </AdminKumoButton>
             </div>
           </div>
-          
           <!-- 变更详情 -->
           <div class="bg-gray-50 dark:bg-zinc-700/50 rounded-lg p-4 text-sm">
             <h4 class="font-medium mb-3">修改内容：</h4>
             <div class="space-y-2">
               <template v-for="(change, field) in request.changes" :key="field">
                 <!-- 标签字段：chip 展示（用 tagMap 解析名称） -->
-                <div v-if="field === 'tagIds' || field === 'newTagNames'" class="grid grid-cols-3 gap-4">
+                <div v-if="(field as any) === 'tagIds' || (field as any) === 'newTagNames'" class="grid grid-cols-3 gap-4">
                   <div class="font-medium text-gray-600 dark:text-gray-400">{{ fieldLabels[field] || field }}</div>
                   <div class="flex flex-wrap gap-1 col-span-2">
                     <!-- 被删除的标签（只在 tagIds 里） -->
-                    <template v-if="field === 'tagIds'">
+                    <template v-if="(field as any) === 'tagIds'">
                       <span
                         v-for="id in removedTagIds(change)"
                         :key="'rm-' + id"
@@ -163,13 +150,13 @@
                       </span>
                     </template>
                     <!-- 待创建的新标签 -->
-                    <template v-if="field === 'newTagNames'">
+                    <template v-if="(field as any) === 'newTagNames'">
                       <span
                         v-for="name in (change.new as string[])"
                         :key="'new-' + name"
                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border border-dashed border-blue-400 text-blue-600 dark:text-blue-400"
                       >
-                        <i class="fa-solid fa-plus text-[10px]"></i>{{ name }}
+                        <Icon name="fa6-solid:plus" class="text-[10px]" />{{ name }}
                       </span>
                     </template>
                   </div>
@@ -187,7 +174,6 @@
               </template>
             </div>
           </div>
-          
           <!-- 审核信息 -->
           <div v-if="request.reviewedBy" class="mt-3 text-xs text-gray-500">
             审核人：{{ request.reviewedBy.username }} · {{ request.reviewedAt ? formatDate(request.reviewedAt) : '-' }}
@@ -198,7 +184,7 @@
     </div>
 
     <!-- 分页 -->
-    <Pagination 
+    <Pagination admin
       v-if="totalPages > 1"
       :current="page"
       :total="totalPages"
@@ -249,7 +235,7 @@
                 class="opacity-50 hover:opacity-100 hover:text-red-500 transition ml-0.5"
                 title="从本次修改中移除该标签"
                 @click="removeReviewTag(tag.id)"
-              ><i class="fa-solid fa-xmark text-xs"></i></button>
+              ><Icon name="fa6-solid:xmark" class="text-xs" /></button>
             </span>
 
             <!-- 待创建的新标签 -->
@@ -262,7 +248,7 @@
                 : 'border-blue-400 text-blue-600 dark:text-blue-400'"
               :title="'新建标签「' + nt.name + '」' + (nt.isNsfw ? '（NSFW）' : '')"
             >
-              <i class="fa-solid fa-plus text-xs opacity-70"></i>
+              <Icon name="fa6-solid:plus" class="text-xs opacity-70" />
               {{ nt.name }}
               <!-- NSFW 角标 -->
               <button
@@ -280,7 +266,7 @@
                 class="opacity-50 hover:opacity-100 hover:text-red-500 transition ml-0.5"
                 title="不创建此标签"
                 @click="removeReviewNewTag(nt.name)"
-              ><i class="fa-solid fa-xmark text-xs"></i></button>
+              ><Icon name="fa6-solid:xmark" class="text-xs" /></button>
             </span>
 
             <!-- + 添加按钮 -->
@@ -291,7 +277,7 @@
                 @click="reviewTagAddOpen = !reviewTagAddOpen"
                 title="添加标签"
               >
-                <i class="fa-solid fa-plus text-xs"></i>添加
+                <Icon name="fa6-solid:plus" class="text-xs" />添加
               </button>
               <!-- 下拉搜索 -->
               <div
@@ -304,7 +290,7 @@
                     v-model="reviewTagSearch"
                     type="text"
                     placeholder="搜索或输入新标签名..."
-                    class="w-full text-sm bg-transparent outline-none placeholder-gray-400"
+                    class="admin-input admin-input--embedded w-full"
                     @input="onReviewTagSearch"
                     @keydown.enter.prevent="onReviewTagSearchEnter"
                   />
@@ -327,7 +313,7 @@
                     class="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-700 transition text-blue-500 border-t dark:border-zinc-600"
                     @click="addReviewNewTag(reviewTagSearch.trim())"
                   >
-                    <i class="fa-solid fa-plus text-xs"></i>
+                    <Icon name="fa6-solid:plus" class="text-xs" />
                     <span>创建「{{ reviewTagSearch.trim() }}」</span>
                   </button>
                   <div
@@ -344,26 +330,23 @@
           <label class="block text-sm font-medium mb-2">审核备注（可选）</label>
           <textarea
             v-model="reviewNote"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-textarea w-full"
             rows="3"
             :placeholder="reviewAction === 'approve' ? '可以添加一些说明...' : '请说明驳回原因...'"
           ></textarea>
         </div>
         <div class="flex justify-end gap-3">
-          <button
+          <AdminKumoButton variant="secondary"
             @click="reviewModalVisible = false"
-            class="px-4 py-2 text-sm border dark:border-zinc-600 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700"
           >
             取消
-          </button>
-          <button
+          </AdminKumoButton>
+          <AdminKumoButton :variant="reviewAction === 'approve' ? 'primary' : 'danger'"
             @click="handleReview"
             :disabled="reviewing"
-            class="px-4 py-2 text-sm text-white rounded-lg disabled:opacity-50"
-            :class="reviewAction === 'approve' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'"
           >
             {{ reviewing ? '处理中...' : (reviewAction === 'approve' ? '确认通过' : '确认驳回') }}
-          </button>
+          </AdminKumoButton>
         </div>
       </div>
     </Modal>
@@ -552,7 +535,7 @@ const allTagsCache = ref<TagItem[]>([])
 async function ensureAllTags() {
   if (allTagsCache.value.length) return
   try {
-    const res = await $fetch<{ items: TagItem[] }>('/api/tags', { query: { limit: 500 } })
+    const res: any = await ($fetch as any)('/api/tags', { query: { limit: 500 } } as any)
     allTagsCache.value = res.items || []
   } catch {}
 }

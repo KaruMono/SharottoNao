@@ -9,6 +9,7 @@ export default defineEventHandler(async (event) => {
     const tags = await prisma.tag.findMany({
       where: {
         isNsfw: false,
+        archivedAt: null,
         games: {
           some: {
             game: {

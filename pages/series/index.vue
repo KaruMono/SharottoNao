@@ -3,16 +3,22 @@
     <h1 class="text-2xl font-bold mb-6">游戏系列</h1>
 
     <!-- 搜索栏 -->
-    <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
-      <div class="relative">
-        <input 
-          v-model="searchQuery"
-          type="text" 
-          placeholder="搜索系列名称..." 
-          class="w-full px-4 py-2 pl-10 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-          @keyup.enter="handleSearch"
-        />
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+    <div class="w-full mb-6">
+      <div class="flex w-full flex-col overflow-hidden bg-white dark:bg-zinc-800 rounded-2xl ring-1 ring-gray-200 dark:ring-zinc-700/70">
+        <div class="flex items-center gap-2 bg-white dark:bg-zinc-800 p-1.5 m-0 transition-colors rounded-2xl">
+          <label class="relative w-full cursor-text border-0 bg-white dark:bg-zinc-700 text-gray-700 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-zinc-700 outline-none focus:outline-none h-10 text-base focus-within:ring-[1.5px] focus-within:ring-gray-400 dark:focus-within:ring-zinc-500 overflow-hidden px-0 flex items-center gap-0 rounded-xl mb-0">
+            <div class="pointer-events-none relative z-[1] flex shrink-0 items-center gap-1.5 text-gray-400 dark:text-gray-500 text-base pl-2.5 pr-0">
+              <Icon name="fa6-solid:magnifying-glass" class="w-4 h-4" />
+            </div>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="搜索系列名称..."
+              class="text-gray-700 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 gap-2 text-base flex h-full min-w-0 grow items-center border-0 bg-transparent font-sans px-4 text-ellipsis relative z-1 shadow-none outline-none focus:outline-none rounded-xl ring-0"
+              @keyup.enter="handleSearch"
+            />
+          </label>
+        </div>
       </div>
     </div>
 
@@ -36,7 +42,7 @@
                 class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
               />
               <div v-else class="w-16 h-16 rounded-lg bg-gray-200 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                <i class="fa-solid fa-layer-group text-gray-400 text-xl"></i>
+                <Icon name="fa6-solid:layer-group" class="text-gray-400 text-xl" />
               </div>
               
               <div class="flex-1 min-w-0">
@@ -83,7 +89,7 @@
                   v-else
                   class="w-full h-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
                 >
-                  <i class="fa-solid fa-gamepad text-gray-400 text-xs"></i>
+                  <Icon name="fa6-solid:gamepad" class="text-gray-400 text-xs" />
                 </div>
                 <div class="absolute inset-0 bg-black/0 group-hover/game:bg-black/20 transition-colors duration-200 rounded-lg"></div>
               </NuxtLink>
@@ -93,7 +99,7 @@
               class="mt-3 flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-700 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
             >
               <span>查看全部 {{ series.gamesCount }} 个游戏</span>
-              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              <Icon name="fa6-solid:arrow-right" class="text-[10px]" />
             </NuxtLink>
           </div>
         </Transition>
@@ -101,7 +107,7 @@
     </div>
 
     <div v-else-if="!pending" class="text-center py-12 text-gray-500">
-      <i class="fa-solid fa-layer-group text-4xl mb-4"></i>
+      <Icon name="fa6-solid:layer-group" class="text-4xl mb-4" />
       <p>暂无系列</p>
     </div>
 

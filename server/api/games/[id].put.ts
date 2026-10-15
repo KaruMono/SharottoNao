@@ -7,9 +7,21 @@ import { recordEdit } from '~/server/utils/content-edit'
 import { diffGame } from '~/server/utils/game-diff'
 import { submitGameToIndexNow } from '~/server/utils/indexnow'
 import { invalidateGameCaches } from '~/server/utils/redis'
-import { normalizeTagNames, findTagByName } from '~/server/utils/tag-normalize'
-import { pickTagColor } from '~/server/utils/tag-color'
-import { generateUniqueSlug } from '~/server/utils/slug'
+import { resolveNsfwMode } from '~/server/utils/nsfw'
+import { normalizeTagNames } from '~/server/utils/tag-normalize'
+import { mergeRequestedTagIdsPreservingHidden } from '~/server/utils/tag-visibility'
+import {
+  isPrismaUniqueConstraintError,
+  resolveOrCreateTagByNameInTransaction,
+  TagNameConflictError,
+} from '~/server/utils/tag-name'
+import { replaceManualGameTagsInTransaction } from '~/server/utils/game-tag-source'
+import { fetchVndbGame } from '~/server/utils/vndb-client'
+import {
+  lockVndbTagSyncInTransaction,
+  syncVndbTagsForGameInTransaction,
+  type VndbTagInput,
+} from '~/server/utils/vndb-tag-sync'
 
 const purchaseLinkSchema = z.object({
   name: z.string(),
@@ -58,7 +70,12 @@ export default defineEventHandler(async (event) => {
   const existingGame = await prisma.game.findUnique({
     where: { id, deletedAt: null },
     include: {
-      tags: true,
+      tags: {
+        where: { sources: { some: { source: 'MANUAL' } } },
+        include: {
+          tag: { select: { isNsfw: true, archivedAt: true } },
+        },
+      },
     },
   })
 
@@ -71,6 +88,14 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
   const data = schema.parse(body)
+
+  if (data.tagIds !== undefined) {
+    data.tagIds = mergeRequestedTagIdsPreservingHidden(
+      data.tagIds,
+      existingGame.tags,
+      resolveNsfwMode(user),
+    )
+  }
 
   // 验证至少有一个标题
   if (!data.titleEn && !data.titleJa && !data.titleZhHans && !data.titleZhHant) {
@@ -105,8 +130,8 @@ export default defineEventHandler(async (event) => {
       descriptionZhHant: data.descriptionZhHant || null,
       coverImage: data.coverImage,
       isNsfw: data.isNsfw ?? existingGame.isNsfw,
-      vndbId: data.vndbId || null,
-      bangumiId: data.bangumiId || null,
+      ...(data.vndbId !== undefined && { vndbId: data.vndbId || null }),
+      ...(data.bangumiId !== undefined && { bangumiId: data.bangumiId || null }),
       purchaseLinks: data.purchaseLinks || [],
     }
 
@@ -120,33 +145,40 @@ export default defineEventHandler(async (event) => {
       updateData.releaseDate = new Date(data.releaseDate)
     }
 
+    const nextVndbId = data.vndbId === undefined ? existingGame.vndbId : (data.vndbId || null)
+    const vndbChanged = nextVndbId !== existingGame.vndbId
+    let vndbTags: VndbTagInput[] | null = null
+    let vndbIsNsfw = false
+    if (nextVndbId && (vndbChanged || !existingGame.vndbTagsSyncedAt)) {
+      const vndbData = await fetchVndbGame(nextVndbId)
+      vndbTags = vndbData.tags
+      vndbIsNsfw = vndbData.isNsfw
+    }
+    if (vndbIsNsfw) updateData.isNsfw = true
+
     // 更新游戏并重建标签关联（事务保证标签删除与重建同时生效）
     let game
     try {
       game = await prisma.$transaction(async (tx) => {
+        if (vndbChanged || vndbTags) {
+          await lockVndbTagSyncInTransaction(tx)
+        }
+
         const updated = await tx.game.update({
           where: { id },
           data: updateData,
         })
 
         // 先处理 newTagNames：管理员直接创建，无需审核
-        let finalTagIds = data.tagIds ?? []
+        let finalTagIds = data.tagIds ?? existingGame.tags.map(tag => tag.tagId)
         if (data.newTagNames?.length) {
           const normalized = normalizeTagNames(data.newTagNames)
           const newIds: number[] = []
           for (const name of normalized) {
-            let tag = await tx.tag.findFirst({
-              where: { name: { equals: name, mode: 'insensitive' } },
+            const { tag } = await resolveOrCreateTagByNameInTransaction(tx, {
+              name,
+              isNsfw: false,
             })
-            if (!tag) {
-              const slug = await generateUniqueSlug(name, async (s) => {
-                const exists = await tx.tag.findFirst({ where: { slug: s } })
-                return !!exists
-              })
-              tag = await tx.tag.create({
-                data: { name, slug, isNsfw: false, color: pickTagColor(name) },
-              })
-            }
             newIds.push(tag.id)
           }
           // 新建标签 id 并入 tagIds（去重）
@@ -155,11 +187,17 @@ export default defineEventHandler(async (event) => {
 
         // 更新标签关联（有 tagIds 或 newTagNames 时才重建）
         if (data.tagIds !== undefined || data.newTagNames?.length) {
-          await tx.gameTag.deleteMany({ where: { gameId: id } })
-          if (finalTagIds.length > 0) {
-            await tx.gameTag.createMany({
-              data: finalTagIds.map(tagId => ({ gameId: id, tagId })),
-            })
+          await replaceManualGameTagsInTransaction(tx, id, finalTagIds)
+        }
+
+        if (vndbChanged || vndbTags) {
+          await syncVndbTagsForGameInTransaction(tx, {
+            gameId: id,
+            tags: vndbTags || [],
+            expectedVndbId: nextVndbId,
+          })
+          if (!nextVndbId) {
+            await tx.game.update({ where: { id }, data: { vndbTagsSyncedAt: null } })
           }
         }
 
@@ -168,6 +206,12 @@ export default defineEventHandler(async (event) => {
     } catch (e: any) {
       if (e.code === 'P2002' && e.meta?.target?.includes('vndbId')) {
         throw createError({ statusCode: 400, message: '该 VNDB ID 已被其他游戏使用' })
+      }
+      if (isPrismaUniqueConstraintError(e)) {
+        throw createError({ statusCode: 409, message: '标签名称、别名或标识已被占用' })
+      }
+      if (e instanceof TagNameConflictError) {
+        throw createError({ statusCode: 409, message: e.message })
       }
       throw e
     }

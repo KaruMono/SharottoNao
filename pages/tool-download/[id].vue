@@ -3,15 +3,15 @@
     <div class="max-w-md w-full bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-8 text-center">
       <!-- 加载中 -->
       <div v-if="pending" class="py-8">
-        <i class="fa-solid fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-4xl text-gray-400 mb-4" />
         <p class="text-gray-500">正在加载...</p>
       </div>
 
       <!-- 错误 -->
       <div v-else-if="error" class="py-8">
-        <i class="fa-solid fa-circle-exclamation text-4xl text-red-500 mb-4"></i>
+        <Icon name="fa6-solid:circle-exclamation" class="text-4xl text-red-500 mb-4" />
         <h2 class="text-xl font-semibold mb-2">获取失败</h2>
-        <p class="text-gray-500 mb-6">{{ error.data?.message || '工具不存在或已被删除' }}</p>
+        <p class="text-gray-500 mb-6">{{ (error as any).data?.message || '工具不存在或已被删除' }}</p>
         <NuxtLink to="/tools" class="px-6 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white hover:bg-gray-700 dark:hover:bg-zinc-500 transition">
           返回工具箱
         </NuxtLink>
@@ -23,7 +23,7 @@
         <div class="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden">
           <img v-if="tool.icon" :src="tool.icon" :alt="tool.name" class="w-full h-full object-cover" />
           <div v-else class="w-full h-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center">
-            <i class="fa-solid fa-wrench text-3xl text-gray-400"></i>
+            <Icon name="fa6-solid:wrench" class="text-3xl text-gray-400" />
           </div>
         </div>
 
@@ -31,13 +31,13 @@
 
         <div class="flex items-center justify-center gap-3 text-xs text-gray-400 mb-2">
           <span v-if="tool.version">
-            <i class="fa-solid fa-code-branch mr-1"></i>v{{ tool.version }}
+            <Icon name="fa6-solid:code-branch" class="mr-1" />v{{ tool.version }}
           </span>
           <span v-if="tool.author">
-            <i class="fa-solid fa-user mr-1"></i>{{ tool.author }}
+            <Icon name="fa6-solid:user" class="mr-1" />{{ tool.author }}
           </span>
           <span v-if="tool.category">
-            <i v-if="tool.category.icon" :class="tool.category.icon" class="mr-1"></i>
+            <FaIcon v-if="tool.category.icon" :icon="tool.category.icon" class="mr-1" />
             {{ tool.category.name }}
           </span>
         </div>
@@ -58,7 +58,7 @@
               :disabled="downloading"
               class="w-full px-6 py-3 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white font-medium hover:bg-gray-700 dark:hover:bg-zinc-500 transition disabled:opacity-50"
             >
-              <i class="fa-solid fa-download mr-2"></i>
+              <Icon name="fa6-solid:download" class="mr-2" />
               {{ downloading ? '跳转中...' : '立即下载' }}
             </button>
             <a
@@ -68,14 +68,14 @@
               rel="noopener noreferrer"
               class="w-full px-6 py-3 rounded-lg border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center justify-center gap-2"
             >
-              <i class="fa-brands fa-github text-lg"></i>
+              <Icon name="fa6-brands:github" class="text-lg" />
               在 GitHub 上查看
             </a>
           </template>
         </div>
 
         <NuxtLink to="/tools" class="inline-block mt-4 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
-          <i class="fa-solid fa-arrow-left mr-1"></i>返回工具箱
+          <Icon name="fa6-solid:arrow-left" class="mr-1" />返回工具箱
         </NuxtLink>
 
         <p class="text-xs text-gray-400 mt-6">
@@ -92,7 +92,7 @@ const toast = useToast()
 
 const toolId = computed(() => parseInt(route.params.id as string))
 
-const { data: tool, pending, error } = await useFetch<any>(`/api/tool-download/${toolId.value}`, { key: `tool-download-${toolId.value}` })
+const { data: tool, pending, error } = await (useFetch as any)(`/api/tool-download/${toolId.value}`, { key: `tool-download-${toolId.value}` })
 
 const countdown = ref(5)
 const downloading = ref(false)

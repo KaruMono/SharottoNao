@@ -3,8 +3,8 @@ import { getAuthUser } from '~/server/utils/auth'
 import { getSiteName, getSiteDescription, getSetting, getHomeTitle } from '~/server/utils/settings'
 import { cachedFetch, CacheKeys, CacheTTL } from '~/server/utils/redis'
 import { getDisplayTitle, getNsfwMode } from '~/server/utils/game'
-import { getCurrentMonthRange } from '~/server/utils/vndb-monthly-release'
 import { getTrafficStats } from '~/server/utils/traffic'
+import { buildTagVisibilityWhere } from '~/server/utils/tag-visibility'
 
 export default defineEventHandler(async (event) => {
   const user = await getAuthUser(event)
@@ -30,8 +30,6 @@ export default defineEventHandler(async (event) => {
       releaseDate: true,
       isNsfw: true,
     }
-    const currentMonthRange = getCurrentMonthRange()
-
     // 并行获取各类数据
     const [
       siteName,
@@ -43,7 +41,6 @@ export default defineEventHandler(async (event) => {
       footerScripts,
       footerHtml,
       customMetaTags,
-      monthlyReleasedGames,
       latestGames,
       recentlyUpdated,
       popularGames,
@@ -63,58 +60,59 @@ export default defineEventHandler(async (event) => {
       getSetting('footer_scripts'),
       getSetting('footer_html'),
       getSetting('custom_meta_tags'),
-      // 本月发布（按发售日排序）
+      // 最新创建（按发布日期排序）
       prisma.game.findMany({
+        // 首页只展示至少有一个可用（已审核且未删除）资源的游戏
         where: {
           deletedAt: null,
-          releaseDate: {
-            gte: currentMonthRange.start,
-            lte: currentMonthRange.end,
-          },
           ...nsfwFilter,
+          releaseDate: { not: null }, // 只显示有发布日期的游戏
+          resources: {
+            some: {
+              deletedAt: null,
+              status: 'APPROVED',
+            },
+          },
         },
         select: gameSelect,
-        orderBy: { releaseDate: 'asc' },
+        orderBy: { releaseDate: 'desc' },
         take: 10,
       }),
-      // 最新创建
-      prisma.game.findMany({
-        where: { deletedAt: null, ...nsfwFilter },
-        select: gameSelect,
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-      }),
-      // 最新上传（按最新添加资源的时间排序）
+      // 最新上传（按资源上传或内容编辑时间排序，每个游戏仅展示一次）
       prisma.resource.findMany({
-        where: { deletedAt: null, status: 'APPROVED' },
+        where: {
+          deletedAt: null,
+          status: 'APPROVED',
+          game: { deletedAt: null, ...nsfwFilter },
+        },
         select: {
-          createdAt: true,
           game: {
             select: gameSelect,
           },
         },
-        orderBy: { createdAt: 'desc' },
-        take: 20, // 多取一些以便去重
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        take: 10,
         distinct: ['gameId'], // 每个游戏只取一条
-      }).then(resources => 
-        resources
-          .filter(r => {
-            if (nsfwMode === 'SFW') return !r.game.isNsfw
-            if (nsfwMode === 'NSFW') return r.game.isNsfw
-            return true // ALL 模式不过滤
-          })
-          .slice(0, 10)
-          .map(r => r.game)
-      ),
-      // 热门推荐
+      }).then(resources => resources.map(r => r.game)),
+      // 热门推荐（仅展示有已审核且未删除资源的游戏）
       prisma.game.findMany({
-        where: { deletedAt: null, ...nsfwFilter },
+        where: {
+          deletedAt: null,
+          ...nsfwFilter,
+          resources: {
+            some: {
+              deletedAt: null,
+              status: 'APPROVED',
+            },
+          },
+        },
         select: gameSelect,
         orderBy: { viewCount: 'desc' },
         take: 10,
       }),
       // 标签云
       prisma.tag.findMany({
+        where: buildTagVisibilityWhere(nsfwMode),
         select: {
           id: true,
           name: true,
@@ -209,7 +207,6 @@ export default defineEventHandler(async (event) => {
       footerScripts: footerScripts || '',
       footerHtml: footerHtml || '',
       customMetaTags: customMetaTags || '',
-      monthlyReleasedGames: processGames(monthlyReleasedGames),
       latestGames: processGames(latestGames),
       recentlyUpdated: processGames(recentlyUpdated),
       popularGames: processGames(popularGames),

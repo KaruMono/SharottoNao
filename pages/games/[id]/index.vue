@@ -1,6 +1,6 @@
 <template>
-  <div class="max-w-6xl mx-auto px-2.5 sm:px-4 md:px-6 pt-4 md:pt-6">
-    <div v-if="game" class="space-y-4 md:space-y-0 md:grid md:grid-cols-[240px_1fr] md:gap-8">
+  <div class="max-w-6xl mx-auto px-2.5 sm:px-4 md:px-6 pt-[11px] md:pt-[19px]">
+    <div v-if="game" class="space-y-4 md:space-y-0 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:gap-8">
 
       <!-- 移动端：封面+标题+操作按钮 -->
       <div class="md:hidden">
@@ -18,7 +18,7 @@
                 v-else
                 class="w-full aspect-[3/4] flex items-center justify-center bg-gray-200 dark:bg-zinc-700"
               >
-                <i class="fa-solid fa-gamepad text-3xl text-gray-400 dark:text-zinc-500"></i>
+                <Icon name="fa6-solid:gamepad" class="text-3xl text-gray-400 dark:text-zinc-500" />
               </div>
             </div>
           </div>
@@ -33,14 +33,12 @@
             <!-- 评分 -->
             <div class="flex items-center gap-2 mb-2">
               <div class="flex text-sm">
-                <i 
-                  v-for="i in 5" 
+                <Icon
+                  v-for="i in 5"
                   :key="i"
-                  :class="[
-                    i <= Math.round(game.avgRating || 0) ? 'fa-solid' : 'fa-regular',
-                    'fa-star text-gray-800 dark:text-gray-200'
-                  ]"
-                ></i>
+                  :name="i <= Math.round(game.avgRating || 0) ? 'fa6-solid:star' : 'fa6-regular:star'"
+                  class="text-gray-800 dark:text-gray-200"
+                />
               </div>
               <span class="text-sm font-semibold">{{ game.avgRating || '-' }}</span>
               <span class="text-xs text-gray-500">({{ game.ratingCount }})</span>
@@ -71,7 +69,7 @@
                 ? 'border-red-300 dark:border-red-700 text-red-600 dark:text-red-400'
                 : 'border-gray-300 dark:border-zinc-600'"
             >
-              <i :class="favoriteIcon"></i>
+              <FaIcon :icon="favoriteIcon" />
               <span class="truncate">{{ mobileFavoriteLabel }}</span>
             </button>
             <Transition name="dropdown">
@@ -86,7 +84,7 @@
                   class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-700 transition text-left"
                   :class="isLoggedIn && game.favoriteStatus === opt.status ? 'text-red-500 font-medium' : 'text-gray-700 dark:text-gray-300'"
                 >
-                  <i :class="opt.icon" class="w-4 text-center"></i>
+                  <FaIcon :icon="opt.icon" class="w-4 text-center" />
                   {{ opt.label }}
                 </button>
                 <div v-if="isLoggedIn && game.isFavorited" class="border-t border-gray-100 dark:border-zinc-700 mt-1 pt-1">
@@ -94,7 +92,7 @@
                     @click="setFavoriteStatus(null)"
                     class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-700 transition text-left text-gray-400 hover:text-red-500"
                   >
-                    <i class="fa-solid fa-trash-can w-4 text-center text-xs"></i>
+                    <Icon name="fa6-solid:trash-can" class="w-4 text-center text-xs" />
                     取消收藏
                   </button>
                 </div>
@@ -106,21 +104,21 @@
             :to="`/games/${game.id}/guides`"
             class="h-10 px-2 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm flex items-center justify-center gap-1.5 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm min-w-0"
           >
-            <i class="fa-solid fa-book"></i><span class="truncate">攻略</span>
+            <Icon name="fa6-solid:book" /><span class="truncate">攻略</span>
           </NuxtLink>
           <NuxtLink 
             v-if="canEdit"
             :to="`/games/${game.id}/edit`"
             class="h-10 px-2 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm flex items-center justify-center gap-1.5 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm min-w-0"
           >
-            <i class="fa-solid fa-pen"></i><span class="truncate">编辑</span>
+            <Icon name="fa6-solid:pen" /><span class="truncate">编辑</span>
           </NuxtLink>
           <NuxtLink 
             v-if="isAdmin"
             :to="`/admin/games/${game.id}/edit`"
             class="h-10 px-2 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm flex items-center justify-center gap-1.5 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm min-w-0"
           >
-            <i class="fa-solid fa-screwdriver-wrench"></i><span class="truncate">管理</span>
+            <Icon name="fa6-solid:screwdriver-wrench" /><span class="truncate">管理</span>
           </NuxtLink>
         </div>
       </div>
@@ -139,25 +137,23 @@
             v-else
             class="w-full aspect-[3/4] flex items-center justify-center bg-gray-200 dark:bg-zinc-700"
           >
-            <i class="fa-solid fa-gamepad text-4xl text-gray-400 dark:text-zinc-500"></i>
+            <Icon name="fa6-solid:gamepad" class="text-4xl text-gray-400 dark:text-zinc-500" />
           </div>
         </div>
 
         <!-- 评分区域 -->
         <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
           <div class="text-sm font-medium mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-star text-gray-400"></i>评分
+            <Icon name="fa6-solid:star" class="text-gray-400" />评分
           </div>
           <div class="flex items-center gap-2 mb-2">
             <div class="flex text-xl">
-              <i 
-                v-for="i in 5" 
+              <Icon
+                v-for="i in 5"
                 :key="i"
-                :class="[
-                  i <= Math.round(game.avgRating || 0) ? 'fa-solid' : 'fa-regular',
-                  'fa-star text-gray-800 dark:text-gray-200'
-                ]"
-              ></i>
+                :name="i <= Math.round(game.avgRating || 0) ? 'fa6-solid:star' : 'fa6-regular:star'"
+                class="text-gray-800 dark:text-gray-200"
+              />
             </div>
             <span class="text-xl font-semibold">{{ game.avgRating || '-' }}</span>
           </div>
@@ -190,26 +186,13 @@
         </div>
 
         <div v-if="game.tags?.length" class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
-          <div class="text-sm font-medium mb-2 flex items-center gap-2">
-            <i class="fa-solid fa-tags text-gray-400"></i>标签
-          </div>
-          <div class="flex flex-wrap gap-2 text-xs">
-            <NuxtLink 
-              v-for="tag in game.tags" 
-              :key="tag.id"
-              :to="`/tags/${tag.slug || tag.id}`"
-              class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 transition"
-              :style="tag.color ? { backgroundColor: tag.color + '20', color: tag.color } : {}"
-            >
-              {{ tag.name }}
-            </NuxtLink>
-          </div>
+          <GameTagGroups :tags="game.tags" />
         </div>
 
         <!-- 制作人员 -->
         <div v-if="staffByRole && Object.keys(staffByRole).length" class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
           <div class="text-sm font-medium mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-users text-gray-400"></i>制作人员
+            <Icon name="fa6-solid:users" class="text-gray-400" />制作人员
           </div>
           <div class="text-sm space-y-2">
             <div v-for="(staffList, role) in staffByRole" :key="role">
@@ -230,7 +213,7 @@
         <!-- 同系列游戏 -->
         <div v-if="game.series || game.seriesGames?.length" class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
           <div class="text-sm font-medium mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-layer-group text-gray-400"></i>
+            <Icon name="fa6-solid:layer-group" class="text-gray-400" />
             <span v-if="game.series">{{ game.series.name }}</span>
             <span v-else>同系列作品</span>
           </div>
@@ -252,7 +235,7 @@
                 v-else
                 class="w-12 h-16 rounded bg-gray-200 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0"
               >
-                <i class="fa-solid fa-gamepad text-gray-400 dark:text-zinc-500"></i>
+                <Icon name="fa6-solid:gamepad" class="text-gray-400 dark:text-zinc-500" />
               </div>
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium truncate group-hover:text-gray-600 dark:group-hover:text-gray-300 transition">
@@ -269,7 +252,7 @@
               :to="`/series/${game.series.id}`"
               class="block text-center py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 rounded-lg transition"
             >
-              查看更多 <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+              查看更多 <Icon name="fa6-solid:chevron-right" class="text-xs ml-1" />
             </NuxtLink>
           </div>
           <div v-else class="text-sm text-gray-500">
@@ -280,7 +263,7 @@
         <!-- 相关作品推荐 -->
         <div v-if="game.relatedGames?.length" class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow">
           <div class="text-sm font-medium mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-heart text-gray-400"></i>相关推荐
+            <Icon name="fa6-solid:heart" class="text-gray-400" />相关推荐
           </div>
           <div class="space-y-3">
             <NuxtLink 
@@ -300,7 +283,7 @@
                 v-else
                 class="w-12 h-16 rounded bg-gray-200 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0"
               >
-                <i class="fa-solid fa-gamepad text-gray-400 dark:text-zinc-500"></i>
+                <Icon name="fa6-solid:gamepad" class="text-gray-400 dark:text-zinc-500" />
               </div>
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium truncate group-hover:text-gray-600 dark:group-hover:text-gray-300 transition">
@@ -319,31 +302,24 @@
           @click="openHistoryModal"
           class="w-full flex items-center gap-2 px-4 py-3 bg-white dark:bg-zinc-800 rounded-xl shadow text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition"
         >
-          <i class="fa-solid fa-clock-rotate-left"></i>
+          <Icon name="fa6-solid:clock-rotate-left" />
           <span>编辑历史</span>
-          <i class="fa-solid fa-chevron-right ml-auto text-xs"></i>
+          <Icon name="fa6-solid:chevron-right" class="ml-auto text-xs" />
         </button>
 
         <AdBanner ad-slot="game_detail_sidebar" />
       </aside>
 
       <!-- 右栏：主体内容 -->
-      <section class="space-y-4 md:space-y-6">
+      <section class="min-w-0 space-y-4 md:space-y-6">
 
         <!-- 移动端标签 -->
         <div v-if="game.tags?.length" class="md:hidden bg-white dark:bg-zinc-800 rounded-lg p-2.5 sm:p-3 shadow">
-          <div class="flex flex-wrap gap-1.5 text-xs">
-            <NuxtLink 
-              v-for="tag in game.tags" 
-              :key="tag.id"
-              :to="`/tags/${tag.slug || tag.id}`"
-              class="px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700"
-              :style="tag.color ? { backgroundColor: tag.color + '20', color: tag.color } : {}"
-            >
-              {{ tag.name }}
-            </NuxtLink>
-          </div>
+          <GameTagGroups :tags="game.tags" />
         </div>
+
+        <!-- 移动端侧栏广告：显示与否由每条广告的移动端设置控制 -->
+        <AdBanner ad-slot="game_detail_sidebar" class="md:hidden" />
 
         <!-- 标题 + 别名 + 操作按钮 (桌面端) -->
         <div class="hidden md:block space-y-3 md:-mt-6">
@@ -356,11 +332,11 @@
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-xs text-gray-400 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm rounded px-1.5 py-0.5">
-              <i class="fa-solid fa-eye mr-1"></i>{{ game.viewCount }} 次浏览
+              <Icon name="fa6-solid:eye" class="mr-1" />{{ game.viewCount }} 次浏览
             </span>
             <!-- 游戏时间 -->
             <span v-if="estimatedPlayTime" class="text-xs text-gray-400 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm rounded px-1.5 py-0.5">
-              <i class="fa-solid fa-clock mr-1"></i>约 {{ estimatedPlayTime }} 小时
+              <Icon name="fa6-solid:clock" class="mr-1" />约 {{ estimatedPlayTime }} 小时
             </span>
             <div class="flex items-center gap-2 ml-auto">
               <!-- 相关链接按钮 -->
@@ -369,8 +345,8 @@
                   @click="showPurchaseDropdown = !showPurchaseDropdown"
                   class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm flex items-center gap-1.5 transition-colors hover:bg-gray-700 dark:hover:bg-zinc-500"
                 >
-                  <i class="fa-solid fa-link"></i>相关链接
-                  <i class="fa-solid fa-chevron-down text-xs"></i>
+                  <Icon name="fa6-solid:link" />相关链接
+                  <Icon name="fa6-solid:chevron-down" class="text-xs" />
                 </button>
                 <Transition name="dropdown">
                   <div 
@@ -386,7 +362,7 @@
                       class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-600 transition"
                       @click="showPurchaseDropdown = false"
                     >
-                      <i class="fa-solid fa-external-link mr-2 text-gray-400"></i>{{ link.name }}
+                      <Icon name="fa6-solid:arrow-up-right-from-square" class="mr-2 text-gray-400" />{{ link.name }}
                     </a>
                   </div>
                 </Transition>
@@ -401,7 +377,7 @@
                   ? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20 text-orange-600 cursor-default' 
                   : 'border-gray-300 dark:border-zinc-600'"
               >
-                <i class="fa-solid fa-fire" :class="{ 'text-orange-500': isLoggedIn && hasBumpedToday }"></i>
+                <Icon name="fa6-solid:fire" :class="{ 'text-orange-500': isLoggedIn && hasBumpedToday }" />
                 <span v-if="isLoggedIn && hasBumpedToday">
                   今日热度 <span class="font-medium">{{ bumpCount }}</span>
                 </span>
@@ -413,7 +389,7 @@
                 :to="`/games/${game.id}/guides`"
                 class="action-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm flex items-center gap-1.5"
               >
-                <i class="fa-solid fa-book"></i>攻略
+                <Icon name="fa6-solid:book" />攻略
                 <span v-if="game.guidesCount" class="text-xs">({{ game.guidesCount }})</span>
               </NuxtLink>
               <!-- 收藏按钮（悬浮弹出分类选项） -->
@@ -426,9 +402,9 @@
                     ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
                     : 'border-gray-300 dark:border-zinc-600'"
                 >
-                  <i :class="favoriteIcon"></i>
+                  <FaIcon :icon="favoriteIcon" />
                   <span>{{ favoriteLabel }}</span>
-                  <i class="fa-solid fa-chevron-down text-[10px] opacity-60 ml-0.5"></i>
+                  <Icon name="fa6-solid:chevron-down" class="text-[10px] opacity-60 ml-0.5" />
                 </button>
                 <Transition name="dropdown">
                   <div
@@ -442,7 +418,7 @@
                       class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-700 transition text-left"
                       :class="isLoggedIn && game.favoriteStatus === opt.status ? 'text-red-500 font-medium' : 'text-gray-700 dark:text-gray-300'"
                     >
-                      <i :class="opt.icon" class="w-4 text-center"></i>
+                      <FaIcon :icon="opt.icon" class="w-4 text-center" />
                       {{ opt.label }}
                     </button>
                     <div v-if="isLoggedIn && game.isFavorited" class="border-t border-gray-100 dark:border-zinc-700 mt-1 pt-1">
@@ -450,7 +426,7 @@
                         @click="setFavoriteStatus(null)"
                         class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-700 transition text-left text-gray-400 hover:text-red-500"
                       >
-                        <i class="fa-solid fa-trash-can w-4 text-center text-xs"></i>
+                        <Icon name="fa6-solid:trash-can" class="w-4 text-center text-xs" />
                         取消收藏
                       </button>
                     </div>
@@ -464,7 +440,7 @@
                 :to="`/games/${game.id}/edit`"
                 class="action-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm flex items-center gap-1.5"
               >
-                <i class="fa-solid fa-pen"></i>编辑
+                <Icon name="fa6-solid:pen" />编辑
               </NuxtLink>
               <!-- 管理员编辑按钮 -->
               <NuxtLink 
@@ -472,7 +448,7 @@
                 :to="`/admin/games/${game.id}/edit`"
                 class="action-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm flex items-center gap-1.5"
               >
-                <i class="fa-solid fa-screwdriver-wrench"></i>管理
+                <Icon name="fa6-solid:screwdriver-wrench" />管理
               </NuxtLink>
             </div>
           </div>
@@ -495,7 +471,7 @@
                 ? 'text-gray-800 dark:text-white' 
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
             >
-              <i class="fa-solid fa-file-lines"></i>游戏简介
+              <Icon name="fa6-solid:file-lines" />游戏简介
             </button>
             <button 
               @click="activeTab = 'screenshots'"
@@ -504,7 +480,7 @@
                 ? 'text-gray-800 dark:text-white' 
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
             >
-              <i class="fa-solid fa-images"></i>游戏截图
+              <Icon name="fa6-solid:images" />游戏截图
             </button>
           </div>
           
@@ -554,8 +530,8 @@
         <!-- 游戏资源上方广告 -->
         <AdBanner ad-slot="game_resource_top" />
 
-        <!-- 下载资源（仅登录用户可见） -->
-        <div v-if="isLoggedIn" class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
+        <!-- 下载资源：游客可查看摘要，下载时再按站点策略要求登录 -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
           <!-- 标签页切换 -->
           <div class="flex items-center justify-between border-b border-gray-200 dark:border-zinc-700">
             <div class="relative flex items-center">
@@ -570,7 +546,7 @@
                 class="px-3 sm:px-5 py-3 text-sm font-medium transition relative z-10"
                 :class="resourceTab === 'game' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
               >
-                <i class="fa-solid fa-download mr-1.5"></i>游戏资源
+                <Icon name="fa6-solid:download" class="mr-1.5" />游戏资源
                 <span v-if="game.resources?.length" class="ml-1 text-xs">({{ game.resources.length }})</span>
               </button>
               <button
@@ -579,17 +555,17 @@
                 class="px-3 sm:px-5 py-3 text-sm font-medium transition relative z-10"
                 :class="resourceTab === 'patch' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
               >
-                <i class="fa-solid fa-puzzle-piece mr-1.5"></i>补丁资源
-                <span v-if="hikariPatch?.resource?.length" class="ml-1 text-xs">({{ hikariPatch.resource.length }})</span>
+                <Icon name="fa6-solid:puzzle-piece" class="mr-1.5" />补丁资源
+                <span v-if="moyuResources.length" class="ml-1 text-xs">({{ moyuResources.length }})</span>
               </button>
             </div>
             <!-- 添加资源按钮（仅游戏资源标签页显示） -->
             <button 
-              v-if="resourceTab === 'game'"
+              v-if="resourceTab === 'game' && isLoggedIn"
               @click="showAddResource = true"
               class="mr-4 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center gap-1.5"
             >
-              <i class="fa-solid fa-plus"></i><span class="hidden md:inline">添加资源</span>
+              <Icon name="fa6-solid:plus" /><span class="hidden md:inline">添加资源</span>
             </button>
           </div>
 
@@ -614,7 +590,7 @@
                           v-if="resource.netDiskType?.name"
                           class="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 rounded font-medium"
                         >
-                          <i :class="resource.netDiskType.icon || 'fa-solid fa-cloud'"></i>{{ resource.netDiskType.name }}
+                          <FaIcon :icon="resource.netDiskType.icon || 'fa6-solid:cloud'" />{{ resource.netDiskType.name }}
                         </span>
                         <span
                           v-if="resource.type?.name"
@@ -631,14 +607,6 @@
                         }">{{ resourceLangLabel(resource.language) }}</span>
                         <span v-if="resource.fileSize" class="px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 rounded">{{ resource.fileSize }}</span>
                         <span v-if="resource.isMachineTranslated" class="px-1.5 py-0.5 text-[10px] bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded">机器翻译</span>
-                        <span
-                          v-if="resource.healthStatus && resource.healthStatus !== 'AVAILABLE'"
-                          class="px-1.5 py-0.5 text-[10px] rounded font-medium"
-                          :class="resourceHealthClass(resource.healthStatus)"
-                        >
-                          {{ resourceHealthLabel(resource.healthStatus) }}
-                          <template v-if="resource.issueCount"> · {{ resource.issueCount }}</template>
-                        </span>
                         <span
                           v-if="resource.status === 'PENDING'"
                           class="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400 rounded"
@@ -671,7 +639,7 @@
                       :to="`/download/${resource.id}`"
                       class="action-btn flex-1 md:flex-none px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm flex items-center justify-center gap-2"
                     >
-                      <i class="fa-solid fa-cloud-arrow-down"></i>下载
+                      <Icon name="fa6-solid:cloud-arrow-down" />下载
                     </NuxtLink>
                     <!-- 资源举报按钮 -->
                     <button 
@@ -680,7 +648,7 @@
                       class="p-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-orange-50 dark:hover:bg-orange-900/20 transition"
                       title="举报资源"
                     >
-                      <i class="fa-solid fa-flag text-orange-500"></i>
+                      <Icon name="fa6-solid:flag" class="text-orange-500" />
                     </button>
                     <!-- 编辑/删除按钮（仅上传者和管理员可见） -->
                     <template v-if="canEditResource(resource)">
@@ -689,14 +657,14 @@
                         class="p-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
                         title="编辑"
                       >
-                        <i class="fa-solid fa-pen text-gray-500"></i>
+                        <Icon name="fa6-solid:pen" class="text-gray-500" />
                       </button>
                       <button 
                         @click="deleteResource(resource)"
                         class="p-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition"
                         title="删除"
                       >
-                        <i class="fa-solid fa-trash text-red-500"></i>
+                        <Icon name="fa6-solid:trash" class="text-red-500" />
                       </button>
                     </template>
                   </div>
@@ -722,13 +690,13 @@
                   </div>
                 </div>
                 <div v-if="resource.remark" class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-700 text-xs text-gray-500 dark:text-gray-400">
-                  <i class="fa-solid fa-circle-info mr-1"></i>备注：{{ resource.remark }}
+                  <Icon name="fa6-solid:circle-info" class="mr-1" />备注：{{ resource.remark }}
                 </div>
               </div>
             </div>
           </div>
           <div v-else class="text-center py-8 text-gray-500">
-            <i class="fa-solid fa-folder-open text-3xl mb-3 text-gray-300 dark:text-zinc-600"></i>
+            <Icon name="fa6-solid:folder-open" class="text-3xl mb-3 text-gray-300 dark:text-zinc-600" />
             <p>暂无游戏资源</p>
             <p class="text-xs mt-1">点击上方按钮添加第一个资源</p>
           </div>
@@ -736,103 +704,14 @@
 
           <!-- 补丁资源标签页 -->
           <div v-else-if="resourceTab === 'patch'" key="patch" class="p-4 sm:p-5 overflow-hidden">
-            <div v-if="hikariLoading" class="text-center py-8 text-gray-500">
-              <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
-              <p>加载补丁资源中...</p>
-            </div>
-            <div v-else-if="hikariPatch?.resource?.length" class="space-y-3">
-              <div 
-                v-for="resource in hikariPatch.resource" 
-                :key="resource.id"
-                class="border rounded-lg dark:border-zinc-700 overflow-hidden"
-              >
-                <div class="p-3 md:p-4 text-sm overflow-hidden">
-                  <div class="flex flex-col gap-3">
-                    <!-- 第一行：标题和操作按钮 -->
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <span
-                            v-for="type in resource.type" 
-                            :key="type"
-                            class="px-1.5 py-0.5 text-[10px] bg-purple-600 dark:bg-purple-700 text-white rounded font-medium"
-                          >
-                            {{ getHikariTypeLabel(type) }}
-                          </span>
-                          <span class="font-medium break-all">{{ resource.localization_group_name || resource.name || '补丁资源' }}</span>
-                          <span
-                            v-for="lang in resource.language" 
-                            :key="lang"
-                            class="px-1.5 py-0.5 text-[10px] rounded font-medium"
-                            :class="{
-                              'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': lang === 'ja',
-                              'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': lang === 'en',
-                              'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300': lang === 'zh-Hans',
-                              'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300': lang === 'zh-Hant',
-                              'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': !['ja', 'en', 'zh-Hans', 'zh-Hant'].includes(lang),
-                            }"
-                          >
-                            {{ getHikariLanguageLabel(lang) }}
-                          </span>
-                          <span v-if="resource.size" class="px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 rounded">{{ resource.size }}</span>
-                          <span
-                            v-for="platform in resource.platform" 
-                            :key="platform"
-                            class="px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 rounded"
-                          >
-                            {{ getHikariPlatformLabel(platform) }}
-                          </span>
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          上传者：{{ resource.user?.name || '未知' }}
-                          <span class="mx-1">·</span>
-                          {{ formatDate(resource.update_time) }}
-                          <span class="mx-1">·</span>
-                          下载：{{ resource.download }}
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-2 shrink-0">
-                        <a 
-                          :href="buildHikariResourceUrl(hikariPatch.id, resource.id)"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="action-btn flex-1 md:flex-none px-4 py-2 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-sm flex items-center justify-center gap-2 hover:bg-purple-700 dark:hover:bg-purple-800 transition"
-                        >
-                          <i class="fa-solid fa-external-link-alt"></i>前往下载
-                        </a>
-                      </div>
-                    </div>
-                    <!-- 第二行：提取密码、解压码 -->
-                    <div v-if="resource.code || resource.password" class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-600 dark:text-gray-400">
-                      <span v-if="resource.code" class="flex items-center gap-1 min-w-0">
-                        <span class="text-gray-500 shrink-0">提取密码：</span>
-                        <code 
-                          class="bg-gray-100 dark:bg-zinc-700 px-1.5 py-0.5 rounded font-mono cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-600 transition break-all"
-                          @click="copyToClipboard(resource.code, '提取密码')"
-                          title="点击复制"
-                        >{{ resource.code }}</code>
-                      </span>
-                      <span v-if="resource.password" class="flex items-center gap-1 min-w-0">
-                        <span class="text-gray-500 shrink-0">解压密码：</span>
-                        <code 
-                          class="bg-gray-100 dark:bg-zinc-700 px-1.5 py-0.5 rounded font-mono cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-600 transition break-all"
-                          @click="copyToClipboard(resource.password, '解压密码')"
-                          title="点击复制"
-                        >{{ resource.password }}</code>
-                      </span>
-                    </div>
-                  </div>
-                  <div v-if="resource.note" class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-700 text-xs text-gray-500 dark:text-gray-400 break-all overflow-hidden whitespace-pre-wrap">
-                    <i class="fa-solid fa-circle-info mr-1"></i>备注：{{ resource.note }}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else class="text-center py-8 text-gray-500">
-              <i class="fa-solid fa-puzzle-piece text-3xl mb-3 text-gray-300 dark:text-zinc-600"></i>
-              <p>暂无补丁资源</p>
-              <p class="text-xs mt-1">该游戏在 <a href="https://www.moyu.moe" target="_blank" class="text-blue-500 hover:underline">鲲 Galgame 补丁</a> 暂无补丁</p>
-            </div>
+            <MoyuPatchResources
+              :resources="moyuResources"
+              :loading="moyuLoading"
+              :error="moyuError"
+              :retry-seconds="moyuRetrySeconds"
+              :missing-vndb="moyuData?.status === 'missing_vndb'"
+              @retry="reloadMoyuPatches"
+            />
           </div>
           </Transition>
           </div>
@@ -844,7 +723,7 @@
         <!-- 评论 -->
         <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 sm:p-5 shadow space-y-4">
           <h2 class="font-medium flex items-center gap-2">
-            <i class="fa-solid fa-comments text-gray-400"></i>评论 ({{ game.commentCount }})
+            <Icon name="fa6-solid:comments" class="text-gray-400" />评论 ({{ game.commentCount }})
           </h2>
 
           <!-- 发表评论 + 评分 -->
@@ -854,21 +733,19 @@
                 <span class="text-sm text-gray-500">我的评分：</span>
                 <!-- 星级评分 -->
                 <div class="flex items-center gap-1 text-lg cursor-pointer">
-                  <i 
-                    v-for="i in 5" 
+                  <Icon
+                    v-for="i in 5"
                     :key="i"
-                    :class="[
-                      i <= (hoverRating || pendingRating) ? 'fa-solid' : 'fa-regular',
-                      'fa-star hover:text-gray-600 dark:hover:text-gray-300 transition cursor-pointer'
-                    ]"
+                    :name="i <= (hoverRating || pendingRating) ? 'fa6-solid:star' : 'fa6-regular:star'"
+                    class="hover:text-gray-600 dark:hover:text-gray-300 transition cursor-pointer"
                     @mouseenter="hoverRating = i"
                     @mouseleave="hoverRating = 0"
                     @click="pendingRating = i"
-                  ></i>
+                  />
                 </div>
                 <span v-if="pendingRating" class="text-sm text-gray-500">{{ pendingRating }} 分</span>
                 <span v-if="userRating && !pendingRating" class="text-xs text-green-600">
-                  <i class="fa-solid fa-check mr-1"></i>已评 {{ userRating }} 分
+                  <Icon name="fa6-solid:check" class="mr-1" />已评 {{ userRating }} 分
                 </span>
               </div>
               <button 
@@ -899,14 +776,14 @@
                 <NuxtLink :to="`/user/${comment.user.id}`" class="flex-shrink-0">
                 <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-gray-500 overflow-hidden">
                   <img v-if="comment.user.avatar" :src="comment.user.avatar" class="w-full h-full object-cover" loading="lazy" />
-                  <i v-else class="fa-solid fa-user"></i>
+                  <Icon name="fa6-solid:user" v-else />
                 </div>
                 </NuxtLink>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 text-sm flex-wrap">
                     <NuxtLink :to="`/user/${comment.user.id}`" class="font-medium hover:underline">{{ comment.user.username }}</NuxtLink>
                     <span v-if="comment.playTime" class="inline-flex items-center gap-1 text-xs text-gray-400">
-                      <i class="fa-solid fa-clock leading-none"></i>
+                      <Icon name="fa6-solid:clock" class="leading-none" />
                       <span class="leading-none">{{ comment.playTime }} 小时</span>
                     </span>
                     <span class="text-xs text-gray-500">{{ formatDate(comment.createdAt) }}</span>
@@ -921,7 +798,7 @@
                       class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
                       :class="{ 'text-red-500': comment.isLiked }"
                     >
-                      <i :class="comment.isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+                      <Icon :name="comment.isLiked ? 'fa6-solid:heart' : 'fa6-regular:heart'" />
                       <span v-if="comment.likeCount > 0">{{ comment.likeCount }}</span>
                       <span v-else>点赞</span>
                     </button>
@@ -930,7 +807,7 @@
                       @click="startReply(comment)"
                       class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition"
                     >
-                      <i class="fa-solid fa-reply"></i>
+                      <Icon name="fa6-solid:reply" />
                       <span>回复</span>
                     </button>
                     <!-- 举报 -->
@@ -939,7 +816,7 @@
                       @click="openReportModal('comment', comment)"
                       class="flex items-center gap-1 text-gray-400 hover:text-orange-500 transition opacity-0 group-hover:opacity-100"
                     >
-                      <i class="fa-solid fa-flag"></i>
+                      <Icon name="fa6-solid:flag" />
                       <span>举报</span>
                     </button>
                     <!-- 删除 (仅作者和管理员可见) -->
@@ -948,7 +825,7 @@
                       @click="handleDeleteComment(comment)"
                       class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
                     >
-                      <i class="fa-solid fa-trash"></i>
+                      <Icon name="fa6-solid:trash" />
                       <span>删除</span>
                     </button>
                   </div>
@@ -985,7 +862,7 @@
                     <div v-for="reply in comment.replies" :key="reply.id" :id="`comment-${reply.id}`" class="flex gap-2 group/reply scroll-mt-20">
                       <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-gray-500 overflow-hidden flex-shrink-0">
                         <img v-if="reply.user.avatar" :src="reply.user.avatar" class="w-full h-full object-cover" loading="lazy" />
-                        <i v-else class="fa-solid fa-user text-xs"></i>
+                        <Icon name="fa6-solid:user" class="text-xs" v-else />
                       </div>
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 text-xs">
@@ -999,7 +876,7 @@
                             class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
                             :class="{ 'text-red-500': reply.isLiked }"
                           >
-                            <i :class="reply.isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-[10px]"></i>
+                            <Icon :name="reply.isLiked ? 'fa6-solid:heart' : 'fa6-regular:heart'" class="text-[10px]" />
                             <span v-if="reply.likeCount > 0">{{ reply.likeCount }}</span>
                           </button>
                           <!-- 回复按钮 -->
@@ -1007,7 +884,7 @@
                             @click="startReplyToReply(comment, reply)"
                             class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition"
                           >
-                            <i class="fa-solid fa-reply text-[10px]"></i>
+                            <Icon name="fa6-solid:reply" class="text-[10px]" />
                             <span>回复</span>
                           </button>
                           <!-- 举报按钮 -->
@@ -1016,7 +893,7 @@
                             @click="openReportModal('comment', reply)"
                             class="text-gray-400 hover:text-orange-500 transition opacity-0 group-hover/reply:opacity-100"
                           >
-                            <i class="fa-solid fa-flag text-[10px]"></i>
+                            <Icon name="fa6-solid:flag" class="text-[10px]" />
                           </button>
                           <!-- 删除按钮 -->
                           <button 
@@ -1024,7 +901,7 @@
                             @click="handleDeleteComment(reply)"
                             class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition opacity-0 group-hover/reply:opacity-100"
                           >
-                            <i class="fa-solid fa-trash text-[10px]"></i>
+                            <Icon name="fa6-solid:trash" class="text-[10px]" />
                             <span>删除</span>
                           </button>
                         </div>
@@ -1071,9 +948,9 @@
           @click="openHistoryModal"
           class="md:hidden w-full flex items-center gap-2 px-4 py-3 bg-white dark:bg-zinc-800 rounded-xl shadow text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition"
         >
-          <i class="fa-solid fa-clock-rotate-left"></i>
+          <Icon name="fa6-solid:clock-rotate-left" />
           <span>编辑历史</span>
-          <i class="fa-solid fa-chevron-right ml-auto text-xs"></i>
+          <Icon name="fa6-solid:chevron-right" class="ml-auto text-xs" />
         </button>
 
         <!-- 举报弹窗 -->
@@ -1105,8 +982,11 @@
                       v-model="reportForm.detail"
                       class="w-full px-3 py-2 text-sm rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
                       rows="3"
-                      placeholder="请详细说明举报理由..."
+                      required
+                      maxlength="1000"
+                      placeholder="请详细说明举报理由（必填）"
                     ></textarea>
+                    <p v-if="reportDetailMissing" class="mt-1 text-xs text-red-500">选择“其他”时，请填写具体举报理由</p>
                   </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-6">
@@ -1118,7 +998,7 @@
                   </button>
                   <button 
                     @click="submitReport"
-                    :disabled="!reportForm.reason || reportSubmitting"
+                    :disabled="!reportForm.reason || reportDetailMissing || reportSubmitting"
                     class="px-4 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50"
                   >
                     {{ reportSubmitting ? '提交中...' : '提交举报' }}
@@ -1137,14 +1017,14 @@
 
     <!-- 加载中 -->
     <div v-else-if="pending" class="text-center py-20">
-      <i class="fa-solid fa-spinner fa-spin text-3xl text-gray-400"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-3xl text-gray-400" />
     </div>
 
     <!-- 错误 -->
     <div v-else class="text-center py-20">
       <!-- NSFW 内容需要登录或开启 NSFW 模式 -->
       <template v-if="error?.statusCode === 403">
-        <i class="fa-solid fa-shield-halved text-5xl text-gray-400 mb-4"></i>
+        <Icon name="fa6-solid:shield-halved" class="text-5xl text-gray-400 mb-4" />
         <h2 class="text-xl font-semibold mb-2">内容访问受限</h2>
         <p class="text-gray-500 mb-6">{{ error?.message || '您没有权限查看此内容' }}</p>
         <div class="flex justify-center gap-4">
@@ -1153,23 +1033,23 @@
             to="/login"
             class="px-6 py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white hover:bg-gray-700 dark:hover:bg-zinc-500 transition"
           >
-            <i class="fa-solid fa-right-to-bracket mr-2"></i>登录账号
+            <Icon name="fa6-solid:right-to-bracket" class="mr-2" />登录账号
           </NuxtLink>
           <NuxtLink 
             to="/games"
             class="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
           >
-            <i class="fa-solid fa-arrow-left mr-2"></i>返回列表
+            <Icon name="fa6-solid:arrow-left" class="mr-2" />返回列表
           </NuxtLink>
         </div>
         <p v-if="isLoggedIn" class="text-sm text-gray-400 mt-6">
-          <i class="fa-solid fa-info-circle mr-1"></i>
+          <Icon name="fa6-solid:circle-info" class="mr-1" />
           如需查看 NSFW 内容，请在设置中开启 NSFW 模式
         </p>
       </template>
       <!-- 其他错误 -->
       <template v-else>
-        <i class="fa-solid fa-exclamation-circle text-4xl text-gray-400 mb-4"></i>
+        <Icon name="fa6-solid:circle-exclamation" class="text-4xl text-gray-400 mb-4" />
         <p class="text-gray-500">{{ error?.message || '加载失败' }}</p>
       </template>
     </div>
@@ -1210,20 +1090,20 @@
             <!-- 头部 -->
             <div class="flex items-center justify-between px-6 py-4 border-b dark:border-zinc-700 flex-shrink-0">
               <h3 class="text-lg font-semibold flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-gray-400"></i>编辑历史
+                <Icon name="fa6-solid:clock-rotate-left" class="text-gray-400" />编辑历史
               </h3>
               <button 
                 @click="showHistoryModal = false"
                 class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
               >
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
 
             <!-- 内容 -->
             <div class="flex-1 overflow-y-auto p-4">
               <div v-if="historyLoading" class="text-center py-12 text-gray-400">
-                <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+                <Icon name="fa6-solid:spinner" class="fa-spin text-2xl" />
               </div>
               <div v-else-if="historyItems.length" class="space-y-3">
                 <div
@@ -1234,7 +1114,7 @@
                   <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-zinc-700/50">
                     <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       <img v-if="item.editor?.avatar" :src="item.editor.avatar" class="w-full h-full object-cover" loading="lazy" />
-                      <i v-else class="fa-solid fa-user text-gray-400 text-xs"></i>
+                      <Icon name="fa6-solid:user" class="text-gray-400 text-xs" v-else />
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 flex-wrap">
@@ -1250,7 +1130,7 @@
                         @click="toggleExpand(item.id)"
                         class="px-2 py-1 text-xs rounded-lg border border-gray-200 dark:border-zinc-600 text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
                       >
-                        <i :class="expandedIds.has(item.id) ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"></i>
+                        <Icon :name="expandedIds.has(item.id) ? 'fa6-solid:chevron-up' : 'fa6-solid:chevron-down'" />
                         <span class="ml-1">{{ getChanges(item).length }} 项变更</span>
                       </button>
                       <button
@@ -1259,7 +1139,7 @@
                         :disabled="revertingId === item.id"
                         @click="handleRevert(item.id)"
                       >
-                        <i v-if="revertingId === item.id" class="fa-solid fa-spinner fa-spin"></i>
+                        <Icon name="fa6-solid:spinner" v-if="revertingId === item.id" />
                         <span v-else>撤销到此版本</span>
                       </button>
                     </div>
@@ -1274,7 +1154,7 @@
                         class="px-4 py-2.5 text-xs border-b last:border-b-0 border-gray-100 dark:border-zinc-700/50"
                       >
                         <div class="flex items-center gap-2 mb-1">
-                          <i :class="changeIcon(change.field)" class="w-4 text-center text-gray-400"></i>
+                          <FaIcon :icon="changeIcon(change.field)" class="w-4 text-center text-gray-400" />
                           <span class="font-medium text-gray-700 dark:text-gray-300">{{ change.label }}</span>
                         </div>
                         <div v-if="isScalarField(change.field)" class="ml-6 space-y-0.5">
@@ -1335,8 +1215,8 @@
                   </Transition>
                 </div>
               </div>
-              <div v-else class="text-center py-12 text-gray-500">
-                <i class="fa-solid fa-clock-rotate-left text-3xl mb-3 block"></i>
+              <div v-else class="flex flex-col items-center justify-center text-center py-12 text-gray-500">
+                <Icon name="fa6-solid:clock-rotate-left" class="text-3xl mb-3" />
                 <p>暂无编辑历史</p>
               </div>
             </div>
@@ -1349,7 +1229,6 @@
 
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core'
-import { getHikariTypeLabel, getHikariLanguageLabel, getHikariPlatformLabel, buildHikariResourceUrl } from '~/utils/hikari'
 import type { FavoriteStatus, GameDetail } from '~/types/api'
 
 type DescriptionKey = 'descriptionZhHans' | 'descriptionZhHant' | 'descriptionJa' | 'descriptionEn'
@@ -1372,8 +1251,14 @@ const { data: game, pending, error, refresh } = await useAuthFetch<GameDetail>((
 
 // 获取补丁资源
 const resourceTab = ref<'game' | 'patch'>('game')
-const hikariLoading = ref(false)
-const hikariPatch = ref<any>(null)
+const {
+  data: moyuData,
+  resources: moyuResources,
+  loading: moyuLoading,
+  error: moyuError,
+  retrySeconds: moyuRetrySeconds,
+  reload: reloadMoyuPatches,
+} = useMoyuPatches(gameId, computed(() => resourceTab.value === 'patch'))
 const gameTabRef = ref<HTMLElement>()
 const patchTabRef = ref<HTMLElement>()
 
@@ -1390,33 +1275,12 @@ async function updateResourceTabIndicator() {
   }
 }
 
-// 加载补丁资源
-async function loadHikariPatches() {
-  if (hikariPatch.value || hikariLoading.value) return
-  hikariLoading.value = true
-  try {
-    const response = await $fetch<any>(`/api/games/${gameId.value}/hikari-patches`)
-    if (response.success && response.data) {
-      hikariPatch.value = response.data
-    }
-  } catch (error) {
-    console.error('加载补丁资源失败:', error)
-  } finally {
-    hikariLoading.value = false
-  }
-}
-
-// 监听标签页切换，自动加载补丁资源，并更新下划线位置
-watch(resourceTab, (newTab) => {
-  if (newTab === 'patch' && !hikariPatch.value) {
-    loadHikariPatches()
-  }
-  updateResourceTabIndicator()
-})
+// 监听标签页切换，更新下划线位置
+watch(resourceTab, updateResourceTabIndicator)
 
 // 游戏资源数量或补丁数量变化时（badge 出现/消失导致宽度变化）重新定位下划线
 watch(() => game.value?.resources?.length, updateResourceTabIndicator)
-watch(() => hikariPatch.value?.resource?.length, updateResourceTabIndicator)
+watch(() => moyuResources.value.length, updateResourceTabIndicator)
 
 // 状态
 const activeTab = ref('intro')
@@ -1430,24 +1294,24 @@ const favoriteDropdownRef = ref<HTMLElement>()
 const favoriteDropdownMobileRef = ref<HTMLElement>()
 
 const favoriteOptions = [
-  { status: 'WISHLIST' as const, label: '想玩', icon: 'fa-regular fa-bookmark' },
-  { status: 'PLAYING' as const, label: '在玩', icon: 'fa-solid fa-gamepad' },
-  { status: 'COMPLETED' as const, label: '玩过', icon: 'fa-solid fa-circle-check' },
-  { status: 'ON_HOLD' as const, label: '搁置', icon: 'fa-solid fa-pause' },
-  { status: 'DROPPED' as const, label: '抛弃', icon: 'fa-solid fa-ban' },
+  { status: 'WISHLIST' as const, label: '想玩', icon: 'fa6-regular:bookmark' },
+  { status: 'PLAYING' as const, label: '在玩', icon: 'fa6-solid:gamepad' },
+  { status: 'COMPLETED' as const, label: '玩过', icon: 'fa6-solid:circle-check' },
+  { status: 'ON_HOLD' as const, label: '搁置', icon: 'fa6-solid:pause' },
+  { status: 'DROPPED' as const, label: '抛弃', icon: 'fa6-solid:ban' },
 ]
 
 const favoriteIcon = computed(() => {
-  if (!isLoggedIn.value || !game.value?.isFavorited) return 'fa-regular fa-heart'
+  if (!isLoggedIn.value || !game.value?.isFavorited) return 'fa6-regular:heart'
   const map: Record<string, string> = {
-    WISHLIST: 'fa-regular fa-bookmark text-red-500',
-    PLAYING: 'fa-solid fa-gamepad text-red-500',
-    COMPLETED: 'fa-solid fa-circle-check text-red-500',
-    ON_HOLD: 'fa-solid fa-pause text-red-500',
-    DROPPED: 'fa-solid fa-ban text-red-500',
+    WISHLIST: 'fa6-regular:bookmark text-red-500',
+    PLAYING: 'fa6-solid:gamepad text-red-500',
+    COMPLETED: 'fa6-solid:circle-check text-red-500',
+    ON_HOLD: 'fa6-solid:pause text-red-500',
+    DROPPED: 'fa6-solid:ban text-red-500',
   }
   const status = game.value.favoriteStatus
-  return status ? map[status] ?? 'fa-solid fa-heart text-red-500' : 'fa-solid fa-heart text-red-500'
+  return status ? map[status] ?? 'fa6-solid:heart text-red-500' : 'fa6-solid:heart text-red-500'
 })
 
 const favoriteLabel = computed(() => {
@@ -1489,6 +1353,8 @@ const reportForm = ref({
   reason: '',
   detail: '',
 })
+
+const reportDetailMissing = computed(() => reportForm.value.reason === '其他' && !reportForm.value.detail.trim())
 
 // 举报理由选项
 const reportReasons = {
@@ -1731,7 +1597,7 @@ async function loadHistory() {
   if (historyLoaded.value) return
   historyLoading.value = true
   try {
-    const res = await $fetch<any>(`/api/games/${gameId.value}/history`)
+    const res: any = await ($fetch as any)(`/api/games/${gameId.value}/history`)
     historyItems.value = res?.items || []
     historyLoaded.value = true
   } catch {
@@ -1782,29 +1648,29 @@ function isScalarField(field: string): boolean {
 
 function changeIcon(field: string): string {
   const map: Record<string, string> = {
-    titleEn: 'fa-solid fa-heading',
-    titleJa: 'fa-solid fa-heading',
-    titleZhHans: 'fa-solid fa-heading',
-    titleZhHant: 'fa-solid fa-heading',
-    aliases: 'fa-solid fa-tags',
-    descriptionEn: 'fa-solid fa-align-left',
-    descriptionJa: 'fa-solid fa-align-left',
-    descriptionZhHans: 'fa-solid fa-align-left',
-    descriptionZhHant: 'fa-solid fa-align-left',
-    coverImage: 'fa-solid fa-image',
-    releaseDate: 'fa-solid fa-calendar',
-    isNsfw: 'fa-solid fa-shield-halved',
-    vndbId: 'fa-solid fa-link',
-    bangumiId: 'fa-solid fa-link',
-    purchaseLinks: 'fa-solid fa-cart-shopping',
-    lengthMinutes: 'fa-solid fa-clock',
-    seriesId: 'fa-solid fa-layer-group',
-    tags: 'fa-solid fa-tags',
-    screenshots: 'fa-solid fa-images',
-    staff: 'fa-solid fa-users',
-    companies: 'fa-solid fa-building',
+    titleEn: 'fa6-solid:heading',
+    titleJa: 'fa6-solid:heading',
+    titleZhHans: 'fa6-solid:heading',
+    titleZhHant: 'fa6-solid:heading',
+    aliases: 'fa6-solid:tags',
+    descriptionEn: 'fa6-solid:align-left',
+    descriptionJa: 'fa6-solid:align-left',
+    descriptionZhHans: 'fa6-solid:align-left',
+    descriptionZhHant: 'fa6-solid:align-left',
+    coverImage: 'fa6-solid:image',
+    releaseDate: 'fa6-solid:calendar',
+    isNsfw: 'fa6-solid:shield-halved',
+    vndbId: 'fa6-solid:link',
+    bangumiId: 'fa6-solid:link',
+    purchaseLinks: 'fa6-solid:cart-shopping',
+    lengthMinutes: 'fa6-solid:clock',
+    seriesId: 'fa6-solid:layer-group',
+    tags: 'fa6-solid:tags',
+    screenshots: 'fa6-solid:images',
+    staff: 'fa6-solid:users',
+    companies: 'fa6-solid:building',
   }
-  return map[field] || 'fa-solid fa-pen'
+  return map[field] || 'fa6-solid:pen'
 }
 
 function formatChangeValue(field: string, value: unknown): string {
@@ -2069,6 +1935,10 @@ function closeReportModal() {
 // 提交举报
 async function submitReport() {
   if (!reportForm.value.reason || reportSubmitting.value) return
+  if (reportDetailMissing.value) {
+    toast.error('选择“其他”时，请填写具体举报理由')
+    return
+  }
   
   reportSubmitting.value = true
   try {
@@ -2078,7 +1948,7 @@ async function submitReport() {
         type: reportType.value.toUpperCase(),
         targetId: reportTarget.value.id,
         reason: reportForm.value.reason,
-        detail: reportForm.value.reason === '其他' ? reportForm.value.detail : null,
+        detail: reportForm.value.reason === '其他' ? reportForm.value.detail.trim() : null,
       },
     })
     toast.success('举报提交成功，我们会尽快处理')
@@ -2139,7 +2009,9 @@ useHead({
         metas.push({ name: 'twitter:image', content: game.value.coverImage })
       }
       
-      // NSFW 游戏禁止搜索引擎索引
+      // 仅对 NSFW 游戏禁止搜索引擎索引。
+      // 普通游戏即使有资源，也应保留游戏条目的正常收录；资源下载地址和敏感凭据
+      // 已在 API/下载页鉴权层处理，不通过整页 noindex 来牺牲资源站的搜索入口。
       if (game.value.isNsfw) {
         metas.push({ name: 'robots', content: 'noindex, nofollow' })
         metas.push({ name: 'googlebot', content: 'noindex, nofollow' })

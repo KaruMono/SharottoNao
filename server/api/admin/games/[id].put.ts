@@ -8,8 +8,19 @@ import { diffGame } from '~/server/utils/game-diff'
 import { submitGameToIndexNow } from '~/server/utils/indexnow'
 import { invalidateGameCaches } from '~/server/utils/redis'
 import { normalizeTagNames } from '~/server/utils/tag-normalize'
-import { pickTagColor } from '~/server/utils/tag-color'
-import { generateUniqueSlug } from '~/server/utils/slug'
+import {
+  isPrismaUniqueConstraintError,
+  resolveOrCreateTagByNameInTransaction,
+  TagNameConflictError,
+} from '~/server/utils/tag-name'
+import { replaceManualGameTagsInTransaction } from '~/server/utils/game-tag-source'
+import { ensureGameStaffRelation } from '~/server/utils/game-staff'
+import { fetchVndbGame } from '~/server/utils/vndb-client'
+import {
+  lockVndbTagSyncInTransaction,
+  syncVndbTagsForGameInTransaction,
+  type VndbTagInput,
+} from '~/server/utils/vndb-tag-sync'
 
 const staffSchema = z.object({
   role: z.enum(['ARTIST', 'WRITER', 'COMPOSER', 'VOICE_ACTOR', 'DIRECTOR', 'OTHER']),
@@ -70,7 +81,10 @@ export default defineEventHandler(async (event) => {
     where: { id },
     include: {
       screenshots: true,
-      tags: { select: { tagId: true } },
+      tags: {
+        where: { sources: { some: { source: 'MANUAL' } } },
+        select: { tagId: true },
+      },
       companies: { select: { companyId: true, role: true } },
       staff: { select: { staffId: true, role: true, characterName: true } },
     },
@@ -140,9 +154,23 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  const nextVndbId = data.vndbId === undefined ? existingGame.vndbId : (data.vndbId || null)
+  const vndbChanged = nextVndbId !== existingGame.vndbId
+  let vndbTags: VndbTagInput[] | null = null
+  let vndbIsNsfw = false
+  if (nextVndbId && (vndbChanged || !existingGame.vndbTagsSyncedAt)) {
+    const vndbData = await fetchVndbGame(nextVndbId)
+    vndbTags = vndbData.tags
+    vndbIsNsfw = vndbData.isNsfw
+  }
+
   // 使用事务更新所有数据
   try {
   await prisma.$transaction(async (tx) => {
+    if (vndbChanged || vndbTags) {
+      await lockVndbTagSyncInTransaction(tx)
+    }
+
     // 更新游戏基本信息
     await tx.game.update({
       where: { id },
@@ -158,9 +186,9 @@ export default defineEventHandler(async (event) => {
         descriptionZhHant: data.descriptionZhHant || null,
         coverImage: data.coverImage,
         releaseDate: data.releaseDate ? new Date(data.releaseDate) : null,
-        isNsfw: data.isNsfw ?? existingGame.isNsfw,
-        vndbId: data.vndbId || null,
-        bangumiId: data.bangumiId || null,
+        isNsfw: vndbIsNsfw || (data.isNsfw ?? existingGame.isNsfw),
+        ...(data.vndbId !== undefined && { vndbId: data.vndbId || null }),
+        ...(data.bangumiId !== undefined && { bangumiId: data.bangumiId || null }),
         seriesId: data.seriesId !== undefined ? (data.seriesId || null) : undefined,
         purchaseLinks: data.purchaseLinks || [],
       },
@@ -189,29 +217,27 @@ export default defineEventHandler(async (event) => {
       const normalized = normalizeTagNames(data.newTagNames)
       const newIds: number[] = []
       for (const name of normalized) {
-        let tag = await tx.tag.findFirst({
-          where: { name: { equals: name, mode: 'insensitive' } },
+        const { tag } = await resolveOrCreateTagByNameInTransaction(tx, {
+          name,
+          isNsfw: false,
         })
-        if (!tag) {
-          const slug = await generateUniqueSlug(name, async (s) => {
-            const exists = await tx.tag.findFirst({ where: { slug: s } })
-            return !!exists
-          })
-          tag = await tx.tag.create({
-            data: { name, slug, isNsfw: false, color: pickTagColor(name) },
-          })
-        }
         newIds.push(tag.id)
       }
       finalTagIds = [...new Set([...finalTagIds, ...newIds])]
     }
 
     if (data.tagIds !== undefined || data.newTagNames?.length) {
-      await tx.gameTag.deleteMany({ where: { gameId: id } })
-      if (finalTagIds.length > 0) {
-        await tx.gameTag.createMany({
-          data: finalTagIds.map(tagId => ({ gameId: id, tagId })),
-        })
+      await replaceManualGameTagsInTransaction(tx, id, finalTagIds)
+    }
+
+    if (vndbChanged || vndbTags) {
+      await syncVndbTagsForGameInTransaction(tx, {
+        gameId: id,
+        tags: vndbTags || [],
+        expectedVndbId: nextVndbId,
+      })
+      if (!nextVndbId) {
+        await tx.game.update({ where: { id }, data: { vndbTagsSyncedAt: null } })
       }
     }
 
@@ -265,13 +291,11 @@ export default defineEventHandler(async (event) => {
         }
 
         // 创建关联
-        await tx.gameStaff.create({
-          data: {
-            gameId: id,
-            staffId,
-            role: staffData.role,
-            characterName: staffData.characterName || null,
-          },
+        await ensureGameStaffRelation(tx, {
+          gameId: id,
+          staffId,
+          role: staffData.role,
+          characterName: staffData.characterName,
         })
       }
     }
@@ -337,6 +361,13 @@ export default defineEventHandler(async (event) => {
     }
   }
   } catch (e: any) {
+    if (e && typeof e === 'object' && 'statusCode' in e) throw e
+    if (isPrismaUniqueConstraintError(e)) {
+      throw createError({ statusCode: 409, message: '标签名称、别名或标识已被占用' })
+    }
+    if (e instanceof TagNameConflictError) {
+      throw createError({ statusCode: 409, message: e.message })
+    }
     console.error('Database error:', e)
     throw createError({
       statusCode: 500,

@@ -14,7 +14,7 @@
     <header class="fixed top-0 md:top-4 inset-x-0 z-50 pointer-events-none max-w-full overflow-x-clip">
       <div class="w-screen max-w-full md:max-w-6xl md:mx-auto px-0 md:px-4 pointer-events-auto">
         <div class="w-full bg-white/70 dark:bg-zinc-800/70 backdrop-blur-xl md:rounded-2xl shadow-lg border-b md:border border-gray-200/40 dark:border-zinc-700/40 overflow-visible">
-          <div class="flex items-center justify-between px-4 md:px-6 h-14 overflow-visible min-w-0">
+          <div class="flex items-center justify-between gap-3 px-4 md:px-6 h-14 overflow-visible min-w-0">
             <!-- 左侧 -->
             <div class="flex items-center gap-3 md:gap-8 overflow-visible min-w-0">
               <!-- 移动端菜单按钮 -->
@@ -22,17 +22,17 @@
                 @click="showMobileMenu = !showMobileMenu"
                 class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-700"
               >
-                <i :class="showMobileMenu ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
+                <Icon :name="showMobileMenu ? 'fa6-solid:xmark' : 'fa6-solid:bars'" />
               </button>
-              <NuxtLink to="/" class="text-lg font-semibold tracking-wide truncate max-w-[52vw] md:max-w-none">
+              <NuxtLink to="/" class="text-lg font-semibold tracking-wide truncate max-w-[52vw] md:max-w-none md:shrink-0">
                 {{ siteName }}
               </NuxtLink>
               <nav
                 ref="navRef"
-                class="hidden md:flex items-center text-sm text-gray-600 dark:text-gray-300 min-w-0 max-w-full overflow-hidden transition-opacity duration-150"
+                class="hidden md:flex items-center text-sm text-gray-600 dark:text-gray-300 min-w-0 max-w-full overflow-x-auto overscroll-x-contain transition-opacity duration-150"
                 :class="navReady ? 'opacity-100' : 'opacity-0'"
               >
-                <div class="flex items-center gap-6 min-w-0">
+                <div class="flex shrink-0 items-center gap-6 min-w-0">
                   <template v-for="link in visibleNavLinks" :key="link.id">
                     <NuxtLink
                       :to="link.to"
@@ -40,7 +40,7 @@
                       active-class="text-gray-900 dark:text-white font-medium"
                     >{{ link.label }}</NuxtLink>
                   </template>
-                  <NavMenuAds v-if="visibleNavLinks.length && navMenuAds.length" :ads="navMenuAds" />
+                  <NavMenuAds v-if="visibleNavLinks.length && (navMenuAds as any).length" :ads="navMenuAds as any" />
                 </div>
               </nav>
               <!-- 溢出导航按钮：放在 nav 外部避免被 overflow-hidden 裁切 -->
@@ -56,7 +56,8 @@
                     class="header-icon-btn hidden md:flex"
                     :disabled="randomLoading"
                   >
-                    <i :class="randomLoading ? 'fa-solid fa-spinner fa-spin' : btn.icon"></i>
+                    <Icon v-if="randomLoading" name="fa6-solid:spinner" />
+                    <FaIcon v-else :icon="btn.icon" />
                   </button>
                   <div class="header-tooltip hidden md:block">{{ btn.label }}</div>
                 </div>
@@ -65,7 +66,7 @@
                     @click="showSearchModal = true"
                     class="header-icon-btn"
                   >
-                    <i :class="btn.icon"></i>
+                    <FaIcon :icon="btn.icon" />
                   </button>
                   <div class="header-tooltip">{{ btn.label }}</div>
                 </div>
@@ -78,7 +79,7 @@
                     @click.stop="showSettingsMenu = !showSettingsMenu" 
                     class="header-icon-btn"
                   >
-                    <i :class="btn.icon"></i>
+                    <FaIcon :icon="btn.icon" />
                   </button>
                   <div class="header-tooltip">{{ btn.label }}</div>
                   <Transition name="dropdown">
@@ -92,7 +93,7 @@
                       
                       <div class="px-2 py-3">
                         <div class="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                          <i class="fa-solid fa-sun w-3.5 text-center"></i>
+                          <Icon name="fa6-solid:sun" class="w-3.5 text-center" />
                           <span>主题模式</span>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
@@ -103,7 +104,7 @@
                               ? 'bg-gray-800 dark:bg-zinc-600 text-white' 
                               : 'bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600'"
                           >
-                            <i class="fa-solid fa-sun block"></i>
+                            <Icon name="fa6-solid:sun" class="block" />
                             <span class="text-[10px] block w-full text-center">浅色主题</span>
                           </button>
                           <button 
@@ -113,7 +114,7 @@
                               ? 'bg-gray-800 dark:bg-zinc-600 text-white' 
                               : 'bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600'"
                           >
-                            <i class="fa-solid fa-moon block"></i>
+                            <Icon name="fa6-solid:moon" class="block" />
                             <span class="text-[10px] block w-full text-center">深色主题</span>
                           </button>
                           <button 
@@ -123,7 +124,7 @@
                               ? 'bg-gray-800 dark:bg-zinc-600 text-white' 
                               : 'bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600'"
                           >
-                            <i class="fa-solid fa-circle-half-stroke block"></i>
+                            <Icon name="fa6-solid:circle-half-stroke" class="block" />
                             <span class="text-[10px] block w-full text-center">跟随系统</span>
                           </button>
                         </div>
@@ -133,7 +134,7 @@
                       
                       <div v-if="isLoggedIn" class="px-2 py-3">
                         <div class="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                          <i class="fa-solid fa-shield-halved w-3.5 text-center"></i>
+                          <Icon name="fa6-solid:shield-halved" class="w-3.5 text-center" />
                           <span>内容过滤</span>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
@@ -144,7 +145,7 @@
                               ? 'bg-gray-800 dark:bg-zinc-600 text-white' 
                               : 'bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600'"
                           >
-                            <i class="fa-solid fa-shield-halved block"></i>
+                            <Icon name="fa6-solid:shield-halved" class="block" />
                             <span class="text-[10px] block w-full text-center">SFW</span>
                           </button>
                           <button 
@@ -154,7 +155,7 @@
                               ? 'bg-gray-800 dark:bg-zinc-600 text-white' 
                               : 'bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600'"
                           >
-                            <i class="fa-solid fa-ban block"></i>
+                            <Icon name="fa6-solid:ban" class="block" />
                             <span class="text-[10px] block w-full text-center">NSFW</span>
                           </button>
                           <button 
@@ -164,7 +165,7 @@
                               ? 'bg-gray-800 dark:bg-zinc-600 text-white' 
                               : 'bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600'"
                           >
-                            <i class="fa-solid fa-circle-minus block"></i>
+                            <Icon name="fa6-solid:circle-minus" class="block" />
                             <span class="text-[10px] block w-full text-center">全部</span>
                           </button>
                         </div>
@@ -178,7 +179,7 @@
                           @click="toggleOpenInNewTab"
                         >
                           <div class="flex items-center gap-2.5">
-                            <i class="fa-solid fa-external-link w-4 text-center text-gray-400"></i>
+                            <Icon name="fa6-solid:arrow-up-right-from-square" class="w-4 text-center text-gray-400" />
                             <span class="text-sm">新窗口打开游戏</span>
                           </div>
                           <div 
@@ -197,10 +198,10 @@
                           @click="openBgSettings()"
                         >
                           <div class="flex items-center gap-2.5">
-                            <i class="fa-solid fa-image w-4 text-center text-gray-400"></i>
+                            <Icon name="fa6-solid:image" class="w-4 text-center text-gray-400" />
                             <span class="text-sm">背景图片设置</span>
                           </div>
-                          <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                          <Icon name="fa6-solid:chevron-right" class="text-gray-400 text-xs" />
                         </div>
                       </div>
                     </div>
@@ -210,14 +211,14 @@
                   <ClientOnly v-if="btn.requireAuth">
                     <div v-if="isLoggedIn" class="relative group/iconbtn">
                       <a :href="btn.action" target="_blank" rel="noopener noreferrer" class="header-icon-btn">
-                        <i :class="btn.icon"></i>
+                        <FaIcon :icon="btn.icon" />
                       </a>
                       <div class="header-tooltip">{{ btn.label }}</div>
                     </div>
                   </ClientOnly>
                   <div v-else class="relative group/iconbtn">
                     <a :href="btn.action" target="_blank" rel="noopener noreferrer" class="header-icon-btn">
-                      <i :class="btn.icon"></i>
+                      <FaIcon :icon="btn.icon" />
                     </a>
                     <div class="header-tooltip">{{ btn.label }}</div>
                   </div>
@@ -226,14 +227,14 @@
                   <ClientOnly v-if="btn.requireAuth">
                     <div v-if="isLoggedIn" class="relative group/iconbtn">
                       <NuxtLink :to="btn.action" class="header-icon-btn">
-                        <i :class="btn.icon"></i>
+                        <FaIcon :icon="btn.icon" />
                       </NuxtLink>
                       <div class="header-tooltip">{{ btn.label }}</div>
                     </div>
                   </ClientOnly>
                   <div v-else class="relative group/iconbtn">
                     <NuxtLink :to="btn.action" class="header-icon-btn">
-                      <i :class="btn.icon"></i>
+                      <FaIcon :icon="btn.icon" />
                     </NuxtLink>
                     <div class="header-tooltip">{{ btn.label }}</div>
                   </div>
@@ -244,7 +245,7 @@
                 <!-- 通知中心 -->
                 <div v-if="isLoggedIn" class="relative group/bell hidden md:block">
                   <NuxtLink to="/messages" class="header-icon-btn relative">
-                    <i class="fa-solid fa-bell"></i>
+                    <Icon name="fa6-solid:bell" />
                     <span v-if="unreadCount > 0" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                   </NuxtLink>
                   <div class="header-tooltip">通知中心</div>
@@ -264,7 +265,7 @@
                           class="w-full h-full object-cover"
                           @error="avatarBroken = true"
                         />
-                        <i v-else class="fa-solid fa-user text-xs text-gray-500"></i>
+                        <Icon name="fa6-solid:user" class="text-xs text-gray-500" v-else />
                       </div>
                       <span
                         v-if="privateUnreadCount > 0"
@@ -285,7 +286,7 @@
                       class="md:hidden flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                       @click="showUserMenu = false"
                     >
-                      <i class="fa-solid fa-bell w-4"></i>
+                      <Icon name="fa6-solid:bell" class="w-4" />
                       通知中心
                       <span v-if="unreadCount > 0" class="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ unreadCount }}</span>
                     </NuxtLink>
@@ -294,7 +295,7 @@
                       class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                       @click="showUserMenu = false"
                     >
-                      <i class="fa-solid fa-message w-4"></i>私信
+                      <Icon name="fa6-solid:message" class="w-4" />站内信
                       <span v-if="privateUnreadCount > 0" class="ml-auto w-2 h-2 bg-red-500 rounded-full"></span>
                     </NuxtLink>
                     <button
@@ -302,7 +303,7 @@
                       :disabled="randomLoading"
                       @click="goRandomGameFromUserMenu"
                     >
-                      <i :class="[randomLoading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-dice', 'w-4']"></i>随机游戏
+                      <Icon :name="randomLoading ? 'fa6-solid:spinner' : 'fa6-solid:dice'" class="w-4" />随机游戏
                     </button>
                     <hr class="md:hidden my-2 border-gray-200 dark:border-zinc-700" />
                     <NuxtLink 
@@ -310,14 +311,14 @@
                       class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                       @click="showUserMenu = false"
                     >
-                      <i class="fa-solid fa-user w-4"></i>个人中心
+                      <Icon name="fa6-solid:user" class="w-4" />个人中心
                     </NuxtLink>
                     <NuxtLink 
                       to="/profile?tab=favorites" 
                       class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                       @click="showUserMenu = false"
                     >
-                      <i class="fa-solid fa-heart w-4"></i>我的收藏
+                      <Icon name="fa6-solid:heart" class="w-4" />我的收藏
                     </NuxtLink>
                     <NuxtLink 
                       v-if="user?.role === 'ADMIN'"
@@ -325,14 +326,14 @@
                       class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                       @click="showUserMenu = false"
                     >
-                      <i class="fa-solid fa-gear w-4"></i>管理后台
+                      <Icon name="fa6-solid:gear" class="w-4" />管理后台
                     </NuxtLink>
                     <hr class="my-2 border-gray-200 dark:border-zinc-700" />
                     <button 
                       @click="handleLogout"
                       class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 w-full text-left text-red-500"
                     >
-                      <i class="fa-solid fa-right-from-bracket w-4"></i>退出登录
+                      <Icon name="fa6-solid:right-from-bracket" class="w-4" />退出登录
                     </button>
                     </div>
                   </Transition>
@@ -344,12 +345,12 @@
                   to="/login"
                   class="px-2 md:px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center gap-1.5"
                 >
-                  <i class="fa-solid fa-user"></i><span class="hidden sm:inline">登录</span>
+                  <Icon name="fa6-solid:user" /><span class="hidden sm:inline">登录</span>
                 </NuxtLink>
 
                 <template #fallback>
                   <div class="w-9 h-9 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-user text-sm text-gray-400"></i>
+                    <Icon name="fa6-solid:user" class="text-sm text-gray-400" />
                   </div>
                 </template>
               </ClientOnly>
@@ -375,11 +376,11 @@
                   class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                   @click="showMobileMenu = false"
                 >
-                  <i :class="[link.icon, 'w-5 text-center text-gray-400']"></i>{{ link.label }}
+                  <FaIcon :icon="link.icon" class="w-5 text-center text-gray-400" />{{ link.label }}
                 </NuxtLink>
               </template>
               <div class="mobile-menu-ad-list w-full">
-                <NavMenuAds v-if="visibleNavLinks.length" mobile :ads="navMenuAds" />
+                <NavMenuAds v-if="visibleNavLinks.length" mobile :ads="navMenuAds as any" />
               </div>
               
               <div class="my-4 border-t dark:border-zinc-700"></div>
@@ -392,7 +393,7 @@
                   class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                   @click="showMobileMenu = false"
                 >
-                  <i class="fa-solid fa-user w-5 text-center text-gray-400"></i>个人中心
+                  <Icon name="fa6-solid:user" class="w-5 text-center text-gray-400" />个人中心
                 </NuxtLink>
                 <NuxtLink 
                   v-if="user?.role === 'ADMIN'"
@@ -400,13 +401,13 @@
                   class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                   @click="showMobileMenu = false"
                 >
-                  <i class="fa-solid fa-gear w-5 text-center text-gray-400"></i>管理后台
+                  <Icon name="fa6-solid:gear" class="w-5 text-center text-gray-400" />管理后台
                 </NuxtLink>
                 <button 
                   @click="handleLogout(); showMobileMenu = false"
                   class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
-                  <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>退出登录
+                  <Icon name="fa6-solid:right-from-bracket" class="w-5 text-center" />退出登录
                 </button>
               </template>
               <template v-else>
@@ -415,14 +416,14 @@
                   class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                   @click="showMobileMenu = false"
                 >
-                  <i class="fa-solid fa-right-to-bracket w-5 text-center text-gray-400"></i>登录
+                  <Icon name="fa6-solid:right-to-bracket" class="w-5 text-center text-gray-400" />登录
                 </NuxtLink>
                 <NuxtLink 
                   to="/register" 
                   class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
                   @click="showMobileMenu = false"
                 >
-                  <i class="fa-solid fa-user-plus w-5 text-center text-gray-400"></i>注册
+                  <Icon name="fa6-solid:user-plus" class="w-5 text-center text-gray-400" />注册
                 </NuxtLink>
               </template>
               </ClientOnly>
@@ -433,9 +434,14 @@
     </Teleport>
 
     <!-- 主内容 -->
-    <main class="pt-20 md:pt-24 pb-12 min-h-screen relative z-10">
-      <AdBanner v-if="$route.path === '/'" ad-slot="home_header_strip" class="mb-4 md:mb-5" />
-      <slot />
+    <main :class="[$route.path === '/login' || $route.path === '/register' ? 'min-h-[calc(100vh-64px)] pt-20 md:pt-24 flex items-center' : 'pt-20 md:pt-24 pb-12 min-h-screen', 'relative z-10']">
+      <div v-if="$route.path === '/login' || $route.path === '/register'" class="w-full">
+        <slot />
+      </div>
+      <template v-else>
+        <AdBanner v-if="$route.path === '/'" ad-slot="home_header_strip" class="mb-4 md:mb-5" />
+        <slot />
+      </template>
     </main>
 
     <!-- 页脚 -->
@@ -464,7 +470,7 @@
                   rel="noopener noreferrer"
                   class="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-300 transition"
                 >
-                  <i v-if="link.icon" :class="link.icon"></i>
+                  <FaIcon v-if="link.icon" :icon="link.icon" />
                   <span>{{ link.label }}</span>
                 </a>
               </ClientOnly>
@@ -475,7 +481,7 @@
                 rel="noopener noreferrer"
                 class="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-300 transition"
               >
-                <i v-if="link.icon" :class="link.icon"></i>
+                <FaIcon v-if="link.icon" :icon="link.icon" />
                 <span>{{ link.label }}</span>
               </a>
             </template>
@@ -495,7 +501,7 @@
         class="fixed right-4 md:right-6 bottom-4 md:bottom-6 w-10 md:w-11 h-10 md:h-11 bg-white dark:bg-zinc-800 rounded-full shadow-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all hover:scale-110 z-40"
         title="返回顶部"
       >
-        <i class="fa-solid fa-arrow-up text-gray-600 dark:text-gray-300"></i>
+        <Icon name="fa6-solid:arrow-up" class="text-gray-600 dark:text-gray-300" />
       </button>
     </Transition>
 
@@ -513,11 +519,11 @@
           <div class="relative">
             <!-- 主搜索弹窗 - 位置固定不变，z-10 让它在热门面板上层 -->
             <div
-              class="relative z-10 bg-white dark:bg-zinc-800 shadow-2xl w-[calc(100vw-2rem)] md:w-[672px] min-h-[60vh] max-h-[85vh] overflow-hidden modal-content flex flex-col transition-[border-radius] duration-300"
+              class="relative z-10 bg-white dark:bg-zinc-800 shadow-2xl w-[calc(100vw-2rem)] md:w-[672px] min-h-[min(60dvh,calc(100dvh-6rem))] max-h-[calc(100dvh-2rem)] md:max-h-[min(85dvh,calc(100dvh-6rem))] overflow-hidden modal-content flex flex-col transition-[border-radius] duration-300"
               :class="showTrendingPanel ? 'rounded-2xl md:rounded-r-none' : 'rounded-2xl'"
             >
             <!-- 搜索类型切换 -->
-            <div class="relative flex border-b dark:border-zinc-700">
+            <div class="relative flex shrink-0 border-b dark:border-zinc-700">
               <!-- 滑动指示条 -->
               <div 
                 class="absolute bottom-0 h-0.5 bg-gray-800 dark:bg-white transition-all duration-300 ease-out"
@@ -533,7 +539,7 @@
                   ? 'text-gray-900 dark:text-white' 
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
               >
-                <i class="fa-solid fa-gamepad mr-1.5"></i>搜索游戏
+                <Icon name="fa6-solid:gamepad" class="mr-1.5" />搜索游戏
               </button>
               <button 
                 @click="searchType = 'company'"
@@ -542,7 +548,7 @@
                   ? 'text-gray-900 dark:text-white' 
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
               >
-                <i class="fa-solid fa-building mr-1.5"></i>搜索会社
+                <Icon name="fa6-solid:building" class="mr-1.5" />搜索会社
               </button>
               <button 
                 @click="searchType = 'image'"
@@ -551,10 +557,12 @@
                   ? 'text-gray-900 dark:text-white' 
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
               >
-                <i class="fa-solid fa-image mr-1.5"></i>图片搜索
+                <Icon name="fa6-solid:image" class="mr-1.5" />图片搜索
               </button>
             </div>
             
+            <!-- 内容独立滚动，避免长识别结果被弹窗裁切 -->
+            <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <!-- 搜索输入框 -->
             <div v-if="searchType !== 'image'" class="p-3 md:p-4">
               <div class="relative">
@@ -567,14 +575,14 @@
                   @keyup.enter="handleSearch"
                   @input="handleSearchInput"
                 />
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <Icon name="fa6-solid:magnifying-glass" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
                   <button
                     v-if="searchQuery"
                     @click="searchQuery = ''; searchSuggestions = []"
                     class="p-1 text-gray-400 hover:text-gray-600"
                   >
-                    <i class="fa-solid fa-xmark"></i>
+                    <Icon name="fa6-solid:xmark" />
                   </button>
                   <button
                     @click="showTrendingPanel = !showTrendingPanel"
@@ -582,7 +590,7 @@
                     :class="{ 'rotate-180': showTrendingPanel }"
                     title="本月热门"
                   >
-                    <i class="fa-solid fa-chevron-left"></i>
+                    <Icon name="fa6-solid:chevron-left" />
                   </button>
                 </div>
               </div>
@@ -597,12 +605,12 @@
                 @drop.prevent="handleImageDrop"
               >
                 <div v-if="!imageSearching && !imagePreview">
-                  <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
+                  <Icon name="fa6-solid:cloud-arrow-up" class="text-4xl text-gray-400 mb-3" />
                   <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">点击或拖拽图片到此处</p>
                   <p class="text-xs text-gray-400">支持 JPG、PNG、GIF、WebP，最大 10MB</p>
                 </div>
                 <div v-else-if="imageSearching" class="py-4">
-                  <i class="fa-solid fa-spinner fa-spin text-3xl text-gray-400 mb-3"></i>
+                  <Icon name="fa6-solid:spinner" class="fa-spin text-3xl text-gray-400 mb-3" />
                   <p class="text-sm text-gray-500">识别中...</p>
                 </div>
                 <div v-else-if="imagePreview">
@@ -623,8 +631,8 @@
                 <!-- 识别到的游戏名称 -->
                 <div class="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <div class="flex items-start gap-2">
-                    <i class="fa-solid fa-info-circle text-blue-500 mt-0.5"></i>
-                    <div class="flex-1 text-sm text-blue-700 dark:text-blue-300">
+                    <Icon name="fa6-solid:circle-info" class="text-blue-500 mt-0.5" />
+                    <div class="min-w-0 flex-1 break-words text-sm text-blue-700 dark:text-blue-300">
                       <div class="font-medium mb-1">图片疑似游戏为：</div>
                       <div class="space-y-1">
                         <div v-for="(gameName, index) in imageRecognizedGames" :key="index" class="text-xs">
@@ -668,14 +676,14 @@
               <!-- 错误提示 -->
               <div v-if="imageSearchError" class="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <div class="flex items-start gap-2">
-                  <i class="fa-solid fa-exclamation-circle text-red-500 mt-0.5"></i>
+                  <Icon name="fa6-solid:circle-exclamation" class="text-red-500 mt-0.5" />
                   <div class="flex-1 text-sm text-red-700 dark:text-red-300">{{ imageSearchError }}</div>
                 </div>
               </div>
             </div>
 
             <!-- 搜索建议 -->
-            <div v-if="searchSuggestions.length && searchType !== 'image'" class="px-3 md:px-4 pb-3 flex-1 overflow-y-auto">
+            <div v-if="searchSuggestions.length && searchType !== 'image'" class="px-3 md:px-4 pb-3">
               <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">搜索建议</div>
               <div class="space-y-1">
                 <NuxtLink
@@ -694,7 +702,7 @@
                     v-else
                     class="w-8 h-10 rounded bg-gray-200 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0"
                   >
-                    <i class="fa-solid fa-gamepad text-xs text-gray-400 dark:text-zinc-500"></i>
+                    <Icon name="fa6-solid:gamepad" class="text-xs text-gray-400 dark:text-zinc-500" />
                   </div>
                   <span class="text-sm truncate">{{ suggestion.title }}</span>
                 </NuxtLink>
@@ -705,7 +713,7 @@
             <div v-if="searchHistory.length && !searchQuery" class="px-3 md:px-4 pb-3 md:pb-4">
               <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center justify-between">
                 <span class="flex items-center gap-1">
-                  <i class="fa-solid fa-clock-rotate-left text-gray-400"></i>
+                  <Icon name="fa6-solid:clock-rotate-left" class="text-gray-400" />
                   <span>搜索历史</span>
                 </span>
                 <button 
@@ -723,10 +731,7 @@
                   class="group max-w-[200px] px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-600 transition flex items-center gap-1.5"
                 >
                   <span class="truncate">{{ term }}</span>
-                  <i 
-                    class="fa-solid fa-xmark text-xs text-gray-400 hover:text-red-500 transition"
-                    @click.stop="removeHistoryItem(index)"
-                  ></i>
+                  <Icon name="fa6-solid:xmark" class="text-xs text-gray-400 hover:text-red-500 transition" @click.stop="removeHistoryItem(index)" />
                 </button>
               </div>
             </div>
@@ -734,7 +739,7 @@
             <!-- 热门搜索 -->
             <div v-if="hotSearches?.length" class="px-3 md:px-4 pb-3 md:pb-4">
               <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
-                <i class="fa-solid fa-fire text-gray-400"></i>
+                <Icon name="fa6-solid:fire" class="text-gray-400" />
                 <span class="dark:text-gray-400">热门搜索</span>
               </div>
               <div class="flex flex-wrap gap-2">
@@ -749,8 +754,10 @@
               </div>
             </div>
             
+            </div>
+
             <!-- 快捷键提示 - 固定在弹窗底部 -->
-            <div class="hidden md:flex mt-auto px-4 py-3 text-xs text-gray-400 items-center gap-4 border-t border-gray-200 dark:border-zinc-700">
+            <div class="hidden md:flex shrink-0 mt-auto px-4 py-3 text-xs text-gray-400 items-center gap-4 border-t border-gray-200 dark:border-zinc-700">
               <span><kbd class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-700 text-xs">Enter</kbd> 搜索</span>
               <span><kbd class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-700 text-xs">Esc</kbd> 关闭</span>
             </div>
@@ -762,14 +769,14 @@
                 <div class="px-3 py-2.5 border-b dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900/50">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <i class="fa-solid fa-fire text-orange-500"></i>
+                      <Icon name="fa6-solid:fire" class="text-orange-500" />
                       <h3 class="font-semibold text-sm">本月热门</h3>
                     </div>
                     <button
                       @click="showTrendingPanel = false"
                       class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-400 hover:text-gray-600 transition"
                     >
-                      <i class="fa-solid fa-xmark text-xs"></i>
+                      <Icon name="fa6-solid:xmark" class="text-xs" />
                     </button>
                   </div>
                 </div>
@@ -810,7 +817,7 @@
                         v-else
                         class="w-11 h-14 rounded bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
                       >
-                        <i class="fa-solid fa-gamepad text-xs text-gray-400"></i>
+                        <Icon name="fa6-solid:gamepad" class="text-xs text-gray-400" />
                       </div>
                     </div>
                     
@@ -825,7 +832,7 @@
                         <span v-if="game.company" class="truncate">{{ game.company.name }}</span>
                       </div>
                       <div class="flex items-center gap-1 mt-0.5 text-xs text-gray-400">
-                        <i class="fa-solid fa-eye"></i>
+                        <Icon name="fa6-solid:eye" />
                         <span>{{ formatViewCount(game.viewCount) }}</span>
                       </div>
                     </div>
@@ -833,7 +840,7 @@
                 </div>
                 
                 <div v-else class="text-center py-8 text-gray-400 text-sm">
-                  <i class="fa-solid fa-spinner fa-spin mb-2"></i>
+                  <Icon name="fa6-solid:spinner" class="fa-spin mb-2" />
                   <p>加载中...</p>
                 </div>
               </div>
@@ -887,7 +894,7 @@
             <div class="px-6 py-4 border-b dark:border-zinc-700 flex items-center justify-between">
               <h3 class="text-lg font-semibold dark:text-gray-100">背景图片设置</h3>
               <button @click="showBgSettingsModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition dark:text-gray-300">
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
             
@@ -931,7 +938,7 @@
                     class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center gap-2"
                     :disabled="bgUploading"
                   >
-                    <i :class="bgUploading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-upload'"></i>
+                    <Icon :name="bgUploading ? 'fa6-solid:spinner' : 'fa6-solid:upload'" />
                     {{ bgUploading ? '上传中' : '上传' }}
                   </button>
                 </div>
@@ -947,7 +954,8 @@
                   min="0"
                   max="1"
                   step="0.05"
-                  class="w-full h-2 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  class="bg-settings-range w-full cursor-pointer"
+                  :style="{ '--range-progress': `${Math.round(bgPreview.opacity * 100)}%` }"
                 />
               </div>
               
@@ -960,7 +968,8 @@
                   min="0"
                   max="20"
                   step="1"
-                  class="w-full h-2 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  class="bg-settings-range w-full cursor-pointer"
+                  :style="{ '--range-progress': `${Math.round((bgPreview.blur / 20) * 100)}%` }"
                 />
               </div>
               
@@ -1074,9 +1083,9 @@ interface NavMenuAd {
 
 const runtimeConfig = useRuntimeConfig()
 const buildId = runtimeConfig.public?.buildId as string | undefined
-const { data: navMenuAdData } = await useAsyncData<NavMenuAd[]>(
+const { data: navMenuAdData } = await useAsyncData(
   'nav-menu-ads',
-  () => $fetch<NavMenuAd[]>('/api/ads', { query: { slot: 'nav_menu', v: buildId } }),
+  () => $fetch('/api/ads', { query: { slot: 'nav_menu', v: buildId } } as any) as Promise<any>,
   { default: () => [] }
 )
 const navMenuAds = computed(() => navMenuAdData.value ?? [])
@@ -1123,15 +1132,16 @@ onClickOutside(userMenuRef, () => {
   showUserMenu.value = false
 })
 
-// 设置菜单用 document 级监听，兼容 fixed 定位的下拉面板
-watch(showSettingsMenu, (val) => {
-  if (val) {
-    const close = () => {
-      showSettingsMenu.value = false
-      document.removeEventListener('click', close, true)
-    }
-    document.addEventListener('click', close, true)
+// 面板内的点击会被 @click.stop 拦截，只有外部点击会冒泡到 document
+watch(showSettingsMenu, (val, _oldVal, onCleanup) => {
+  if (!val) return
+
+  const close = () => {
+    showSettingsMenu.value = false
   }
+
+  document.addEventListener('click', close)
+  onCleanup(() => document.removeEventListener('click', close))
 })
 
 // 方法
@@ -1146,7 +1156,7 @@ async function setNsfwMode(mode: 'SFW' | 'NSFW' | 'ALL') {
   
   try {
     const { authFetch } = useAuthRequest()
-    await authFetch('/api/user/nsfw-mode', {
+    await (authFetch as any)('/api/user/nsfw-mode', {
       method: 'PUT',
       body: { mode },
     })
@@ -1170,7 +1180,7 @@ async function goRandomGame() {
   if (randomLoading.value) return
   randomLoading.value = true
   try {
-    const data = await $fetch<{ id: number }>('/api/games/random', { timeout: 8000 })
+    const data: any = await $fetch('/api/games/random', { timeout: 8000 } as any)
     await navigateTo(`/games/${data.id}`)
   } catch {
     // 静默失败
@@ -1203,9 +1213,9 @@ async function fetchUnreadCount() {
   
   const { $api } = useNuxtApp()
   if (!$api) return
-  
+
   try {
-    const data = await $api<any>('/api/user/messages', {
+    const data: any = await $api('/api/user/messages', {
       params: { unreadOnly: true, limit: 1 },
     })
     setUnreadCount(data.unreadCount)
@@ -1224,7 +1234,7 @@ async function fetchPrivateUnreadCount() {
   if (!$api) return
 
   try {
-    const data = await $api<any>('/api/private-messages/unread-count')
+    const data: any = await ($api as any)('/api/private-messages/unread-count')
     setPrivateUnreadCount(data.unreadCount)
   } catch {
     // 忽略错误
@@ -1313,6 +1323,53 @@ watch(() => user.value?.avatar, () => {
 .group\/settings:hover .header-tooltip,
 .group\/iconbtn:hover .header-tooltip {
   @apply opacity-100;
+}
+
+/* 背景设置滑块：用自定义属性绘制当前值对应的进度 */
+.bg-settings-range {
+  --range-progress: 0%;
+  --range-active: #1f2937;
+  --range-track: #e5e7eb;
+  height: 0.5rem;
+  appearance: none;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    var(--range-active) 0,
+    var(--range-active) var(--range-progress),
+    var(--range-track) var(--range-progress),
+    var(--range-track) 100%
+  );
+}
+
+:global(.dark) .bg-settings-range {
+  --range-active: #a1a1aa;
+  --range-track: #3f3f46;
+}
+
+.bg-settings-range::-webkit-slider-thumb {
+  width: 1rem;
+  height: 1rem;
+  appearance: none;
+  border: 2px solid var(--range-active);
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.bg-settings-range::-moz-range-thumb {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--range-active);
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.bg-settings-range::-moz-range-track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: transparent;
 }
 
 /* 下拉菜单动画 */

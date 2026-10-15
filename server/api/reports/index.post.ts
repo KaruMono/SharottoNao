@@ -6,8 +6,8 @@ import { checkWriteRateLimit } from '~/server/utils/rate-limit'
 const schema = z.object({
   type: z.enum(['COMMENT', 'RESOURCE', 'GUIDE']),
   targetId: z.number(),
-  reason: z.string().min(1).max(255),
-  detail: z.string().max(1000).nullable().optional(),
+  reason: z.string().trim().min(1).max(255),
+  detail: z.string().trim().max(1000).nullable().optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -21,6 +21,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const { type, targetId, reason, detail } = result.data
+  if (reason === '其他' && !detail) {
+    throw createError({ statusCode: 400, message: '选择“其他”时，请填写具体举报理由' })
+  }
   const userId = user.id
 
   // 检查目标是否存在

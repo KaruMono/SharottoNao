@@ -3,6 +3,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { v4 as uuidv4 } from 'uuid'
+import { resolveUploadRoot } from '~/server/utils/local-storage-path'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -57,7 +58,7 @@ export default defineEventHandler(async (event) => {
 
     return { url }
   } else {
-    const uploadDir = path.join(process.cwd(), config.localUploadPath, 'icons')
+    const uploadDir = path.join(resolveUploadRoot(config), 'icons')
     await fs.mkdir(uploadDir, { recursive: true })
     await fs.writeFile(path.join(uploadDir, filename), file.data)
     return { url: `/uploads/${filePath}` }

@@ -1,0 +1,67 @@
+# Charlotte OpenResty example (adapt paths, TLS and server_name).
+#
+# Put the upstream block in the http {} context. Put the server block in the
+# site's configuration. The deploy script appends every release's hashed
+# asset to this shared directory before switching current.
+# Ensure the OpenResty worker user has execute permission on shared directories
+# and read permission on files (use a deployment group rather than world-write).
+
+upstream charlotte_app {
+    server 127.0.0.1:3000;
+    keepalive 32;
+}
+
+# Add this format in the http {} context when diagnosing stream resets.
+# log_format charlotte '$remote_addr [$time_iso8601] "$request" $status '
+#   '$body_bytes_sent/$request_length $request_time '
+#   'upstream=$upstream_addr upstream_status=$upstream_status '
+#   'upstream_bytes=$upstream_bytes_received/$upstream_bytes_sent '
+#   'encoding=$sent_http_content_encoding build=$sent_http_x_charlotte_build';
+
+server {
+    listen 80;
+    server_name www.sharotto.com sharotto.com;
+
+    # Let the existing HTTPS redirect/server handle TLS in production.
+    # return 301 https://$host$request_uri;
+
+    # Hashed Nuxt assets are immutable and must be served independently of
+    # the current Node release, so old browser tabs keep working after deploy.
+    location ^~ /_nuxt/ {
+        alias /opt/1panel/www/project/Charlotte/shared/nuxt-assets/_nuxt/;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Charlotte-Asset-Source "shared" always;
+        # Keep one compression layer while diagnosing HTTP/2 stream resets.
+        # The original .js/.css files remain available; enable gzip_static or
+        # brotli_static only when the corresponding module and Vary are tested.
+        gzip off;
+        gzip_static off;
+        # access_log /var/log/openresty/charlotte-assets.log charlotte;
+    }
+
+    # Local uploads are shared across releases. Prefer S3 in production.
+    location ^~ /uploads/ {
+        alias /opt/1panel/www/project/Charlotte/shared/uploads/;
+        add_header Cache-Control "public, max-age=86400" always;
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+
+    location / {
+        proxy_pass http://charlotte_app;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Request-Id $request_id;
+        proxy_set_header Connection "";
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_buffering on;
+        proxy_request_buffering on;
+        proxy_next_upstream off;
+        proxy_intercept_errors off;
+    }
+}

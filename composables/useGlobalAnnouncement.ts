@@ -11,11 +11,8 @@ export function useGlobalAnnouncement() {
 
   async function fetchGlobalAnnouncement() {
     try {
-      const data = await $fetch<{
-        sidebar: any
-        global: any
-      }>('/api/announcements/settings')
-      
+      const data: any = await ($fetch as any)('/api/announcements/settings')
+
       if (data.global?.isActive) {
         const announcement = data.global
         const storageKey = 'global_announcement_dismissed'

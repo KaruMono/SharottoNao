@@ -6,7 +6,7 @@
       <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-700 flex-shrink-0">
         <h3 class="font-semibold">编辑下载资源</h3>
         <button @click="emit('close')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-          <i class="fa-solid fa-xmark"></i>
+          <Icon name="fa6-solid:xmark" />
         </button>
       </div>
       
@@ -166,10 +166,11 @@ const emit = defineEmits<{
 const { authFetch } = useAuthRequest()
 const toast = useToast()
 
-const { data: resourceTypes } = await useFetch('/api/resource-types', {
+const { data: resourceTypesData } = await (useFetch as any)('/api/resource-types', {
   key: 'edit-resource-types',
   getCachedData: () => undefined as any,
 })
+const resourceTypes = computed(() => (resourceTypesData.value ?? []) as any[])
 
 const form = reactive({
   title: props.resource.title,
@@ -193,10 +194,10 @@ async function handleSubmit() {
     toast.error('文件大小必须以M或G结尾，如：1.2G、800M')
     return
   }
-  
+
   loading.value = true
   try {
-    await authFetch(`/api/resources/${props.resource.id}`, {
+    await (authFetch as any)(`/api/resources/${props.resource.id}`, {
       method: 'PUT',
       body: {
         typeId: form.typeId,

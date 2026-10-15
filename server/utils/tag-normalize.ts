@@ -1,4 +1,4 @@
-import prisma from '~/server/utils/prisma'
+import prisma from './prisma'
 
 /**
  * 标签名归一化。
@@ -49,9 +49,17 @@ export function normalizeTagNames(raws: string[]): string[] {
 export async function findTagByName(name: string) {
   const normalized = normalizeTagName(name)
   if (!normalized) return null
+  const normalizedName = normalized.toLowerCase()
 
   return prisma.tag.findFirst({
-    where: { name: { equals: normalized, mode: 'insensitive' } },
+    where: {
+      archivedAt: null,
+      isSystem: false,
+      OR: [
+        { name: { equals: normalized, mode: 'insensitive' } },
+        { aliases: { some: { normalizedName } } },
+      ],
+    },
     select: { id: true, name: true, color: true, isNsfw: true },
   })
 }
@@ -65,7 +73,14 @@ export async function findSimilarTags(name: string, limit = 5) {
   if (!normalized) return []
 
   return prisma.tag.findMany({
-    where: { name: { contains: normalized, mode: 'insensitive' } },
+    where: {
+      archivedAt: null,
+      isSystem: false,
+      OR: [
+        { name: { contains: normalized, mode: 'insensitive' } },
+        { aliases: { some: { name: { contains: normalized, mode: 'insensitive' } } } },
+      ],
+    },
     select: { id: true, name: true, color: true, isNsfw: true },
     take: limit,
   })

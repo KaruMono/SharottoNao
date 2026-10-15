@@ -1,58 +1,122 @@
 import { defineNuxtModule } from '@nuxt/kit'
-import { resolve } from 'path'
+
+const IGNORED_DIRECTORIES = [
+  '.claude',
+  '.cursor',
+  '.kiro',
+  '.git',
+  '.nuxt',
+  '.output',
+  'dist',
+  'node_modules',
+  'uploads',
+] as const
+
+const IGNORED_DIRECTORY_PATTERNS = IGNORED_DIRECTORIES.flatMap(directory => [
+  directory,
+  `${directory}/**`,
+  `**/${directory}`,
+  `**/${directory}/**`,
+])
+
+type IgnoreMatcher = string | RegExp | ((path: string) => boolean)
+type WatchOptionsLike = { ignored?: unknown }
+type FileSystemStorageOptions = {
+  driver?: string
+  ignore?: unknown
+}
+
+const ignoredDirectoryNames = new Set<string>(IGNORED_DIRECTORIES)
+
+function isIgnoredDirectoryPath(path: string) {
+  return path.split(/[\\/]+/).some(segment => ignoredDirectoryNames.has(segment))
+}
+
+function mergeIgnored(current: unknown, additions: readonly IgnoreMatcher[]) {
+  const merged: unknown[] = current == null
+    ? []
+    : Array.isArray(current)
+      ? [...current]
+      : [current]
+
+  for (const addition of additions) {
+    if (!merged.includes(addition)) {
+      merged.push(addition)
+    }
+  }
+
+  return merged
+}
+
+function mergeStorageIgnores(storageConfig: unknown, additions: readonly string[]) {
+  if (!storageConfig || typeof storageConfig !== 'object') return
+
+  for (const storage of Object.values(storageConfig)) {
+    if (!storage || typeof storage !== 'object') continue
+
+    const options = storage as FileSystemStorageOptions
+    if (options.driver !== 'fs') continue
+
+    options.ignore = mergeIgnored(options.ignore, additions)
+  }
+}
 
 /**
- * 开发模式下忽略 uploads 目录的文件变化
- * 防止图片上传时触发 Vite HMR / Nitro 服务端重载
- * 
- * 生产环境完全不受影响（没有 HMR/watcher）
+ * Prevent development watchers from traversing generated, dependency,
+ * uploaded, and local tool-state directories in the repository.
  */
 export default defineNuxtModule({
   meta: {
     name: 'ignore-uploads',
   },
   setup(_options, nuxt) {
-    // 只在开发模式下生效
     if (!nuxt.options.dev) return
 
-    const uploadsDir = resolve(nuxt.options.rootDir, 'uploads')
+    const watcherIgnoreMatchers: IgnoreMatcher[] = [isIgnoredDirectoryPath]
 
-    // 1. 让 Nitro 的 watcher 忽略 uploads
+    // Nitro can receive a string, matcher function, or an array from user config.
     nuxt.hook('nitro:config', (nitroConfig) => {
-      nitroConfig.watchOptions = nitroConfig.watchOptions || {}
-      nitroConfig.watchOptions.ignored = nitroConfig.watchOptions.ignored || []
-      if (Array.isArray(nitroConfig.watchOptions.ignored)) {
-        nitroConfig.watchOptions.ignored.push(uploadsDir, '**/uploads/**')
-      }
+      nitroConfig.watchOptions ||= {}
+      const watchOptions = nitroConfig.watchOptions as WatchOptionsLike
+      watchOptions.ignored = mergeIgnored(watchOptions.ignored, watcherIgnoreMatchers)
+
+      // Nuxt Content watches every Nitro storage mount in development. Its
+      // filesystem drivers have independent watcher options, including the
+      // root mount, so they need the same traversal guard.
+      // Functions in Nitro storage config are serialized as null in the dev
+      // worker bundle. Glob strings survive serialization and are compiled by
+      // unstorage's filesystem driver at runtime.
+      mergeStorageIgnores(nitroConfig.storage, IGNORED_DIRECTORY_PATTERNS)
+      mergeStorageIgnores(nitroConfig.devStorage, IGNORED_DIRECTORY_PATTERNS)
     })
 
-    // 2. 让 Vite 的 watcher 忽略 uploads  
+    // Vite uses the same matcher shapes as Chokidar. Preserve a null watch
+    // option because it explicitly disables watching.
     nuxt.hook('vite:extendConfig', (viteConfig) => {
-      const server = (viteConfig as { server?: { watch?: { ignored?: string[] } } }).server ?? {}
-      const watch = server.watch ?? {}
-      const ignored = watch.ignored ?? []
-      ignored.push(uploadsDir, '**/uploads/**')
-      ;(viteConfig as { server?: { watch?: { ignored?: string[] } } }).server = {
-        ...server,
-        watch: {
-          ...watch,
-          ignored,
-        },
+      const config = viteConfig as {
+        server?: {
+          watch?: WatchOptionsLike | null
+        }
       }
+
+      config.server ||= {}
+      if (config.server.watch === null) return
+
+      config.server.watch ||= {}
+      config.server.watch.ignored = mergeIgnored(
+        config.server.watch.ignored,
+        watcherIgnoreMatchers,
+      )
     })
 
-    // 3. 让 Nuxt builder 自身的 watcher 忽略 uploads
-    nuxt.hook('builder:watch', function (this: any, event: string, path: string) {
-      if (path.includes('uploads')) {
-        // 返回 false 或阻止进一步处理 - 实际上这个 hook 无法阻止
-        // 但配合上面的 nitro 和 vite 配置应该能解决
-      }
-    })
+    // Nuxt feeds this list to both its Chokidar ignore matcher and the Parcel
+    // watcher. Include the directory itself so traversal stops at its root.
+    nuxt.options.ignore = [
+      ...new Set([
+        ...(nuxt.options.ignore || []),
+        ...IGNORED_DIRECTORY_PATTERNS,
+      ]),
+    ]
 
-    // 4. 将 uploads 加入 Nuxt 的 ignore 列表
-    nuxt.options.ignore = nuxt.options.ignore || []
-    nuxt.options.ignore.push('uploads/**', '**/uploads/**')
-
-    console.log('[ignore-uploads] 开发模式已配置忽略 uploads 目录')
   },
 })

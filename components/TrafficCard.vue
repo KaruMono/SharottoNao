@@ -3,10 +3,10 @@
     <button type="button" class="w-full text-left group" @click="showModal = true">
       <!-- 标题栏 -->
       <div class="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-700 flex items-center gap-2">
-        <i class="fa-solid fa-gauge-high text-gray-400 text-sm"></i>
+        <Icon name="fa6-solid:gauge-high" class="text-gray-400 text-sm" />
         <h3 class="font-medium text-sm">今日流量</h3>
         <span class="ml-auto text-[10px] text-gray-400 dark:text-zinc-500 flex items-center gap-1 group-hover:text-gray-500 dark:group-hover:text-zinc-400 transition">
-          近7天 <i class="fa-solid fa-chevron-right text-[9px]"></i>
+          近7天 <Icon name="fa6-solid:chevron-right" class="text-[9px]" />
         </span>
       </div>
 
@@ -33,7 +33,7 @@
             class="flex items-center justify-end gap-0.5 text-xs font-semibold"
             :class="yesterdayDiff >= 0 ? 'text-emerald-500' : 'text-red-500'"
           >
-            <i :class="yesterdayDiff >= 0 ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'" class="text-[9px]"></i>
+            <Icon :name="yesterdayDiff >= 0 ? 'fa6-solid:arrow-up' : 'fa6-solid:arrow-down'" class="text-[9px]" />
             <span class="tabular-nums">{{ diffAbsText }}</span>
           </div>
           <div v-else class="text-xs text-gray-300 dark:text-zinc-600">--</div>

@@ -48,14 +48,14 @@
         </div>
         
         <div v-else class="text-center py-12 text-gray-500">
-          <i class="fa-solid fa-layer-group text-3xl mb-3"></i>
+          <Icon name="fa6-solid:layer-group" class="text-3xl mb-3" />
           <p>暂无游戏</p>
         </div>
       </div>
     </div>
     
     <div v-else-if="error" class="text-center py-12">
-      <i class="fa-solid fa-exclamation-circle text-4xl text-red-500 mb-4"></i>
+      <Icon name="fa6-solid:circle-exclamation" class="text-4xl text-red-500 mb-4" />
       <p class="text-gray-500">{{ error.message || '系列不存在' }}</p>
     </div>
   </div>

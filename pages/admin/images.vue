@@ -3,47 +3,43 @@
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">图片管理</h1>
       <div class="flex gap-2">
-        <button 
+        <AdminKumoButton variant="primary"
           @click="syncImages"
           :disabled="syncing"
-          class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600 disabled:opacity-50"
         >
-          <i class="fa-solid fa-sync mr-1.5" :class="{ 'animate-spin': syncing }"></i>{{ syncing ? '同步中...' : '同步使用状态' }}
-        </button>
-        <button 
+          <Icon name="fa6-solid:arrows-rotate"  :class="{ 'animate-spin': syncing }" />{{ syncing ? '同步中...' : '同步使用状态' }}
+        </AdminKumoButton>
+        <AdminKumoButton variant="danger"
           @click="cleanupImages"
           :disabled="cleaning"
-          class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 disabled:opacity-50"
         >
-          <i class="fa-solid fa-trash mr-1.5"></i>{{ cleaning ? '清理中...' : '清理未使用图片' }}
-        </button>
+          <Icon name="fa6-solid:trash" />{{ cleaning ? '清理中...' : '清理未使用图片' }}
+        </AdminKumoButton>
       </div>
     </div>
 
     <!-- 筛选 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
       <div class="flex items-center justify-between gap-4">
-        <select 
+        <AdminSelect aria-label="图片"
           v-model="unusedFilter"
-          class="px-4 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
           @change="handleFilter"
         >
           <option value="">全部图片</option>
           <option value="true">未使用</option>
           <option value="false">已使用</option>
-        </select>
+        </AdminSelect>
         <div class="flex items-center gap-3">
           <label class="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
             <input type="checkbox" :checked="allSelected" @change="toggleAll" class="rounded" />
             全选当前页
           </label>
-          <button
+          <AdminKumoButton variant="danger" size="toolbar"
             v-if="selectedIds.length"
             @click="batchDelete"
-            class="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600"
           >
-            <i class="fa-solid fa-trash mr-1"></i>删除所选 {{ selectedIds.length }}
-          </button>
+            <Icon name="fa6-solid:trash" />删除所选 {{ selectedIds.length }}
+          </AdminKumoButton>
         </div>
       </div>
     </div>
@@ -71,7 +67,7 @@
               target="_blank"
               class="p-2 bg-white/20 rounded-lg hover:bg-white/30 text-white"
             >
-              <i class="fa-solid fa-magnifying-glass"></i>
+              <Icon name="fa6-solid:magnifying-glass" />
             </a>
           </div>
           <div 
@@ -89,12 +85,12 @@
     </div>
 
     <div v-if="!imagesData?.items?.length" class="text-center text-gray-500 py-16">
-      <i class="fa-solid fa-image text-4xl mb-4"></i>
+      <Icon name="fa6-solid:image" class="text-4xl mb-4" />
       <p>暂无图片</p>
     </div>
 
     <!-- 分页 -->
-    <Pagination 
+    <Pagination admin
       v-if="imagesData && imagesData.pagination.totalPages > 1"
       :current-page="currentPage"
       :total-pages="imagesData.pagination.totalPages"

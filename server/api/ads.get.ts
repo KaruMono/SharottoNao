@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
         imageUrl: true,
         linkUrl: true,
         openInNewTab: true,
+        showOnMobile: true,
       },
       orderBy: { sortOrder: 'asc' },
     })

@@ -64,7 +64,7 @@ export function useSearchModal() {
           const params = vndbMatch
             ? { vndbId: query.toLowerCase() }
             : { bangumiId: bangumiMatch![1] }
-          const result = await $fetch<{ id: number }>('/api/games/lookup', { params })
+          const result: any = await ($fetch as any)('/api/games/lookup', { params } as any)
           searchQuery.value = ''
           showSearchModal.value = false
           router.push(`/games/${result.id}`)
@@ -150,9 +150,9 @@ export function useSearchModal() {
 
     searchDebounceTimer = setTimeout(async () => {
       try {
-        const data = await $fetch<any[]>('/api/search/suggestions', {
+        const data: any = await ($fetch as any)('/api/search/suggestions', {
           params: { q, limit: 5 },
-        })
+        } as any)
         searchSuggestions.value = data
       } catch {
         searchSuggestions.value = []
@@ -163,7 +163,7 @@ export function useSearchModal() {
   // 加载热门搜索
   async function loadHotSearches() {
     try {
-      const data = await $fetch<{ items: string[] }>('/api/hot-searches')
+      const data: any = await ($fetch as any)('/api/hot-searches')
       hotSearches.value = data.items || []
     } catch {
       hotSearches.value = []
@@ -247,9 +247,9 @@ export function useSearchModal() {
           const searchResults = await Promise.all(
             uniqueGameNames.slice(0, 5).map(async (name: string) => {
               try {
-                const games = await $fetch<{ items: SearchGameResult[] }>('/api/games', {
+                const games: any = await ($fetch as any)('/api/games', {
                   params: { search: name, limit: 1 },
-                })
+                } as any)
                 return games.items[0]
               } catch {
                 return null
@@ -295,9 +295,9 @@ export function useSearchModal() {
     // 5 分钟内复用缓存
     if (trendingGames.value.length > 0 && Date.now() - trendingLoadedAt < 5 * 60 * 1000) return
     try {
-      const data = await $fetch<any[]>('/api/trending/monthly', {
+      const data: any = await ($fetch as any)('/api/trending/monthly', {
         params: { limit: 5 },
-      })
+      } as any)
       trendingGames.value = data || []
       trendingLoadedAt = Date.now()
     } catch (err) {

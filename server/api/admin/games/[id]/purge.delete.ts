@@ -2,6 +2,8 @@ import { requireAdmin } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
 import { logAdminOperation } from '~/server/utils/admin-operation-log'
 import { invalidateGameCaches } from '~/server/utils/redis'
+import { lockExistingGameTagStatesInTransaction } from '~/server/utils/game-tag-source'
+import { lockVndbTagSyncInTransaction } from '~/server/utils/vndb-tag-sync'
 
 export default defineEventHandler(async (event) => {
   const admin = await requireAdmin(event)
@@ -27,6 +29,20 @@ export default defineEventHandler(async (event) => {
   const title = game.titleZhHans || game.titleJa || game.titleEn || `#${id}`
 
   await prisma.$transaction(async (tx) => {
+    await lockVndbTagSyncInTransaction(tx)
+    const lockedIds = await lockExistingGameTagStatesInTransaction(tx, [id])
+    if (lockedIds.length === 0) {
+      throw createError({ statusCode: 404, message: '条目不存在' })
+    }
+
+    const lockedGame = await tx.game.findUnique({
+      where: { id },
+      select: { deletedAt: true },
+    })
+    if (!lockedGame?.deletedAt) {
+      throw createError({ statusCode: 409, message: '条目已恢复，无法彻底删除' })
+    }
+
     await tx.gameTag.deleteMany({ where: { gameId: id } })
     await tx.gameCompany.deleteMany({ where: { gameId: id } })
     await tx.gameStaff.deleteMany({ where: { gameId: id } })

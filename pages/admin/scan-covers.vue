@@ -7,14 +7,13 @@
       <p class="text-sm text-gray-500 mb-4">
         扫描所有游戏封面链接，检测失效图片。对于有 VNDB ID 的游戏，可以从 VNDB 重新获取封面并保存为本地 WebP。
       </p>
-      <button
+      <AdminKumoButton variant="primary"
         @click="startScan"
         :disabled="scanning"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition text-sm"
       >
-        <i :class="scanning ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-magnifying-glass'" class="mr-2"></i>
+        <Icon :name="scanning ? 'fa6-solid:spinner' : 'fa6-solid:magnifying-glass'" />
         {{ scanning ? '扫描中...' : '开始扫描' }}
-      </button>
+      </AdminKumoButton>
     </div>
 
     <!-- 扫描结果 -->
@@ -24,20 +23,19 @@
           <span>共扫描 <strong>{{ scanResult.total }}</strong> 个封面</span>
           <span class="text-red-500">失效 <strong>{{ brokenItems.length }}</strong> 个</span>
           <span v-if="fixedCount > 0" class="text-green-500">已修复 <strong>{{ fixedCount }}</strong> 个</span>
-          <button
+          <AdminKumoButton variant="primary" size="toolbar"
             v-if="fixableItems.length > 0"
             @click="fixAll"
             :disabled="fixingAll"
-            class="ml-auto px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition text-sm"
           >
-            <i :class="fixingAll ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-wand-magic-sparkles'" class="mr-1"></i>
+            <Icon :name="fixingAll ? 'fa6-solid:spinner' : 'fa6-solid:wand-magic-sparkles'" />
             {{ fixingAll ? `修复中 (${fixProgress}/${fixableItems.length})` : `一键修复全部 (${fixableItems.length})` }}
-          </button>
+          </AdminKumoButton>
         </div>
       </div>
 
       <div v-if="brokenItems.length === 0" class="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 text-center text-green-600 dark:text-green-400">
-        <i class="fa-solid fa-circle-check text-3xl mb-2"></i>
+        <Icon name="fa6-solid:circle-check" class="text-3xl mb-2" />
         <p>所有封面链接正常</p>
       </div>
 
@@ -49,7 +47,7 @@
             class="p-4 flex items-center gap-4"
           >
             <div class="w-16 h-20 bg-gray-100 dark:bg-zinc-700 rounded overflow-hidden flex-shrink-0 flex items-center justify-center">
-              <i class="fa-solid fa-image-slash text-gray-400 text-xl" v-if="!item.fixed"></i>
+              <Icon name="fa6-solid:file-circle-xmark" class="text-gray-400 text-xl" v-if="!item.fixed" />
               <img v-else :src="item.newCoverUrl" class="w-full h-full object-cover" />
             </div>
             <div class="flex-1 min-w-0">
@@ -59,7 +57,7 @@
                 </NuxtLink>
                 <span v-if="item.fixed" class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">已修复</span>
                 <span v-else-if="item.fixing" class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                  <i class="fa-solid fa-spinner fa-spin mr-1"></i>修复中
+                  <Icon name="fa6-solid:spinner" class="fa-spin mr-1" />修复中
                 </span>
                 <span v-else-if="item.error" class="text-xs px-2 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">{{ item.error }}</span>
               </div>
@@ -70,13 +68,13 @@
               </div>
               <div class="text-xs text-gray-400 mt-0.5 truncate">{{ item.coverImage }}</div>
             </div>
-            <button
+            <AdminKumoButton variant="primary" size="sm"
               v-if="item.vndbId && !item.fixed && !item.fixing"
               @click="fixOne(item)"
-              class="px-3 py-1.5 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex-shrink-0"
+              class="flex-shrink-0"
             >
-              <i class="fa-solid fa-download mr-1"></i>修复
-            </button>
+              <Icon name="fa6-solid:download" />修复
+            </AdminKumoButton>
           </div>
         </div>
       </div>

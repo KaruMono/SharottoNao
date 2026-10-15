@@ -8,15 +8,14 @@
           v-model="actionQuery"
           type="text"
           placeholder="筛选动作（模糊匹配）..."
-          class="px-4 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+          class="admin-input"
           @keyup.enter="handleSearch"
         />
-        <button
+        <AdminKumoButton variant="primary"
           @click="handleSearch"
-          class="px-3 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
         >
           查询
-        </button>
+        </AdminKumoButton>
       </div>
     </div>
 
@@ -38,7 +37,7 @@
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-zinc-700 overflow-hidden flex items-center justify-center">
                   <img v-if="log.admin?.avatar" :src="log.admin.avatar" class="w-full h-full object-cover" />
-                  <i v-else class="fa-solid fa-user text-gray-400 text-xs"></i>
+                  <Icon name="fa6-solid:user" class="text-gray-400 text-xs" v-else />
                 </div>
                 <span class="text-sm">{{ log.admin?.username || '-' }}</span>
                 <span class="text-xs text-gray-400">#{{ log.adminId }}</span>
@@ -59,7 +58,7 @@
       <div v-if="!data?.items?.length" class="text-center text-gray-500 py-12">暂无日志</div>
     </div>
 
-    <Pagination
+    <Pagination admin
       v-if="data && data.pagination.totalPages > 1"
       :current-page="currentPage"
       :total-pages="data.pagination.totalPages"

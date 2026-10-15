@@ -8,7 +8,7 @@
         :class="['toolbar-btn', { active: editor.isActive('bold') }]"
         title="加粗"
       >
-        <i class="fa-solid fa-bold"></i>
+        <Icon name="fa6-solid:bold" />
       </button>
       <button
         type="button"
@@ -16,7 +16,7 @@
         :class="['toolbar-btn', { active: editor.isActive('italic') }]"
         title="斜体"
       >
-        <i class="fa-solid fa-italic"></i>
+        <Icon name="fa6-solid:italic" />
       </button>
       <button
         type="button"
@@ -24,7 +24,7 @@
         :class="['toolbar-btn', { active: editor.isActive('strike') }]"
         title="删除线"
       >
-        <i class="fa-solid fa-strikethrough"></i>
+        <Icon name="fa6-solid:strikethrough" />
       </button>
       <button
         type="button"
@@ -32,7 +32,7 @@
         :class="['toolbar-btn', { active: editor.isActive('spoiler') }]"
         title="剧透"
       >
-        <i class="fa-solid fa-eye-slash"></i>
+        <Icon name="fa6-solid:eye-slash" />
       </button>
 
       <!-- 表情 -->
@@ -43,7 +43,7 @@
           class="toolbar-btn"
           title="表情"
         >
-          <i class="fa-regular fa-face-smile"></i>
+          <Icon name="fa6-regular:face-smile" />
         </button>
 
         <Transition name="dropdown">
@@ -152,7 +152,7 @@ const showEmojiPicker = ref(false)
 const emojiPickerRef = ref<HTMLElement>()
 
 // 获取表情包
-const { data: emojiPacksData } = await useFetch('/api/emoji-packs', { key: 'emoji-packs' })
+const { data: emojiPacksData } = await (useFetch as any)('/api/emoji-packs', { key: 'emoji-packs' })
 watch(emojiPacksData, (data) => {
   if (data) {
     emojiPacks.value = data as EmojiPack[]

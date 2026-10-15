@@ -6,14 +6,14 @@
         class="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-zinc-800 shadow hover:shadow-lg transition"
         @click="prevMonth"
       >
-        <i class="fa-solid fa-chevron-left text-gray-600 dark:text-gray-300"></i>
+        <Icon name="fa6-solid:chevron-left" class="text-gray-600 dark:text-gray-300" />
       </button>
       <h1 class="text-2xl font-bold min-w-[160px] text-center">{{ year }}年{{ month }}月</h1>
       <button
         class="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-zinc-800 shadow hover:shadow-lg transition"
         @click="nextMonth"
       >
-        <i class="fa-solid fa-chevron-right text-gray-600 dark:text-gray-300"></i>
+        <Icon name="fa6-solid:chevron-right" class="text-gray-600 dark:text-gray-300" />
       </button>
     </div>
 
@@ -107,7 +107,7 @@
               loading="lazy"
             />
             <div v-else class="w-10 h-14 rounded bg-gray-200 dark:bg-zinc-600 flex-shrink-0 flex items-center justify-center">
-              <i class="fa-solid fa-gamepad text-gray-400 text-xs"></i>
+              <Icon name="fa6-solid:gamepad" class="text-gray-400 text-xs" />
             </div>
             <span class="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-2">{{ game.title }}</span>
           </NuxtLink>
@@ -120,7 +120,7 @@
       v-if="calendarData && calendarData.games.length === 0"
       class="text-center text-gray-500 dark:text-gray-400 py-16"
     >
-      <i class="fa-solid fa-calendar-xmark text-4xl mb-4"></i>
+      <Icon name="fa6-solid:calendar-xmark" class="text-4xl mb-4" />
       <p>本月暂无游戏发售</p>
     </div>
   </div>

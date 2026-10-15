@@ -11,7 +11,7 @@
       >
         <!-- 列标题 -->
         <div class="px-4 py-3 border-b border-gray-100 dark:border-zinc-700 flex items-center gap-2">
-          <i :class="col.icon" class="text-gray-400"></i>
+          <FaIcon :icon="col.icon" class="text-gray-400" />
           <h2 class="font-medium text-sm">{{ col.label }}</h2>
         </div>
 
@@ -24,9 +24,9 @@
           >
             <!-- 排名 -->
             <div class="w-7 text-center font-bold text-sm flex-shrink-0" :class="rankTextClass(item.rank)">
-              <i v-if="item.rank === 1" class="fa-solid fa-crown text-yellow-500"></i>
-              <i v-else-if="item.rank === 2" class="fa-solid fa-medal text-gray-400"></i>
-              <i v-else-if="item.rank === 3" class="fa-solid fa-medal text-amber-600"></i>
+              <Icon name="fa6-solid:crown" class="text-yellow-500" v-if="item.rank === 1" />
+              <Icon name="fa6-solid:medal" class="text-gray-400" v-else-if="item.rank === 2" />
+              <Icon name="fa6-solid:medal" class="text-amber-600" v-else-if="item.rank === 3" />
               <span v-else>{{ item.rank }}</span>
             </div>
 
@@ -38,7 +38,7 @@
                   :src="item.user.avatar"
                   class="w-full h-full object-cover"
                 />
-                <i v-else class="fa-solid fa-user text-gray-400 text-xs"></i>
+                <Icon name="fa6-solid:user" class="text-gray-400 text-xs" v-else />
               </div>
               <span class="text-sm font-medium truncate">{{ item.user.username }}</span>
             </NuxtLink>
@@ -59,7 +59,7 @@
 
         <!-- 空状态 -->
         <div v-else class="text-center text-gray-400 py-12">
-          <i class="fa-solid fa-trophy text-2xl mb-2"></i>
+          <Icon name="fa6-solid:trophy" class="text-2xl mb-2" />
           <p class="text-sm">暂无数据</p>
         </div>
       </div>
@@ -70,23 +70,23 @@
 <script setup lang="ts">
 import type { LeaderboardResponse } from '~/types/api'
 
-const { data: editData } = await useFetch<LeaderboardResponse>('/api/leaderboard', {
+const { data: editData } = await (useFetch as any)('/api/leaderboard', {
   key: 'leaderboard-edit',
   query: { limit: 20, type: 'edit' },
 })
-const { data: resourceData } = await useFetch<LeaderboardResponse>('/api/leaderboard', {
+const { data: resourceData } = await (useFetch as any)('/api/leaderboard', {
   key: 'leaderboard-resource',
   query: { limit: 20, type: 'resource' },
 })
-const { data: guideData } = await useFetch<LeaderboardResponse>('/api/leaderboard', {
+const { data: guideData } = await (useFetch as any)('/api/leaderboard', {
   key: 'leaderboard-guide',
   query: { limit: 20, type: 'guide' },
 })
 
 const columns = computed(() => [
-  { type: 'edit', label: '编辑榜', icon: 'fa-solid fa-pen', data: editData.value },
-  { type: 'resource', label: '资源榜', icon: 'fa-solid fa-download', data: resourceData.value },
-  { type: 'guide', label: '攻略榜', icon: 'fa-solid fa-book', data: guideData.value },
+  { type: 'edit', label: '编辑榜', icon: 'fa6-solid:pen', data: editData.value },
+  { type: 'resource', label: '资源榜', icon: 'fa6-solid:download', data: resourceData.value },
+  { type: 'guide', label: '攻略榜', icon: 'fa6-solid:book', data: guideData.value },
 ])
 
 function rankTextClass(rank: number) {

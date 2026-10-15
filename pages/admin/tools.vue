@@ -9,30 +9,28 @@
             class="px-4 py-1.5 rounded-md text-sm font-medium transition"
             :class="activeTab === 'tools' ? 'bg-white dark:bg-zinc-600 shadow text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
           >
-            <i class="fa-solid fa-wrench mr-1.5"></i>工具列表
+            <Icon name="fa6-solid:wrench" class="mr-1.5" />工具列表
           </button>
           <button
             @click="activeTab = 'categories'"
             class="px-4 py-1.5 rounded-md text-sm font-medium transition"
             :class="activeTab === 'categories' ? 'bg-white dark:bg-zinc-600 shadow text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
           >
-            <i class="fa-solid fa-folder mr-1.5"></i>分类管理
+            <Icon name="fa6-solid:folder" class="mr-1.5" />分类管理
           </button>
         </div>
-        <button
+        <AdminKumoButton variant="primary"
           v-if="activeTab === 'tools'"
           @click="openToolModal()"
-          class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 flex items-center gap-1.5"
         >
-          <i class="fa-solid fa-plus"></i>添加工具
-        </button>
-        <button
+          <Icon name="fa6-solid:plus" />添加工具
+        </AdminKumoButton>
+        <AdminKumoButton variant="primary"
           v-if="activeTab === 'categories'"
           @click="openCategoryModal()"
-          class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 flex items-center gap-1.5"
         >
-          <i class="fa-solid fa-plus"></i>添加分类
-        </button>
+          <Icon name="fa6-solid:plus" />添加分类
+        </AdminKumoButton>
       </div>
     </div>
 
@@ -53,7 +51,7 @@
           <tbody class="divide-y dark:divide-zinc-700">
             <tr v-for="cat in categories" :key="cat.id" class="hover:bg-gray-50 dark:hover:bg-zinc-700/50">
               <td class="px-4 py-3 font-medium">
-                <i v-if="cat.icon" :class="cat.icon" class="mr-2 text-gray-400"></i>
+                <FaIcon v-if="cat.icon" :icon="cat.icon" class="mr-2 text-gray-400" />
                 {{ cat.name }}
               </td>
               <td class="px-4 py-3 text-sm text-gray-500">
@@ -76,13 +74,12 @@
     <!-- ==================== 工具列表 ==================== -->
     <div v-if="activeTab === 'tools'">
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
-        <select
+        <AdminSelect aria-label="分类"
           v-model="filterCategoryId"
-          class="px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
         >
           <option :value="0">全部分类</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-        </select>
+        </AdminSelect>
       </div>
 
       <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
@@ -109,7 +106,7 @@
                   class="w-10 h-10 rounded-lg object-cover"
                 />
                 <div v-else class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center">
-                  <i class="fa-solid fa-wrench text-gray-400"></i>
+                  <Icon name="fa6-solid:wrench" class="text-gray-400" />
                 </div>
               </td>
               <td class="px-4 py-3 font-medium">{{ tool.name }}</td>
@@ -121,7 +118,7 @@
               <td class="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">{{ tool.sortOrder }}</td>
               <td class="px-4 py-3 text-sm hidden lg:table-cell">
                 <a v-if="tool.githubUrl" :href="tool.githubUrl" target="_blank" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                  <i class="fa-brands fa-github"></i>
+                  <Icon name="fa6-brands:github" />
                 </a>
                 <span v-else class="text-gray-300 dark:text-zinc-600">-</span>
               </td>
@@ -148,32 +145,32 @@
             <div class="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h3 class="font-semibold">{{ editingCategory ? '编辑分类' : '添加分类' }}</h3>
               <button @click="showCategoryModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
             <form @submit.prevent="handleSaveCategory" class="p-4 space-y-4">
               <div>
                 <label class="block text-sm font-medium mb-1">名称 *</label>
-                <input v-model="categoryForm.name" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" required />
+                <input v-model="categoryForm.name" type="text" class="admin-input w-full" required />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">Slug *</label>
-                <input v-model="categoryForm.slug" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如 windows, android, ios" required />
+                <input v-model="categoryForm.slug" type="text" class="admin-input w-full" placeholder="如 windows, android, ios" required />
                 <p class="text-xs text-gray-400 mt-1">只能包含小写字母、数字和连字符</p>
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">图标 (FontAwesome)</label>
-                <input v-model="categoryForm.icon" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如 fa-brands fa-windows" />
+                <input v-model="categoryForm.icon" type="text" class="admin-input w-full" placeholder="如 fa-brands fa-windows" />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">排序</label>
-                <input v-model.number="categoryForm.sortOrder" type="number" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" />
+                <input v-model.number="categoryForm.sortOrder" type="number" class="admin-input w-full" />
               </div>
               <div class="flex justify-end gap-3 pt-2">
-                <button type="button" @click="showCategoryModal = false" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm">取消</button>
-                <button type="submit" :disabled="saving" class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm disabled:opacity-50">
+                <AdminKumoButton variant="secondary" type="button" @click="showCategoryModal = false" >取消</AdminKumoButton>
+                <AdminKumoButton variant="primary" type="submit" :disabled="saving" >
                   {{ saving ? '保存中...' : '保存' }}
-                </button>
+                </AdminKumoButton>
               </div>
             </form>
           </div>
@@ -193,30 +190,30 @@
             <div class="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h3 class="font-semibold">{{ editingTool ? '编辑工具' : '添加工具' }}</h3>
               <button @click="showToolModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
             <form @submit.prevent="handleSaveTool" class="p-4 space-y-4">
               <div>
                 <label class="block text-sm font-medium mb-1">名称 *</label>
-                <input v-model="toolForm.name" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" required />
+                <input v-model="toolForm.name" type="text" class="admin-input w-full" required />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">简介</label>
-                <textarea v-model="toolForm.description" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" rows="3" placeholder="软件功能简介"></textarea>
+                <textarea v-model="toolForm.description" class="admin-textarea w-full" rows="3" placeholder="软件功能简介"></textarea>
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">图标</label>
                 <div class="flex items-center gap-3">
                   <img v-if="toolForm.icon" :src="toolForm.icon" class="w-14 h-14 rounded-lg object-cover border dark:border-zinc-600" />
                   <div v-else class="w-14 h-14 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center border dark:border-zinc-600">
-                    <i class="fa-solid fa-image text-gray-400"></i>
+                    <Icon name="fa6-solid:image" class="text-gray-400" />
                   </div>
                   <div class="flex-1">
                     <input ref="iconFileInput" type="file" accept="image/*" class="hidden" @change="handleIconUpload" />
-                    <button type="button" @click="iconFileInput?.click()" :disabled="uploading" class="px-3 py-1.5 rounded-lg border dark:border-zinc-600 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition disabled:opacity-50">
+                    <AdminKumoButton variant="secondary" size="toolbar" type="button" @click="iconFileInput?.click()" :disabled="uploading" >
                       {{ uploading ? '上传中...' : '上传图标' }}
-                    </button>
+                    </AdminKumoButton>
                     <button v-if="toolForm.icon" type="button" @click="toolForm.icon = ''" class="ml-2 text-red-500 text-sm hover:underline">移除</button>
                   </div>
                 </div>
@@ -224,40 +221,40 @@
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium mb-1">版本</label>
-                  <input v-model="toolForm.version" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如 1.0.0" />
+                  <input v-model="toolForm.version" type="text" class="admin-input w-full" placeholder="如 1.0.0" />
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">作者</label>
-                  <input v-model="toolForm.author" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" />
+                  <input v-model="toolForm.author" type="text" class="admin-input w-full" />
                 </div>
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">下载链接 *</label>
-                <input v-model="toolForm.downloadUrl" type="url" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="https://..." required />
+                <input v-model="toolForm.downloadUrl" type="url" class="admin-input w-full" placeholder="https://..." required />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">GitHub 链接</label>
-                <input v-model="toolForm.githubUrl" type="url" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="https://github.com/..." />
+                <input v-model="toolForm.githubUrl" type="url" class="admin-input w-full" placeholder="https://github.com/..." />
                 <p class="text-xs text-gray-400 mt-1">可选，填写后前台会显示 GitHub 图标按钮</p>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium mb-1">分类 *</label>
-                  <select v-model.number="toolForm.categoryId" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" required>
+                  <AdminSelect aria-label="分类 *" v-model.number="toolForm.categoryId" class="w-full" required>
                     <option :value="0" disabled>请选择分类</option>
                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                  </select>
+                  </AdminSelect>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">排序</label>
-                  <input v-model.number="toolForm.sortOrder" type="number" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" />
+                  <input v-model.number="toolForm.sortOrder" type="number" class="admin-input w-full" />
                 </div>
               </div>
               <div class="flex justify-end gap-3 pt-2">
-                <button type="button" @click="showToolModal = false" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm">取消</button>
-                <button type="submit" :disabled="saving" class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm disabled:opacity-50">
+                <AdminKumoButton variant="secondary" type="button" @click="showToolModal = false" >取消</AdminKumoButton>
+                <AdminKumoButton variant="primary" type="submit" :disabled="saving" >
                   {{ saving ? '保存中...' : '保存' }}
-                </button>
+                </AdminKumoButton>
               </div>
             </form>
           </div>

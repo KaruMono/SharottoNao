@@ -3,6 +3,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
+import { resolveUploadRoot, resolveUploadFile } from './local-storage-path'
 
 let s3Client: S3Client | null = null
 
@@ -51,6 +52,9 @@ export async function uploadImage(
 ): Promise<UploadResult> {
   const config = useRuntimeConfig()
   const { folder = 'images', maxWidth = 1920, maxHeight = 1920, quality = 85 } = options
+  if (!isSafeUploadFolder(folder)) {
+    throw new Error('Invalid upload folder')
+  }
 
   // 处理图片：转换为webp，限制尺寸
   let image = sharp(buffer)
@@ -101,7 +105,7 @@ export async function uploadImage(
     }
   } else {
     // 本地存储
-    const uploadDir = path.join(process.cwd(), config.localUploadPath, folder)
+    const uploadDir = path.join(resolveUploadRoot(config), folder)
     await fs.mkdir(uploadDir, { recursive: true })
     
     const localPath = path.join(uploadDir, filename)
@@ -119,6 +123,10 @@ export async function uploadImage(
   }
 }
 
+function isSafeUploadFolder(folder: string): boolean {
+  return /^[A-Za-z0-9_-]+$/.test(folder)
+}
+
 // 删除图片
 export async function deleteImage(filePath: string): Promise<void> {
   const config = useRuntimeConfig()
@@ -130,7 +138,8 @@ export async function deleteImage(filePath: string): Promise<void> {
       Key: filePath,
     }))
   } else {
-    const localPath = path.join(process.cwd(), config.localUploadPath, filePath)
+    const localPath = resolveUploadFile(filePath, config)
+    if (!localPath) return
     try {
       await fs.unlink(localPath)
     } catch {

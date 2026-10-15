@@ -6,7 +6,7 @@
         <div class="flex items-start gap-6">
           <div class="w-24 h-24 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
             <img v-if="company.logo" :src="company.logo" class="w-full h-full object-cover" />
-            <i v-else class="fa-solid fa-building text-3xl text-gray-400"></i>
+            <Icon name="fa6-solid:building" class="text-3xl text-gray-400" v-else />
           </div>
           <div class="flex-1">
             <h1 class="text-2xl font-bold">{{ company.name }}</h1>
@@ -27,10 +27,10 @@
             
             <div class="flex flex-wrap gap-4 mt-3 text-sm text-gray-600 dark:text-gray-300">
               <span v-if="company.foundedYear">
-                <i class="fa-solid fa-calendar mr-1.5 text-gray-400"></i>{{ company.foundedYear }}年成立
+                <Icon name="fa6-solid:calendar" class="mr-1.5 text-gray-400" />{{ company.foundedYear }}年成立
               </span>
               <span>
-                <i class="fa-solid fa-gamepad mr-1.5 text-gray-400"></i>{{ company.gamesCount }} 部作品
+                <Icon name="fa6-solid:gamepad" class="mr-1.5 text-gray-400" />{{ company.gamesCount }} 部作品
               </span>
               <a 
                 v-if="company.website" 
@@ -39,14 +39,14 @@
                 rel="noopener noreferrer"
                 class="hover:underline text-blue-500 hover:text-blue-600"
               >
-                <i class="fa-solid fa-globe mr-1.5"></i>访问官网
+                <Icon name="fa6-solid:globe" class="mr-1.5" />访问官网
               </a>
             </div>
 
             <!-- 父子会社关系 -->
             <div class="mt-3 flex flex-wrap gap-3 text-sm">
               <div v-if="company.parent" class="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                <i class="fa-solid fa-sitemap text-gray-400 text-xs"></i>
+                <Icon name="fa6-solid:sitemap" class="text-gray-400 text-xs" />
                 <span class="text-gray-400">母会社：</span>
                 <NuxtLink :to="`/companies/${company.parent.id}`" class="text-blue-500 hover:underline font-medium flex items-center gap-1.5">
                   <img v-if="company.parent.logo" :src="company.parent.logo" class="w-4 h-4 rounded object-cover" loading="lazy" />
@@ -54,7 +54,7 @@
                 </NuxtLink>
               </div>
               <div v-if="company.children?.length" class="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                <i class="fa-solid fa-code-branch text-gray-400 text-xs"></i>
+                <Icon name="fa6-solid:code-branch" class="text-gray-400 text-xs" />
                 <span class="text-gray-400">子会社：</span>
                 <span class="flex flex-wrap gap-2">
                   <NuxtLink
@@ -88,19 +88,19 @@
       </div>
 
       <div v-if="!company.games?.length" class="text-center text-gray-500 py-16">
-        <i class="fa-solid fa-gamepad text-4xl mb-4"></i>
+        <Icon name="fa6-solid:gamepad" class="text-4xl mb-4" />
         <p>暂无作品</p>
       </div>
     </div>
 
     <!-- 加载中 -->
     <div v-else-if="pending" class="text-center py-20">
-      <i class="fa-solid fa-spinner fa-spin text-3xl text-gray-400"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-3xl text-gray-400" />
     </div>
 
     <!-- 错误 -->
     <div v-else class="text-center py-20">
-      <i class="fa-solid fa-exclamation-circle text-4xl text-gray-400 mb-4"></i>
+      <Icon name="fa6-solid:circle-exclamation" class="text-4xl text-gray-400 mb-4" />
       <p class="text-gray-500">{{ error?.message || '加载失败' }}</p>
     </div>
   </div>

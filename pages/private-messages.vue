@@ -6,7 +6,7 @@
         :class="selectedConversationId ? 'hidden md:flex' : 'flex'"
       >
         <div class="h-16 px-4 flex items-center justify-between border-b border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
-          <h1 class="text-lg font-semibold">私信</h1>
+          <h1 class="text-lg font-semibold">站内信</h1>
           <button
             type="button"
             class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
@@ -14,7 +14,7 @@
             title="刷新"
             @click="loadConversations"
           >
-            <i class="fa-solid fa-rotate-right text-sm" :class="{ 'fa-spin': loadingConversations }"></i>
+            <Icon name="fa6-solid:rotate-right" class="text-sm" :class="{ 'fa-spin': loadingConversations }" />
           </button>
         </div>
 
@@ -27,9 +27,11 @@
             :class="selectedConversationId === conversation.id ? 'bg-white dark:bg-zinc-800' : ''"
             @click="selectConversation(conversation.id)"
           >
-            <div class="relative w-12 h-12 rounded-full bg-gray-200 dark:bg-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
-              <img v-if="conversation.participant.avatar" :src="conversation.participant.avatar" class="w-full h-full object-cover" />
-              <i v-else class="fa-solid fa-user text-gray-400"></i>
+            <div class="relative w-12 h-12 shrink-0">
+              <div class="w-full h-full rounded-full bg-gray-200 dark:bg-zinc-700 overflow-hidden flex items-center justify-center">
+                <img v-if="conversation.participant.avatar" :src="conversation.participant.avatar" class="w-full h-full object-cover" />
+                <Icon name="fa6-solid:user" class="text-gray-400" v-else />
+              </div>
               <span
                 v-if="conversation.unreadCount"
                 class="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 rounded-full bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[11px] leading-5 text-center"
@@ -54,18 +56,15 @@
                 </span>
               </div>
               <div class="mt-1 flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-0">
-                <i
-                  v-if="conversation.lastMessage?.senderId === currentUser?.id && conversation.lastMessage?.readAt"
-                  class="fa-solid fa-check text-[11px] text-gray-800 dark:text-gray-200 shrink-0"
-                ></i>
+                <Icon name="fa6-solid:check" class="text-[11px] text-gray-800 dark:text-gray-200 shrink-0" v-if="conversation.lastMessage?.senderId === currentUser?.id && conversation.lastMessage?.readAt" />
                 <span class="truncate">{{ lastMessagePreview(conversation.lastMessage) }}</span>
               </div>
             </div>
           </button>
 
           <div v-if="!conversations.length && !loadingConversations" class="h-full flex flex-col items-center justify-center text-gray-400 py-16">
-            <i class="fa-solid fa-message text-4xl mb-3"></i>
-            <p class="text-sm">暂无私信</p>
+            <Icon name="fa6-solid:message" class="text-4xl mb-3" />
+            <p class="text-sm">暂无站内信</p>
           </div>
         </div>
       </aside>
@@ -82,14 +81,14 @@
               title="返回"
               @click="closeMobileChat"
             >
-              <i class="fa-solid fa-arrow-left"></i>
+              <Icon name="fa6-solid:arrow-left" />
             </button>
             <NuxtLink
               :to="`/user/${activeConversation.participant.id}`"
               class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 overflow-hidden flex items-center justify-center shrink-0"
             >
               <img v-if="activeConversation.participant.avatar" :src="activeConversation.participant.avatar" class="w-full h-full object-cover" />
-              <i v-else class="fa-solid fa-user text-gray-400"></i>
+              <Icon name="fa6-solid:user" class="text-gray-400" v-else />
             </NuxtLink>
             <div class="min-w-0">
               <NuxtLink :to="`/user/${activeConversation.participant.id}`" class="font-semibold hover:underline truncate block">
@@ -128,10 +127,7 @@
                     :class="message.senderId === currentUser?.id ? 'justify-end' : 'justify-start'"
                   >
                     <span>{{ formatMessageTime(message.createdAt) }}</span>
-                    <i
-                      v-if="message.senderId === currentUser?.id && message.readAt"
-                      class="fa-solid fa-check text-[10px] text-gray-700 dark:text-gray-300"
-                    ></i>
+                    <Icon name="fa6-solid:check" class="text-[10px] text-gray-700 dark:text-gray-300" v-if="message.senderId === currentUser?.id && message.readAt" />
                   </div>
                 </div>
               </div>
@@ -147,7 +143,7 @@
                 title="发送图片"
                 @click="imageInput?.click()"
               >
-                <i class="fa-solid fa-image"></i>
+                <Icon name="fa6-solid:image" />
               </button>
               <textarea
                 v-model="draft"
@@ -162,7 +158,7 @@
                 :disabled="sending || uploadingImage || !draft.trim()"
                 title="发送"
               >
-                <i class="fa-solid fa-paper-plane text-sm"></i>
+                <Icon name="fa6-solid:paper-plane" class="text-sm" />
               </button>
             </div>
             <input ref="imageInput" type="file" accept="image/*" class="hidden" @change="handleImageChange" />
@@ -170,7 +166,7 @@
         </template>
 
         <div v-else class="flex-1 flex flex-col items-center justify-center text-gray-400">
-          <i class="fa-regular fa-comments text-5xl mb-3"></i>
+          <Icon name="fa6-regular:comments" class="text-5xl mb-3" />
           <p class="text-sm">暂无聊天</p>
         </div>
       </section>
@@ -251,7 +247,7 @@ async function loadConversations() {
     conversations.value = data.items
     globalPrivateUnreadCount.value = data.items.reduce((total, item) => total + item.unreadCount, 0)
   } catch (error: any) {
-    toast.error(error.data?.message || '加载私信失败')
+    toast.error(error.data?.message || '加载站内信失败')
   } finally {
     loadingConversations.value = false
   }
@@ -266,7 +262,7 @@ async function openConversationWithUser(userId: number) {
     await loadConversations()
     await selectConversation(conversation.id, true)
   } catch (error: any) {
-    toast.error(error.data?.message || '无法发起私信')
+    toast.error(error.data?.message || '无法发起站内信')
     await router.replace({ query: {} })
   }
 }
@@ -444,7 +440,7 @@ watch(
 
 const siteName = useSiteName()
 useHead({
-  title: computed(() => `私信 - ${siteName.value}`),
+  title: computed(() => `站内信 - ${siteName.value}`),
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
 })
 </script>

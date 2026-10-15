@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   if (targetUserId === user.id) {
     throw createError({
       statusCode: 400,
-      message: '不能给自己发送私信',
+      message: '不能给自己发送站内信',
     })
   }
 

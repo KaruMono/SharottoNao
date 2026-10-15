@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import { requireAuth } from '~/server/utils/auth'
-import { checkExternalApiRateLimit } from '~/server/utils/rate-limit'
 
+const maxImageBytes = 10 * 1024 * 1024
 const maxBase64Length = 10 * 1024 * 1024 * 2
 
 const schema = z.object({
-  file: z.string().optional(), // Base64 图片数据
+  file: z.string().max(maxBase64Length).optional(), // Base64 图片数据
   url: z.string().url().optional(), // 图片 URL
   model: z.string().default('animetrace_high_beta'), // 使用最高质量模型
   is_multi: z.boolean().default(true), // 显示多个结果
@@ -44,8 +44,17 @@ export default defineEventHandler(async (event) => {
     if (data.file) {
       // 确保 Base64 数据不包含 data URI 前缀
       const base64Data = data.file.includes(',') ? data.file.split(',')[1] : data.file
-      formData.append('base64', base64Data)
-      console.log('使用 Base64 数据，长度:', base64Data.length)
+      const imageBytes = Buffer.from(base64Data, 'base64')
+      if (!imageBytes.length) {
+        throw createError({ statusCode: 400, message: '图片数据无效' })
+      }
+      if (imageBytes.length > maxImageBytes) {
+        throw createError({ statusCode: 413, message: '图片大小不能超过 10MB' })
+      }
+      // 上游普通表单字段限制为 1MB；使用文件字段，避免 Base64 膨胀后触发 HTTP 400。
+      formData.append('file', new Blob([new Uint8Array(imageBytes)], {
+        type: 'application/octet-stream',
+      }), 'image')
     } else if (data.url) {
       formData.append('url', data.url)
       console.log('使用 URL:', data.url)
@@ -65,7 +74,7 @@ export default defineEventHandler(async (event) => {
       body: formData,
     })
 
-    const result = await response.json()
+    const result = await response.json().catch(() => null)
     
     console.log('AnimeTrace API 完整响应:', {
       status: response.status,
@@ -76,18 +85,24 @@ export default defineEventHandler(async (event) => {
     // 处理错误状态码
     if (!response.ok) {
       console.error('AnimeTrace API HTTP 错误:', response.status, response.statusText)
+      const detail = [result?.zh_message, result?.message, result?.msg, result?.detail]
+        .find((value) => typeof value === 'string' && value.trim())
       throw createError({
         statusCode: response.status,
-        message: `API 请求失败: ${response.statusText}`,
+        message: `图片识别请求失败: ${detail || `HTTP ${response.status}`}`,
       })
     }
 
+    if (!result || typeof result !== 'object' || Array.isArray(result)) {
+      throw createError({ statusCode: 502, message: '图片识别服务返回了无效响应，请稍后重试' })
+    }
+
     // 检查是否有错误消息
-    if (result.message && result.message !== 'Success' && result.message !== '识别成功') {
+    if (typeof result.message === 'string' && result.message && result.message.toLowerCase() !== 'success' && result.message !== '识别成功') {
       console.error('AnimeTrace API 返回错误消息:', result.message)
       throw createError({
         statusCode: 422,
-        message: result.message,
+        message: result.zh_message || result.message,
       })
     }
 

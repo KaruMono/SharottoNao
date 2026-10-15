@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   const data = schema.parse(body)
 
   const announcement = await prisma.announcement.create({
-    data,
+    data: data as any,
   })
 
   return announcement

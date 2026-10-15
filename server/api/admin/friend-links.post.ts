@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const data = schema.parse(body)
 
   const link = await prisma.friendLink.create({
-    data,
+    data: data as any,
   })
 
   // 标记Logo图片为已使用

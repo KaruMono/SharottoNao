@@ -6,7 +6,7 @@
       <aside class="hidden lg:block">
         <div class="sticky top-28 bg-white dark:bg-zinc-800 rounded-xl shadow p-4 max-h-[calc(100vh-140px)] overflow-y-auto">
           <h3 class="font-semibold text-sm mb-3 flex items-center gap-2 text-gray-500 dark:text-gray-400">
-            <i class="fa-solid fa-book"></i>文档目录
+            <Icon name="fa6-solid:book" />文档目录
           </h3>
           <nav class="space-y-1">
             <template v-for="category in categories" :key="category.name">
@@ -16,16 +16,13 @@
                   @click="toggleCategory(category.name)"
                   class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
                 >
-                  <i 
-                    :class="expandedCategories.includes(category.name) ? 'fa-solid fa-folder-open' : 'fa-solid fa-folder'" 
+                  <FaIcon
+                    :icon="expandedCategories.includes(category.name) ? 'fa6-solid:folder-open' : 'fa6-solid:folder'"
                     class="text-gray-400 w-4 transition-transform duration-200"
                     :style="{ transform: expandedCategories.includes(category.name) ? 'scale(1.1)' : 'scale(1)' }"
-                  ></i>
+                  />
                   <span class="flex-1 text-left truncate">{{ category.name }}</span>
-                  <i 
-                    class="fa-solid fa-chevron-right text-xs text-gray-400 transition-transform duration-200"
-                    :style="{ transform: expandedCategories.includes(category.name) ? 'rotate(90deg)' : 'rotate(0)' }"
-                  ></i>
+                  <Icon name="fa6-solid:chevron-right" class="text-xs text-gray-400 transition-transform duration-200" :style="{ transform: expandedCategories.includes(category.name) ? 'rotate(90deg)' : 'rotate(0)' }" />
                 </button>
                 <!-- 文档列表（带动画） -->
                 <Transition name="folder">
@@ -38,7 +35,7 @@
                       :class="{ 'bg-gray-100 dark:bg-zinc-700 font-medium': route.path === post._path }"
                       :style="{ animationDelay: `${idx * 30}ms` }"
                     >
-                      <i class="fa-solid fa-file-lines text-gray-400 w-4"></i>
+                      <Icon name="fa6-solid:file-lines" class="text-gray-400 w-4" />
                       <span class="truncate">{{ post.title }}</span>
                     </NuxtLink>
                   </div>
@@ -68,15 +65,15 @@
                 class="lg:hidden shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
                 title="页面索引"
               >
-                <i class="fa-solid fa-list text-sm text-gray-500"></i>
+                <Icon name="fa6-solid:list" class="text-sm text-gray-500" />
               </button>
             </div>
             <div class="flex items-center gap-4 mt-4 text-sm text-gray-500">
               <span v-if="doc.date">
-                <i class="fa-solid fa-calendar mr-1.5"></i>{{ formatDate(doc.date) }}
+                <Icon name="fa6-solid:calendar" class="mr-1.5" />{{ formatDate(doc.date) }}
               </span>
               <span v-if="author">
-                <i class="fa-solid fa-user mr-1.5"></i>{{ author }}
+                <Icon name="fa6-solid:user" class="mr-1.5" />{{ author }}
               </span>
             </div>
             <p v-if="doc.description" class="text-gray-600 dark:text-gray-400 mt-4">
@@ -99,10 +96,10 @@
               <div class="bg-white dark:bg-zinc-800 rounded-t-2xl shadow-2xl w-full max-h-[60vh] overflow-hidden animate-in slide-in-from-bottom duration-200">
                 <div class="flex items-center justify-between px-5 py-4 border-b dark:border-zinc-700">
                   <h3 class="font-semibold text-sm flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                    <i class="fa-solid fa-list"></i>页面索引
+                    <Icon name="fa6-solid:list" />页面索引
                   </h3>
                   <button @click="showMobileToc = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-                    <i class="fa-solid fa-xmark text-gray-400"></i>
+                    <Icon name="fa6-solid:xmark" class="text-gray-400" />
                   </button>
                 </div>
                 <nav class="p-4 space-y-1 overflow-y-auto max-h-[calc(60vh-60px)]">
@@ -137,7 +134,7 @@
               to="/posts"
               class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
             >
-              <i class="fa-solid fa-arrow-left"></i>返回文档列表
+              <Icon name="fa6-solid:arrow-left" />返回文档列表
             </NuxtLink>
           </div>
         </ContentDoc>
@@ -147,7 +144,7 @@
       <aside class="hidden lg:block">
         <div class="sticky top-28 bg-white dark:bg-zinc-800 rounded-xl shadow p-4 max-h-[calc(100vh-140px)] overflow-y-auto">
           <h3 class="font-semibold text-sm mb-3 flex items-center gap-2 text-gray-500 dark:text-gray-400">
-            <i class="fa-solid fa-list"></i>页面索引
+            <Icon name="fa6-solid:list" />页面索引
           </h3>
           <nav class="space-y-1">
             <a 
@@ -179,26 +176,29 @@
 </template>
 
 <script setup lang="ts">
+// @ts-ignore - queryContent 是 Nuxt 自动导入的
+const queryContent = (globalThis as any).queryContent
+
 const route = useRoute()
 const { formatDate } = useFormatDate()
 
 // 获取文章
-const { data: doc } = await useAsyncData('post-' + route.path, () => 
-  queryContent(route.path).findOne()
+const { data: doc } = await useAsyncData('post-' + route.path, () =>
+  (queryContent as any)(route.path).findOne()
 )
 
 // 获取所有文章（用于左侧导航）
-const { data: posts } = await useAsyncData('all-posts', () => 
-  queryContent('/posts').find()
+const { data: posts } = await useAsyncData('all-posts', () =>
+  (queryContent as any)('/posts').find()
 )
 
 // 按分类分组
 const categories = computed(() => {
   if (!posts.value) return []
-  
+
   const grouped: Record<string, any[]> = {}
-  
-  for (const post of posts.value) {
+
+  for (const post of posts.value as any[]) {
     const pathParts = post._path?.split('/').filter(Boolean) || []
     const category = pathParts.length > 1 ? pathParts[1] : '未分类'
     
@@ -243,7 +243,7 @@ function toggleCategory(name: string) {
 
 // 获取作者信息
 const author = ref<string | null>(null)
-if (doc.value?.userId) {
+if ((doc.value as any)?.userId) {
   try {
     // 可以从API获取用户信息
     // const userData = await $fetch(`/api/users/${doc.value.userId}`)
@@ -340,11 +340,12 @@ onUnmounted(() => {
 const siteName = useSiteName()
 // SEO
 useHead({
-  title: computed(() => doc.value?.title ? `${doc.value.title} - ${siteName.value}` : siteName.value),
+  title: computed(() => (doc.value as any)?.title ? `${(doc.value as any).title} - ${siteName.value}` : siteName.value),
   meta: computed(() => {
-    const title = doc.value?.title ? `${doc.value.title} - ${siteName.value}` : siteName.value
-    const desc = doc.value?.description || ''
-    const hasBanner = !!doc.value?.banner
+    const currentDoc = doc.value as any
+    const title = currentDoc?.title ? `${currentDoc.title} - ${siteName.value}` : siteName.value
+    const desc = currentDoc?.description || ''
+    const hasBanner = !!currentDoc?.banner
     const metas: any[] = [
       { name: 'description', content: desc },
       { property: 'og:title', content: title },
@@ -355,11 +356,11 @@ useHead({
       { name: 'twitter:description', content: desc },
     ]
     if (hasBanner) {
-      metas.push({ property: 'og:image', content: doc.value.banner })
-      metas.push({ name: 'twitter:image', content: doc.value.banner })
+      metas.push({ property: 'og:image', content: currentDoc?.banner })
+      metas.push({ name: 'twitter:image', content: currentDoc?.banner })
     }
-    if (doc.value?.date) {
-      metas.push({ property: 'article:published_time', content: new Date(doc.value.date).toISOString() })
+    if (currentDoc?.date) {
+      metas.push({ property: 'article:published_time', content: new Date(currentDoc.date).toISOString() })
     }
     return metas
   }),

@@ -36,7 +36,7 @@ export async function assertCanSendPrivateMessage(sender: Pick<User, 'id' | 'rol
   if (!allowed) {
     throw createError({
       statusCode: 403,
-      message: '当前用户只能私信管理员或编辑',
+      message: '当前用户只能给管理员或编辑发送站内信',
     })
   }
 }

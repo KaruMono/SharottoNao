@@ -142,6 +142,7 @@ model Advertisement {
   imageUrl     String   @db.VarChar(500)
   linkUrl      String   @db.VarChar(500)
   enabled      Boolean  @default(true)
+  showOnMobile Boolean  @default(true)
   openInNewTab Boolean  @default(true)
   sortOrder    Int      @default(0)
   createdAt    DateTime @default(now())
@@ -207,6 +208,9 @@ model Game {
   // VNDB 游戏时长信息（分钟）
   lengthMinutes Int? // VNDB 获取的游戏时长
 
+  // 最近一次成功同步 VNDB 原始标签的时间
+  vndbTagsSyncedAt DateTime?
+
   // 游戏系列
   seriesId Int?
   series   GameSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
@@ -217,6 +221,7 @@ model Game {
 
   companies    GameCompany[] // 多对多：一个游戏可以有多个开发商/发行商
   tags         GameTag[]
+  vndbTags     GameVndbTag[]
   staff        GameStaff[]
   screenshots  Screenshot[]
   resources    Resource[]
@@ -299,28 +304,118 @@ enum ResourceStatus {
 // ==================== 标签相关 ====================
 
 model Tag {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar(100)
-  slug        String?  @unique @db.VarChar(100) // 英文/拼音标识
-  description String?  @db.Text
-  color       String?  @db.VarChar(7) // HEX颜色
-  isNsfw      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(100)
+  slug        String?   @unique @db.VarChar(100) // 英文/拼音标识
+  description String?   @db.Text
+  color       String?   @db.VarChar(7) // HEX颜色
+  isNsfw      Boolean   @default(false)
+  isSystem    Boolean   @default(false)
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
 
-  games GameTag[]
+  games    GameTag[]
+  vndbTags VndbTag[]
+  aliases  TagAlias[]
 
   @@index([name])
   @@index([slug])
   @@index([isNsfw])
 }
 
+// 中文、英文及其他语言的搜索别名；Tag.name 始终是站内规范显示名。
+model TagAlias {
+  id             Int      @id @default(autoincrement())
+  tagId          Int
+  tag            Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  name           String   @db.VarChar(100)
+  normalizedName String   @unique @db.VarChar(100)
+  locale         String?  @db.VarChar(20)
+  createdAt      DateTime @default(now())
+
+  @@index([tagId])
+  @@index([name])
+}
+
 model GameTag {
-  gameId Int
-  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  tagId  Int
-  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  gameId  Int
+  game    Game            @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tagId   Int
+  tag     Tag             @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  sources GameTagSource[]
 
   @@id([gameId, tagId])
+  @@index([tagId])
+}
+
+// 最终游戏标签的来源。同一标签可以同时由人工、VNDB 和系统规则提供。
+model GameTagSource {
+  gameId      Int
+  tagId       Int
+  source      GameTagSourceType
+  displayTier TagDisplayTier   @default(PRIMARY)
+  gameTag     GameTag          @relation(fields: [gameId, tagId], references: [gameId, tagId], onDelete: Cascade)
+
+  @@id([gameId, tagId, source])
+  @@index([gameId, source])
+  @@index([tagId, source])
+}
+
+// VNDB 标签词表。Tag 是站内中文规范标签，多个 VNDB 标签可映射到同一个 Tag。
+model VndbTag {
+  id              String         @id @db.VarChar(20) // VNDB 标签 ID，如 g235
+  nameEn          String         @db.VarChar(255)
+  category        String?        @db.VarChar(10) // VNDB 分类：cont / ero / tech
+  tagId           Int?
+  tag             Tag?           @relation(fields: [tagId], references: [id], onDelete: SetNull)
+  status          VndbTagStatus  @default(PENDING)
+  displayTier     TagDisplayTier @default(PRIMARY)
+  isNsfw          Boolean        @default(false)
+  affectsGameNsfw Boolean        @default(false)
+  lastSeenAt      DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @default(now()) @updatedAt
+
+  games GameVndbTag[]
+
+  @@index([tagId])
+  @@index([status])
+  @@index([displayTier])
+  @@index([isNsfw])
+  @@index([category])
+}
+
+// 游戏从 VNDB 获取到的原始标签关联，保留相关度和剧透等级。
+model GameVndbTag {
+  gameId    Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  vndbTagId String   @db.VarChar(20)
+  vndbTag   VndbTag  @relation(fields: [vndbTagId], references: [id], onDelete: Cascade)
+  rating    Float
+  spoiler   Int
+  fetchedAt DateTime @default(now())
+
+  @@id([gameId, vndbTagId])
+  @@index([vndbTagId])
+  @@index([gameId, spoiler, rating])
+}
+
+enum VndbTagStatus {
+  PENDING
+  MAPPED
+  IGNORED
+}
+
+enum GameTagSourceType {
+  MANUAL
+  VNDB
+  SYSTEM
+}
+
+enum TagDisplayTier {
+  PRIMARY
+  SECONDARY
 }
 
 // ==================== STAFF相关 ====================
@@ -420,6 +515,7 @@ model Resource {
   status              ResourceStatus       @default(APPROVED) // 审核状态
   deletedAt           DateTime? // 软删除时间戳
   createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @default(now()) // 内容编辑时显式更新，下载计数等操作不刷新
 
   downloads       DownloadRecord[]
   reports         Report[]                 @relation("ResourceReports")
@@ -428,8 +524,10 @@ model Resource {
   @@index([gameId])
   @@index([netDiskTypeId])
   @@index([healthStatus])
-  // 首页「最新上传」：status + deletedAt 过滤后按 createdAt 排序
+  // 资源上传时间查询
   @@index([status, deletedAt, createdAt])
+  // 首页「最新上传」：按资源上传或内容编辑时间排序
+  @@index([status, deletedAt, updatedAt])
   @@index([gameId, status, deletedAt])
 }
 

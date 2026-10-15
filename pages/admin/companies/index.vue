@@ -2,36 +2,36 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">会社管理</h1>
-      <NuxtLink 
+      <AdminKumoButton
         to="/admin/companies/create"
-        class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center gap-1.5"
+        variant="emphasis"
       >
-        <i class="fa-solid fa-plus"></i>添加会社
-      </NuxtLink>
+        <Icon name="fa6-solid:plus" />添加会社
+      </AdminKumoButton>
     </div>
 
     <!-- 搜索 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
       <div class="relative max-w-md">
-        <input 
+        <input
           v-model="searchQuery"
-          type="text" 
-          placeholder="搜索会社..." 
-          class="w-full px-4 py-2 pl-10 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+          type="text"
+          placeholder="搜索会社..."
+          class="admin-input w-full pl-10"
           @keyup.enter="handleSearch"
         />
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
       </div>
     </div>
 
     <div v-if="selectedIds.length" class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6 flex items-center justify-between">
       <span class="text-sm text-gray-500">已选择 {{ selectedIds.length }} 个会社</span>
-      <button
+      <AdminKumoButton
         @click="batchDelete"
-        class="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600"
+        variant="danger"
       >
-        <i class="fa-solid fa-trash mr-1"></i>批量删除
-      </button>
+        <Icon name="fa6-solid:trash" />批量删除
+      </AdminKumoButton>
     </div>
 
     <!-- 会社列表 -->
@@ -58,7 +58,7 @@
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
                   <img v-if="company.logo" :src="company.logo" class="w-full h-full object-cover" />
-                  <i v-else class="fa-solid fa-building text-gray-400"></i>
+                  <Icon name="fa6-solid:building" class="text-gray-400" v-else />
                 </div>
                 <div>
                   <NuxtLink :to="`/companies/${company.id}`" class="font-medium hover:underline">
@@ -68,7 +68,7 @@
                     {{ company.nameOriginal }}
                   </div>
                   <div v-if="company.parent" class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                    <i class="fa-solid fa-sitemap text-[10px]"></i>
+                    <Icon name="fa6-solid:sitemap" class="text-[10px]" />
                     <NuxtLink :to="`/companies/${company.parent.id}`" class="hover:text-blue-500 hover:underline">
                       {{ company.parent.name }}
                     </NuxtLink>
@@ -110,7 +110,7 @@
     </div>
 
     <!-- 分页 -->
-    <Pagination 
+    <Pagination admin
       v-if="companiesData && companiesData.pagination.totalPages > 1"
       :current-page="currentPage"
       :total-pages="companiesData.pagination.totalPages"

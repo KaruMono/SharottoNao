@@ -82,6 +82,7 @@ export default defineEventHandler(async (event) => {
       fileSize: data.fileSize !== undefined ? data.fileSize : resource.fileSize,
       isMachineTranslated: data.isMachineTranslated !== undefined ? data.isMachineTranslated : resource.isMachineTranslated,
       netDiskTypeId,
+      updatedAt: new Date(),
     },
     include: {
       type: true,

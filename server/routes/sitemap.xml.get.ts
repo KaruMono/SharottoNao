@@ -4,8 +4,6 @@ import { escapeXml, sendSitemapXml, URLS_PER_SITEMAP } from '~/server/utils/site
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const siteUrl = (config.public.siteUrl as string).replace(/\/+$/, '')
-  const today = new Date().toISOString().split('T')[0]
-
   const gameCount = await prisma.game.count({
     where: { isNsfw: false, deletedAt: null },
   })
@@ -15,39 +13,32 @@ export default defineEventHandler(async (event) => {
 
   sitemaps.push(`  <sitemap>
     <loc>${escapeXml(siteUrl)}/sitemap-static.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`)
 
   for (let i = 1; i <= gamePages; i++) {
     sitemaps.push(`  <sitemap>
     <loc>${escapeXml(siteUrl)}/sitemap-games-${i}.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`)
   }
 
   sitemaps.push(`  <sitemap>
     <loc>${escapeXml(siteUrl)}/sitemap-guides.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`)
 
   sitemaps.push(`  <sitemap>
     <loc>${escapeXml(siteUrl)}/sitemap-posts.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`)
 
   sitemaps.push(`  <sitemap>
     <loc>${escapeXml(siteUrl)}/sitemap-tags.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`)
 
   sitemaps.push(`  <sitemap>
     <loc>${escapeXml(siteUrl)}/sitemap-companies.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`)
 
   sitemaps.push(`  <sitemap>
     <loc>${escapeXml(siteUrl)}/sitemap-series.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`)
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

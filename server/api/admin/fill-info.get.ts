@@ -12,7 +12,8 @@ export default defineEventHandler(async (event) => {
       titleZhHans: true,
       titleJa: true,
       titleEn: true,
-      _count: { select: { staff: true, companies: true } },
+      vndbTagsSyncedAt: true,
+      _count: { select: { staff: true, companies: true, vndbTags: true } },
     },
     orderBy: { id: 'asc' },
   })
@@ -26,6 +27,8 @@ export default defineEventHandler(async (event) => {
       titleEn: g.titleEn,
       hasStaff: g._count.staff > 0,
       hasCompany: g._count.companies > 0,
+      hasVndbTags: g._count.vndbTags > 0,
+      vndbTagsSyncedAt: g.vndbTagsSyncedAt,
     })),
     total: games.length,
   }

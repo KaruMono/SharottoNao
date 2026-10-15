@@ -21,6 +21,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: '分类名称或 slug 已存在' })
   }
 
-  const category = await prisma.toolCategory.create({ data })
+  const category = await prisma.toolCategory.create({ data: data as any })
   return category
 })

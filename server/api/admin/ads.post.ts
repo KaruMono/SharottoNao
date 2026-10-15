@@ -11,6 +11,7 @@ const schema = z.object({
   imageUrl: z.string().min(1).max(500),
   linkUrl: z.string().min(1).max(500),
   enabled: z.boolean().default(true),
+  showOnMobile: z.boolean().default(true),
   openInNewTab: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
 })
@@ -24,7 +25,7 @@ export default defineEventHandler(async (event) => {
     data: {
       ...data,
       icon: data.icon || null,
-    },
+    } as any,
   })
   await markImageAsUsed(ad.imageUrl)
   await invalidateAdsCache(ad.slot)

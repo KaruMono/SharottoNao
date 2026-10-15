@@ -20,7 +20,7 @@
             class="w-full md:w-48 h-9 px-3 py-2 pl-9 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
             @keyup.enter="handleSearch"
           />
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
         </div>
         
         <!-- 排序下拉菜单 -->
@@ -29,9 +29,9 @@
             @click="showSortMenu = !showSortMenu"
             class="h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center gap-2 whitespace-nowrap"
           >
-            <i :class="sortOptions.find(o => o.value === sortBy)?.icon || 'fa-solid fa-sort'" class="text-gray-400"></i>
+            <Icon :name="sortOptions.find(o => o.value === sortBy)?.icon || 'fa6-solid:sort'" class="text-gray-400" />
             <span>{{ sortOptions.find(o => o.value === sortBy)?.label || '排序' }}</span>
-            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+            <Icon name="fa6-solid:chevron-down" class="text-xs text-gray-400" />
           </button>
           <Transition name="dropdown">
             <div 
@@ -45,9 +45,9 @@
                 class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center gap-2 transition-colors"
                 :class="{ 'text-gray-900 dark:text-white font-medium': sortBy === option.value }"
               >
-                <i :class="option.icon" class="w-4 text-gray-400"></i>
+                <FaIcon :icon="option.icon" class="w-4 text-gray-400" />
                 {{ option.label }}
-                <i v-if="sortBy === option.value" class="fa-solid fa-check ml-auto text-green-500"></i>
+                <Icon name="fa6-solid:check" class="ml-auto text-green-500" v-if="sortBy === option.value" />
               </button>
             </div>
           </Transition>
@@ -88,7 +88,7 @@
       >
         <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center text-gray-400 dark:text-zinc-400 group-hover:text-gray-600 dark:group-hover:text-zinc-200 transition overflow-hidden">
           <img v-if="company.logo" :src="company.logo" class="w-full h-full object-cover" />
-          <i v-else class="fa-solid fa-building text-xl"></i>
+          <Icon name="fa6-solid:building" class="text-xl" v-else />
         </div>
         <div class="flex-1 min-w-0">
           <h3 class="font-semibold text-base group-hover:text-gray-600 dark:group-hover:text-white transition truncate">
@@ -107,7 +107,7 @@
 
     <!-- 空状态 -->
     <div v-if="!companiesData?.items?.length" class="text-center text-gray-500 py-16">
-      <i class="fa-solid fa-building text-4xl mb-4"></i>
+      <Icon name="fa6-solid:building" class="text-4xl mb-4" />
       <p>暂无会社数据</p>
     </div>
 
@@ -140,9 +140,9 @@ const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M
 
 // 排序选项
 const sortOptions = [
-  { value: 'games', label: '按作品数', icon: 'fa-solid fa-gamepad' },
-  { value: 'name', label: '按名称', icon: 'fa-solid fa-font' },
-  { value: 'founded', label: '按成立时间', icon: 'fa-solid fa-calendar' },
+  { value: 'games', label: '按作品数', icon: 'fa6-solid:gamepad' },
+  { value: 'name', label: '按名称', icon: 'fa6-solid:font' },
+  { value: 'founded', label: '按成立时间', icon: 'fa6-solid:calendar' },
 ]
 
 // 点击外部关闭菜单
@@ -157,7 +157,7 @@ function selectSort(value: string) {
 }
 
 // 获取数据
-const { data: companiesData } = await useFetch('/api/companies', {
+const { data: companiesData } = await (useFetch as any)('/api/companies', {
   key: 'companies-list',
   query: computed(() => ({
     page: currentPage.value,

@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
     data: {
       ...data,
       packId,
-    },
+    } as any,
   })
 
   // 标记表情图片为已使用

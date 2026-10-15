@@ -16,14 +16,14 @@
                 @click="triggerAvatarUpload"
               >
                 <img v-if="profile.avatar" :src="profile.avatar" class="w-full h-full object-cover" />
-                <i v-else class="fa-solid fa-user text-xl md:text-3xl text-gray-400"></i>
+                <Icon name="fa6-solid:user" class="text-xl md:text-3xl text-gray-400" v-else />
               </div>
               <div 
                 class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer"
                 @click="triggerAvatarUpload"
               >
-                <i v-if="uploadingAvatar" class="fa-solid fa-spinner fa-spin text-white text-xl"></i>
-                <i v-else class="fa-solid fa-camera text-white text-xl"></i>
+                <Icon name="fa6-solid:spinner" class="text-white text-xl" v-if="uploadingAvatar" />
+                <Icon name="fa6-solid:camera" class="text-white text-xl" v-else />
               </div>
               <input 
                 ref="avatarInputRef"
@@ -94,11 +94,11 @@
         <!-- 详细信息 - 移动端隐藏 -->
         <div class="hidden lg:block bg-white dark:bg-zinc-800 rounded-xl p-4 shadow text-sm space-y-3">
           <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <i class="fa-solid fa-calendar w-5"></i>
+            <Icon name="fa6-solid:calendar" class="w-5" />
             <span>加入时间：{{ formatDate(profile.createdAt) }}</span>
           </div>
           <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <i class="fa-solid fa-id-card w-5"></i>
+            <Icon name="fa6-solid:id-card" class="w-5" />
             <span>用户ID：{{ profile.id }}</span>
           </div>
         </div>
@@ -108,7 +108,7 @@
           @click="showEditModal = true"
           class="w-full py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition flex items-center justify-center gap-2"
         >
-          <i class="fa-solid fa-pen"></i>编辑个人信息
+          <Icon name="fa6-solid:pen" />编辑个人信息
         </button>
       </aside>
 
@@ -134,7 +134,7 @@
                 ? 'text-gray-800 dark:text-white' 
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
             >
-              <i :class="tab.icon"></i>
+              <FaIcon :icon="tab.icon" />
               <span class="hidden sm:inline">{{ tab.label }}</span>
             </button>
           </div>
@@ -162,10 +162,10 @@
                     <SafeHtml tag="p" class="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1 md:mt-2 line-clamp-2" :content="comment.content" />
                     <div class="flex items-center gap-3 md:gap-4 text-xs text-gray-500 mt-2">
                       <span v-if="comment.playTime">
-                        <i class="fa-solid fa-clock mr-1"></i>{{ comment.playTime }} 小时
+                        <Icon name="fa6-solid:clock" class="mr-1" />{{ comment.playTime }} 小时
                       </span>
                       <span class="flex items-center gap-1">
-                        <i class="fa-solid fa-heart text-red-400"></i>{{ comment.likeCount || 0 }}
+                        <Icon name="fa6-solid:heart" class="text-red-400" />{{ comment.likeCount || 0 }}
                       </span>
                     </div>
                   </div>
@@ -174,7 +174,7 @@
               </div>
             </div>
             <div v-else class="text-center py-8 md:py-12 text-gray-500">
-              <i class="fa-solid fa-comments text-2xl md:text-3xl mb-3"></i>
+              <Icon name="fa6-solid:comments" class="text-2xl md:text-3xl mb-3" />
               <p class="text-sm">暂无评论记录</p>
             </div>
           </div>
@@ -192,7 +192,7 @@
                   ? 'bg-gray-800 dark:bg-zinc-600 text-white border-transparent'
                   : 'border-gray-200 dark:border-zinc-600 text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-700'"
               >
-                <i :class="f.icon" class="mr-1"></i>{{ f.label }}
+                <FaIcon :icon="f.icon" class="mr-1" />{{ f.label }}
               </button>
             </div>
             <Transition name="fade" mode="out-in">
@@ -218,7 +218,7 @@
                     v-else
                     class="w-full h-full flex items-center justify-center"
                   >
-                    <i class="fa-solid fa-gamepad text-3xl text-gray-400 dark:text-zinc-500"></i>
+                    <Icon name="fa6-solid:gamepad" class="text-3xl text-gray-400 dark:text-zinc-500" />
                   </div>
                 </div>
                 <h4 class="text-sm font-medium mt-2 truncate group-hover:text-gray-600 dark:group-hover:text-gray-300">
@@ -228,7 +228,7 @@
               </NuxtLink>
             </div>
             <div v-else :key="favoriteStatusFilter + '-empty'" class="text-center py-12 text-gray-500">
-              <i class="fa-solid fa-heart text-3xl mb-3"></i>
+              <Icon name="fa6-solid:heart" class="text-3xl mb-3" />
               <p>暂无收藏</p>
             </div>
             </Transition>
@@ -247,12 +247,12 @@
                   ? 'bg-gray-800 dark:bg-zinc-600 text-white border-transparent'
                   : 'border-gray-200 dark:border-zinc-600 text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-700'"
               >
-                <i :class="f.icon" class="mr-1"></i>{{ f.label }}
+                <FaIcon :icon="f.icon" class="mr-1" />{{ f.label }}
               </button>
             </div>
 
             <div v-if="activityLoading" class="text-center py-12 text-gray-400">
-              <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+              <Icon name="fa6-solid:spinner" class="fa-spin text-2xl" />
             </div>
             <template v-else>
               <Transition name="fade" mode="out-in">
@@ -272,14 +272,7 @@
                       'bg-orange-100 text-orange-500 dark:bg-orange-900/30': item.type === 'RATE_GAME',
                     }"
                   >
-                    <i :class="{
-                      'fa-solid fa-plus': item.type === 'CREATE_GAME',
-                      'fa-solid fa-pen': item.type === 'EDIT_GAME',
-                      'fa-solid fa-comment': item.type === 'COMMENT',
-                      'fa-solid fa-book': ['CREATE_GUIDE','EDIT_GUIDE'].includes(item.type),
-                      'fa-solid fa-heart': item.type === 'FAVORITE_GAME',
-                      'fa-solid fa-star': item.type === 'RATE_GAME',
-                    }" class="text-sm"></i>
+                    <FaIcon :icon="activityIcon(item.type)" class="text-sm" />
                   </div>
                   <div class="flex-1 min-w-0">
                     <p class="text-sm">
@@ -300,7 +293,7 @@
                 </div>
               </div>
               <div v-else :key="activityFilter + '-empty'" class="text-center py-12 text-gray-500">
-                <i class="fa-solid fa-bolt text-3xl mb-3"></i>
+                <Icon name="fa6-solid:bolt" class="text-3xl mb-3" />
                 <p>{{ activityFilter === '' ? '暂无动态记录' : '该类型暂无记录' }}</p>
               </div>
               </Transition>
@@ -401,7 +394,7 @@
               </div>
             </div>
             <div v-else class="text-center py-12 text-gray-500">
-              <i class="fa-solid fa-clock text-3xl mb-3"></i>
+              <Icon name="fa6-solid:clock" class="text-3xl mb-3" />
               <p>暂无待审核内容</p>
             </div>
           </div>
@@ -412,7 +405,7 @@
 
     <!-- 加载中 -->
     <div v-else class="text-center py-20">
-      <i class="fa-solid fa-spinner fa-spin text-3xl text-gray-400"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-3xl text-gray-400" />
     </div>
 
     <!-- 编辑资料弹窗 -->
@@ -426,7 +419,7 @@
             <div class="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h3 class="font-semibold">编辑个人资料</h3>
               <button @click="showEditModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-                <i class="fa-solid fa-xmark text-gray-400"></i>
+                <Icon name="fa6-solid:xmark" class="text-gray-400" />
               </button>
             </div>
             
@@ -449,7 +442,7 @@
                   ? 'text-gray-800 dark:text-white' 
                   : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
               >
-                <i :class="tab.icon" class="mr-1.5"></i>{{ tab.label }}
+                <FaIcon :icon="tab.icon" class="mr-1.5" />{{ tab.label }}
               </button>
             </div>
             
@@ -640,7 +633,7 @@
                 <!-- 已启用状态 -->
                 <div v-if="profile?.twoFactorEnabled" class="space-y-4">
                   <div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                    <i class="fa-solid fa-shield-check text-lg"></i>
+                    <Icon name="fa6-solid:shield-halved" class="text-lg" />
                     <div>
                       <p class="text-sm font-medium">两步验证已启用</p>
                       <p class="text-xs opacity-75">登录时需要输入 Authenticator 验证码</p>
@@ -668,7 +661,7 @@
                 <!-- 未启用状态 -->
                 <div v-else class="space-y-4">
                   <div class="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400">
-                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                    <Icon name="fa6-solid:shield-halved" class="text-lg" />
                     <div>
                       <p class="text-sm font-medium">两步验证未启用</p>
                       <p class="text-xs opacity-75">启用后可大幅提升账号安全性</p>
@@ -717,7 +710,7 @@
 
                   <!-- 启用成功 -->
                   <div v-else class="text-center py-4 text-green-600 dark:text-green-400">
-                    <i class="fa-solid fa-circle-check text-3xl mb-2"></i>
+                    <Icon name="fa6-solid:circle-check" class="text-3xl mb-2" />
                     <p class="font-medium">两步验证已成功启用！</p>
                     <p class="text-sm text-gray-500 mt-1">下次登录时将需要输入验证码</p>
                   </div>
@@ -733,7 +726,7 @@
     <!-- 粉丝列表弹窗 -->
     <Modal v-model="showFollowersModal" title="我的粉丝">
       <div v-if="followersLoading" class="text-center py-8">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-2xl text-gray-400" />
       </div>
       <div v-else-if="followersList.length" class="space-y-3 max-h-96 overflow-y-auto">
         <NuxtLink
@@ -745,7 +738,7 @@
         >
           <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
-            <i v-else class="fa-solid fa-user text-gray-400"></i>
+            <Icon name="fa6-solid:user" class="text-gray-400" v-else />
           </div>
           <div>
             <div class="font-medium text-sm">{{ user.username }}</div>
@@ -759,7 +752,7 @@
     <!-- 关注列表弹窗 -->
     <Modal v-model="showFollowingModal" title="我的关注">
       <div v-if="followingLoading" class="text-center py-8">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-2xl text-gray-400" />
       </div>
       <div v-else-if="followingList.length" class="space-y-3 max-h-96 overflow-y-auto">
         <NuxtLink
@@ -771,7 +764,7 @@
         >
           <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
-            <i v-else class="fa-solid fa-user text-gray-400"></i>
+            <Icon name="fa6-solid:user" class="text-gray-400" v-else />
           </div>
           <div>
             <div class="font-medium text-sm">{{ user.username }}</div>
@@ -820,12 +813,12 @@ const { data: comments } = await useAuthFetch<UserCommentItem[]>('/api/user/comm
 const { data: favorites } = await useAuthFetch<UserFavoriteItem[]>('/api/user/favorites', { key: 'user-favorites' })
 
 const favoriteFilters = [
-  { value: '', label: '全部', icon: 'fa-solid fa-list' },
-  { value: 'WISHLIST', label: '想玩', icon: 'fa-regular fa-bookmark' },
-  { value: 'PLAYING', label: '在玩', icon: 'fa-solid fa-gamepad' },
-  { value: 'COMPLETED', label: '玩过', icon: 'fa-solid fa-circle-check' },
-  { value: 'ON_HOLD', label: '搁置', icon: 'fa-solid fa-pause' },
-  { value: 'DROPPED', label: '抛弃', icon: 'fa-solid fa-ban' },
+  { value: '', label: '全部', icon: 'fa6-solid:list' },
+  { value: 'WISHLIST', label: '想玩', icon: 'fa6-regular:bookmark' },
+  { value: 'PLAYING', label: '在玩', icon: 'fa6-solid:gamepad' },
+  { value: 'COMPLETED', label: '玩过', icon: 'fa6-solid:circle-check' },
+  { value: 'ON_HOLD', label: '搁置', icon: 'fa6-solid:pause' },
+  { value: 'DROPPED', label: '抛弃', icon: 'fa6-solid:ban' },
 ]
 const favoriteStatusFilter = ref('')
 const filteredFavorites = computed(() => {
@@ -850,13 +843,13 @@ const activityPagination = ref({ total: 0, totalPages: 0 })
 const activityFilter = ref('')
 
 const activityFilters = [
-  { value: '', label: '全部', icon: 'fa-solid fa-list' },
-  { value: 'CREATE_GAME', label: '创建', icon: 'fa-solid fa-plus' },
-  { value: 'EDIT_GAME', label: '编辑', icon: 'fa-solid fa-pen' },
-  { value: 'COMMENT', label: '评论', icon: 'fa-solid fa-comment' },
-  { value: 'GUIDE', label: '攻略', icon: 'fa-solid fa-book' },
-  { value: 'RATE_GAME', label: '评分', icon: 'fa-solid fa-star' },
-  { value: 'FAVORITE_GAME', label: '收藏', icon: 'fa-solid fa-heart' },
+  { value: '', label: '全部', icon: 'fa6-solid:list' },
+  { value: 'CREATE_GAME', label: '创建', icon: 'fa6-solid:plus' },
+  { value: 'EDIT_GAME', label: '编辑', icon: 'fa6-solid:pen' },
+  { value: 'COMMENT', label: '评论', icon: 'fa6-solid:comment' },
+  { value: 'GUIDE', label: '攻略', icon: 'fa6-solid:book' },
+  { value: 'RATE_GAME', label: '评分', icon: 'fa6-solid:star' },
+  { value: 'FAVORITE_GAME', label: '收藏', icon: 'fa6-solid:heart' },
 ]
 
 async function loadActivities() {
@@ -913,6 +906,19 @@ function activityLabel(type: string) {
   return map[type] || type
 }
 
+function activityIcon(type: string) {
+  const map: Record<string, string> = {
+    CREATE_GAME: 'fa6-solid:plus',
+    EDIT_GAME: 'fa6-solid:pen',
+    COMMENT: 'fa6-solid:comment',
+    CREATE_GUIDE: 'fa6-solid:book',
+    EDIT_GUIDE: 'fa6-solid:book',
+    FAVORITE_GAME: 'fa6-solid:heart',
+    RATE_GAME: 'fa6-solid:star',
+  }
+  return map[type] || 'fa6-solid:bell'
+}
+
 // 关注/粉丝弹窗
 const showFollowersModal = ref(false)
 const showFollowingModal = ref(false)
@@ -926,7 +932,7 @@ async function loadFollowers() {
   if (!userId) return
   followersLoading.value = true
   try {
-    const data = await $fetch<ListResponse<UserSummary>>(`/api/user/${userId}/followers`)
+    const data: any = await ($fetch as any)(`/api/user/${userId}/followers`)
     followersList.value = data.items
   } catch {
     followersList.value = []
@@ -940,7 +946,7 @@ async function loadFollowing() {
   if (!userId) return
   followingLoading.value = true
   try {
-    const data = await $fetch<ListResponse<UserSummary>>(`/api/user/${userId}/following`)
+    const data: any = await ($fetch as any)(`/api/user/${userId}/following`)
     followingList.value = data.items
   } catch {
     followingList.value = []
@@ -1026,10 +1032,10 @@ const roleLabels: Record<string, string> = {
 
 // 标签页
 const tabs = [
-  { key: 'comments', label: '我的评论', icon: 'fa-solid fa-comments' },
-  { key: 'favorites', label: '我的收藏', icon: 'fa-solid fa-heart' },
-  { key: 'activity', label: '我的动态', icon: 'fa-solid fa-bolt' },
-  { key: 'pending', label: '待审核', icon: 'fa-solid fa-clock' },
+  { key: 'comments', label: '我的评论', icon: 'fa6-solid:comments' },
+  { key: 'favorites', label: '我的收藏', icon: 'fa6-solid:heart' },
+  { key: 'activity', label: '我的动态', icon: 'fa6-solid:bolt' },
+  { key: 'pending', label: '待审核', icon: 'fa6-solid:clock' },
 ]
 
 // 监听activeTab变化，更新URL
@@ -1041,10 +1047,10 @@ watch(activeTab, (newTab) => {
 const showEditModal = ref(false)
 const editActiveTab = ref('profile')
 const editTabs = [
-  { key: 'profile', label: '基本信息', icon: 'fa-solid fa-user' },
-  { key: 'email', label: '换绑邮箱', icon: 'fa-solid fa-envelope' },
-  { key: 'password', label: '修改密码', icon: 'fa-solid fa-lock' },
-  { key: 'security', label: '两步验证', icon: 'fa-solid fa-shield-halved' },
+  { key: 'profile', label: '基本信息', icon: 'fa6-solid:user' },
+  { key: 'email', label: '换绑邮箱', icon: 'fa6-solid:envelope' },
+  { key: 'password', label: '修改密码', icon: 'fa6-solid:lock' },
+  { key: 'security', label: '两步验证', icon: 'fa6-solid:shield-halved' },
 ]
 
 const editForm = reactive({

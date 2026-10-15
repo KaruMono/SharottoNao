@@ -19,6 +19,8 @@ const querySchema = z.object({
   noZhTitle: z.enum(['true']).optional(),
   noZhDesc: z.enum(['true']).optional(),
   hasMachineTranslation: z.enum(['true']).optional(),
+  sortBy: z.enum(['views', 'resources', 'createdAt', 'releaseDate']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
 })
 
 function getDisplayTitle(game: { titleEn: string | null; titleJa: string | null; titleZhHans: string | null; titleZhHant: string | null }): string {
@@ -46,6 +48,8 @@ export default defineEventHandler(async (event) => {
     noZhTitle,
     noZhDesc,
     hasMachineTranslation,
+    sortBy,
+    sortOrder,
   } = querySchema.parse(query)
   
   const skip = (page - 1) * limit
@@ -127,6 +131,16 @@ export default defineEventHandler(async (event) => {
     whereClause.id = { in: result.map(r => r.gameId) }
   }
 
+  // Keep the sort field whitelisted so arbitrary Prisma fields cannot be passed
+  // through the admin endpoint.
+  const orderBy: any = sortBy === 'views'
+    ? { viewCount: sortOrder }
+    : sortBy === 'resources'
+      ? { resources: { _count: sortOrder } }
+      : sortBy === 'releaseDate'
+        ? { releaseDate: { sort: sortOrder, nulls: 'last' } }
+        : { createdAt: sortOrder }
+
   const [games, total] = await Promise.all([
     prisma.game.findMany({
       where: whereClause,
@@ -140,6 +154,7 @@ export default defineEventHandler(async (event) => {
         isNsfw: true,
         viewCount: true,
         createdAt: true,
+        releaseDate: true,
         creator: {
           select: { id: true, username: true },
         },
@@ -157,7 +172,7 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       skip,
       take: limit,
     }),

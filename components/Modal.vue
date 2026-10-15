@@ -21,7 +21,7 @@
               @click="handleClose"
               class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition text-gray-400 hover:text-gray-600"
             >
-              <i class="fa-solid fa-xmark text-lg"></i>
+              <Icon name="fa6-solid:xmark" class="text-lg" />
             </button>
           </div>
           

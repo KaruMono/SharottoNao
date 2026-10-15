@@ -1,62 +1,112 @@
 <template>
-  <div>
-  <div class="max-w-md mx-auto px-2.5 sm:px-4 md:px-6 py-8 md:py-12">
-    <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 md:p-8 shadow">
-      <h1 class="text-xl md:text-2xl font-bold text-center mb-6 md:mb-8">登录</h1>
-
-      <form @submit.prevent="handleLogin" class="space-y-4 md:space-y-5">
-        <div>
-          <label class="block text-sm font-medium mb-2">邮箱</label>
-          <input
-            v-model="form.email"
-            type="email"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            placeholder="your@email.com"
-            autocomplete="username"
-            required
+  <div class="flex items-center justify-center h-full py-8 px-2 md:px-4">
+    <!-- 登录卡片容器 -->
+    <div class="w-full max-w-4xl bg-white dark:bg-zinc-800 rounded-2xl shadow-xl overflow-hidden">
+      <div class="flex flex-col md:flex-row">
+        <!-- 左侧 - 品牌展示区（手机端隐藏）-->
+        <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 p-8 md:p-10 flex-col justify-center relative overflow-hidden min-h-[520px]">
+          <img
+            v-if="hasBackgroundImage"
+            :src="backgroundImageUrl"
+            alt=""
+            class="absolute inset-0 w-full h-full object-cover"
+            @error="backgroundImageFailed = true"
           />
+          <div v-if="hasBackgroundImage" class="absolute inset-0 bg-black/50"></div>
+          <template v-else>
+            <!-- 未配置图片或加载失败时使用默认背景 -->
+            <div class="absolute top-16 left-8 w-24 h-24 bg-blue-200/30 dark:bg-blue-800/20 rounded-full"></div>
+            <div class="absolute bottom-24 right-16 w-36 h-36 bg-blue-300/20 dark:bg-blue-700/10 rounded-full"></div>
+            <div class="absolute bottom-16 left-1/4 w-20 h-20 bg-blue-100/40 dark:bg-blue-900/15 rounded-full"></div>
+          </template>
+
+          <!-- 品牌内容 -->
+          <div class="relative z-10">
+            <!-- 标题 -->
+            <h2
+              class="text-3xl md:text-4xl font-bold mb-3 break-words"
+              :class="hasBackgroundImage ? 'text-white drop-shadow' : 'text-gray-800 dark:text-gray-100'"
+            >
+              {{ siteName }}
+            </h2>
+
+            <!-- 描述 -->
+            <p
+              class="text-base"
+              :class="hasBackgroundImage ? 'text-white/90 drop-shadow' : 'text-gray-600 dark:text-gray-300'"
+            >
+              所以我们要留下很多幸福的回忆。
+            </p>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-2">密码</label>
-          <input
-            v-model="form.password"
-            type="password"
-            autocomplete="current-password"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            placeholder="••••••••"
-            required
-          />
-        </div>
+        <!-- 右侧 - 登录表单区 -->
+        <div class="md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
+          <!-- 表单标题 -->
+          <div class="mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              欢迎回来
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              登录 {{ siteName }} 账户
+            </p>
+          </div>
 
-        <div v-if="errorMessage" class="text-red-500 text-sm text-center">
-          {{ errorMessage }}
-        </div>
+          <!-- 登录表单 -->
+          <form @submit.prevent="handleLogin" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                账号 <span class="text-red-500">*</span>
+              </label>
+              <CloudInput
+                v-model="form.account"
+                type="text"
+                placeholder="请输入邮箱或用户名"
+                autocomplete="username"
+                required
+              />
+            </div>
 
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white font-medium hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50 transition"
-        >
-          {{ loading ? '登录中...' : '登录' }}
-        </button>
-      </form>
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                密码 <span class="text-red-500">*</span>
+              </label>
+              <CloudInput
+                v-model="form.password"
+                type="password"
+                placeholder="请输入密码"
+                autocomplete="current-password"
+                required
+              />
+            </div>
 
-      <div class="mt-6 space-y-2 text-center text-sm text-gray-500">
-        <div>
-          <NuxtLink to="/forgot-password" class="text-gray-600 dark:text-gray-400 hover:underline">
-            忘记密码？
-          </NuxtLink>
-        </div>
-        <div>
-          还没有账号？
-          <NuxtLink to="/register" class="text-gray-800 dark:text-gray-200 hover:underline">
-            立即注册
-          </NuxtLink>
+            <div v-if="errorMessage" class="text-red-500 text-sm">
+              {{ errorMessage }}
+            </div>
+
+            <CloudButton
+              type="submit"
+              variant="primary"
+              size="large"
+              :loading="loading"
+              full-width
+            >
+              {{ loading ? '登录中...' : '登录' }}
+            </CloudButton>
+          </form>
+
+          <!-- 底部链接 -->
+          <div class="mt-5 space-y-2 text-sm text-center">
+            <div class="text-gray-600 dark:text-gray-400">
+              还没有帐户？<NuxtLink to="/register" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">立即注册</NuxtLink>
+            </div>
+            <div class="text-gray-600 dark:text-gray-400">
+              忘记了您的 <NuxtLink to="/forgot-password" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">密码</NuxtLink>？
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
   <!-- 2FA 验证弹窗 -->
   <Teleport to="body">
@@ -91,20 +141,25 @@
           {{ twoFactorError }}
         </div>
 
-        <button
-          :disabled="totpCode.length < 6 || twoFactorLoading"
-          class="w-full py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white font-medium hover:bg-gray-700 disabled:opacity-50 transition"
+        <CloudButton
+          variant="primary"
+          size="large"
+          :disabled="totpCode.length < 6"
+          :loading="twoFactorLoading"
+          full-width
           @click="handleTwoFactor"
         >
           {{ twoFactorLoading ? '验证中...' : '验证' }}
-        </button>
+        </CloudButton>
 
-        <button
-          class="w-full mt-2 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+        <CloudButton
+          variant="ghost"
+          full-width
+          class="mt-2"
           @click="cancelTwoFactor"
         >
           取消，重新登录
-        </button>
+        </CloudButton>
       </div>
     </div>
   </Teleport>
@@ -116,8 +171,17 @@ const { signIn } = useAuth()
 const route = useRoute()
 const router = useRouter()
 
+// 随机结果随 Nuxt 数据一起传给客户端，避免服务端渲染和水合时选到不同图片。
+const { data: loginBackground } = await useFetch<{ imageUrl: string }, Error, string & {}>('/api/login-background', {
+  key: 'login-background',
+})
+const backgroundImageUrl = computed(() => loginBackground.value?.imageUrl || '')
+const backgroundImageFailed = ref(false)
+const hasBackgroundImage = computed(() => !!backgroundImageUrl.value && !backgroundImageFailed.value)
+watch(backgroundImageUrl, () => { backgroundImageFailed.value = false })
+
 const form = reactive({
-  email: '',
+  account: '',
   password: '',
 })
 
@@ -140,10 +204,10 @@ async function handleLogin() {
 
   try {
     // 直接调接口，判断是否需要 2FA
-    const res = await $fetch<any>('/api/auth/login', {
+    const res: any = await $fetch('/api/auth/login', {
       method: 'POST',
-      body: { email: form.email, password: form.password },
-    })
+      body: { account: form.account, password: form.password },
+    } as any)
 
     if (res.needsTwoFactor) {
       tempToken.value = res.tempToken
@@ -153,7 +217,7 @@ async function handleLogin() {
       digitRefs.value[0]?.focus()
     } else {
       // 无 2FA，通过 signIn 写入 session
-      await signIn({ email: form.email, password: form.password }, { redirect: false })
+      await signIn({ account: form.account, password: form.password }, { redirect: false })
       const redirect = route.query.redirect as string || '/'
       router.push(redirect)
     }
@@ -197,13 +261,13 @@ async function handleTwoFactor() {
   twoFactorError.value = ''
 
   try {
-    const res = await $fetch<any>('/api/auth/2fa/verify', {
+    const res: any = await ($fetch as any)('/api/auth/2fa/verify', {
       method: 'POST',
       body: { tempToken: tempToken.value, code: totpCode.value },
-    })
+    } as any)
 
     // 用 signIn 写入 session（携带已验证的邮密）
-    await signIn({ email: form.email, password: form.password }, { redirect: false })
+    await signIn({ account: form.account, password: form.password }, { redirect: false })
     showTwoFactor.value = false
     const redirect = route.query.redirect as string || '/'
     router.push(redirect)

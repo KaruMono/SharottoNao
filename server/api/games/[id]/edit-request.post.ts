@@ -3,7 +3,9 @@ import type { Prisma } from '@prisma/client'
 import { requireAuth } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
 import { buildGameEditChanges } from '~/server/utils/edit-request'
+import { resolveNsfwMode } from '~/server/utils/nsfw'
 import { normalizeTagNames, findTagByName } from '~/server/utils/tag-normalize'
+import { mergeRequestedTagIdsPreservingHidden } from '~/server/utils/tag-visibility'
 
 const schema = z.object({
   titleEn: z.string().optional(),
@@ -57,7 +59,10 @@ export default defineEventHandler(async (event) => {
   const game = await prisma.game.findUnique({
     where: { id: gameId, deletedAt: null },
     include: {
-      tags: { include: { tag: true } },
+      tags: {
+        where: { sources: { some: { source: 'MANUAL' } } },
+        include: { tag: true },
+      },
       staff: { include: { staff: true } },
       companies: { include: { company: { select: { name: true } } } },
     },
@@ -72,6 +77,14 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
   const data = schema.parse(body)
+
+  if (data.tagIds !== undefined) {
+    data.tagIds = mergeRequestedTagIdsPreservingHidden(
+      data.tagIds,
+      game.tags,
+      resolveNsfwMode(user),
+    )
+  }
 
   // 自由输入的标签名：先归一化去重，再逐个查词表。
   // 已存在的（忽略大小写/全角差异）直接归位到 tagIds，不必让管理员再处理一遍；
@@ -96,7 +109,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 计算变更内容（统一逻辑，含日期归一化、会社、vndbId 等字段）
-  const changes = buildGameEditChanges(game as any, data)
+  const changes = buildGameEditChanges(game as any, data as any)
 
   // 如果没有任何变更
   if (Object.keys(changes).length === 0) {

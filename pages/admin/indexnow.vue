@@ -5,51 +5,47 @@
     <!-- API Key 设置 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow mb-6">
       <h2 class="font-semibold text-lg mb-4">API Key 设置</h2>
-      
       <div v-if="!settings" class="space-y-4">
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <div class="flex items-start gap-3">
-            <i class="fa-solid fa-info-circle text-blue-500 mt-0.5"></i>
+            <Icon name="fa6-solid:circle-info" class="text-blue-500 mt-0.5" />
             <div class="flex-1 text-sm">
               <p class="font-medium text-blue-900 dark:text-blue-100 mb-1">首次使用需要生成 API Key</p>
               <p class="text-blue-700 dark:text-blue-300">生成后，系统会自动创建 API Key 文件，用于向搜索引擎提交网站更新。</p>
             </div>
           </div>
         </div>
-        <button
+        <AdminKumoButton variant="primary"
           @click="generateApiKey"
           :disabled="generating"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 transition"
         >
-          <i v-if="generating" class="fa-solid fa-spinner fa-spin mr-1"></i>
+          <Icon name="fa6-solid:spinner"  v-if="generating" />
           {{ generating ? '生成中...' : '生成 API Key' }}
-        </button>
+        </AdminKumoButton>
       </div>
 
       <div v-else class="space-y-4">
         <div>
           <div class="flex items-center justify-between mb-2">
             <label class="text-sm font-medium">API Key</label>
-            <button
+            <AdminKumoButton variant="secondary" size="sm"
               @click="regenerateApiKey"
-              class="px-2 py-1 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded text-xs transition"
             >
-              <i class="fa-solid fa-rotate mr-1"></i>重新生成
-            </button>
+              <Icon name="fa6-solid:rotate" />重新生成
+            </AdminKumoButton>
           </div>
           <div class="flex gap-2">
             <input
               :value="settings.apiKey"
               type="text"
               readonly
-              class="flex-1 px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm font-mono"
+              class="admin-input flex-1 font-mono"
             />
-            <button
+            <AdminKumoButton variant="secondary"
               @click="copyApiKey"
-              class="px-3 py-2 bg-gray-100 dark:bg-zinc-700 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-600 text-sm"
             >
-              <i class="fa-solid fa-copy"></i>
-            </button>
+              <Icon name="fa6-solid:copy" />
+            </AdminKumoButton>
           </div>
           <p class="text-xs text-gray-500 mt-1">
             API Key 文件地址: <code class="bg-gray-100 dark:bg-zinc-700 px-1 py-0.5 rounded">{{ siteUrl }}/{{ settings.apiKey }}.txt</code>
@@ -75,15 +71,14 @@
               type="number"
               min="1"
               max="10000"
-              class="w-32 px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
+              class="admin-input w-32"
             />
             <span class="text-sm text-gray-500">条/天</span>
-            <button
+            <AdminKumoButton variant="primary"
               @click="updateDailyLimit"
-              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 text-sm"
             >
               保存
-            </button>
+            </AdminKumoButton>
           </div>
           <p class="text-xs text-gray-500">
             限制每天自动提交的 URL 数量，防止超出搜索引擎配额。今日已提交：{{ stats?.todayCount || 0 }} / {{ dailyLimit }}
@@ -101,17 +96,16 @@
           v-model="manualUrl"
           type="text"
           placeholder="输入要提交的完整 URL"
-          class="flex-1 px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
+          class="admin-input flex-1"
           @keydown.enter="submitManualUrl"
         />
-        <button
+        <AdminKumoButton variant="primary"
           @click="submitManualUrl"
           :disabled="!manualUrl.trim() || submitting"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 text-sm"
         >
-          <i v-if="submitting" class="fa-solid fa-spinner fa-spin mr-1"></i>
+          <Icon name="fa6-solid:spinner"  v-if="submitting" />
           提交
-        </button>
+        </AdminKumoButton>
       </div>
     </div>
 
@@ -140,27 +134,25 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-semibold text-lg">提交历史</h2>
         <div class="flex gap-2">
-          <select v-model="filterStatus" class="px-3 py-1.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm">
+          <AdminSelect aria-label="状态筛选" v-model="filterStatus" >
             <option value="">全部状态</option>
             <option value="SUCCESS">成功</option>
             <option value="FAILED">失败</option>
-          </select>
-          <button
+          </AdminSelect>
+          <AdminKumoButton variant="secondary" size="toolbar"
             @click="refreshSubmissions"
-            class="px-3 py-1.5 bg-gray-100 dark:bg-zinc-700 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-600 text-sm"
             title="刷新"
           >
-            <i class="fa-solid fa-rotate"></i>
-          </button>
-          <button
+            <Icon name="fa6-solid:rotate" />
+          </AdminKumoButton>
+          <AdminKumoButton variant="danger" size="toolbar"
             @click="clearSubmissions"
             :disabled="clearing || submissions.length === 0"
-            class="px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 disabled:opacity-40 text-sm transition"
             title="清空历史"
           >
-            <i v-if="clearing" class="fa-solid fa-spinner fa-spin"></i>
-            <i v-else class="fa-solid fa-trash"></i>
-          </button>
+            <Icon name="fa6-solid:spinner" v-if="clearing" />
+            <Icon name="fa6-solid:trash" v-else />
+          </AdminKumoButton>
         </div>
       </div>
 
@@ -172,8 +164,8 @@
         >
           <i
             :class="{
-              'fa-solid fa-circle-check text-green-500': submission.status === 'SUCCESS',
-              'fa-solid fa-circle-xmark text-red-500': submission.status === 'FAILED',
+              'fa6-solid:circle-check text-green-500': submission.status === 'SUCCESS',
+              'fa6-solid:circle-xmark text-red-500': submission.status === 'FAILED',
             }"
           ></i>
           <div class="flex-1 min-w-0">
@@ -194,13 +186,12 @@
               <span v-if="submission.errorMessage" class="text-red-500">{{ submission.errorMessage }}</span>
             </div>
           </div>
-          <button
+          <AdminKumoButton variant="primary" size="sm"
             v-if="submission.status === 'FAILED'"
             @click="resubmit(submission)"
-            class="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-500"
           >
             重试
-          </button>
+          </AdminKumoButton>
         </div>
 
         <div v-if="filteredSubmissions.length === 0" class="text-center py-8 text-gray-400">

@@ -53,6 +53,18 @@ export type CompanyItem = {
   createdAt?: string | Date
 }
 
+export type TagAliasItem = {
+  id: number
+  name: string
+  locale?: string | null
+}
+
+export type VndbTagSummary = {
+  id: string
+  nameEn: string
+  displayTier?: 'PRIMARY' | 'SECONDARY'
+}
+
 export type TagItem = {
   id: number
   name: string
@@ -60,7 +72,73 @@ export type TagItem = {
   color?: string | null
   description?: string | null
   isNsfw?: boolean
+  isSystem?: boolean
+  archivedAt?: string | Date | null
+  aliases?: TagAliasItem[]
+  vndbTags?: VndbTagSummary[]
   gamesCount?: number
+}
+
+export type AdminTagItem = TagItem & {
+  description: string | null
+  color: string | null
+  isNsfw: boolean
+  isSystem: boolean
+  archivedAt: string | Date | null
+  aliases: TagAliasItem[]
+  vndbTags: VndbTagSummary[]
+  displayTier: 'PRIMARY' | 'SECONDARY'
+  gamesCount: number
+}
+
+export type AdminTagsResponse = ListResponse<AdminTagItem>
+
+export type AdminTagArchiveResponse = {
+  success: boolean
+  message: string
+}
+
+export type AdminTagBatchArchiveResponse = {
+  success: boolean
+  archivedCount: number
+  deletedCount?: number
+  failed: unknown[]
+}
+
+export type AdminTagRestoreResponse = {
+  success: boolean
+  message: string
+}
+
+export type AdminTagBatchRestoreResponse = {
+  success: boolean
+  restoredCount: number
+}
+
+export type AdminTagBatchColorResponse = {
+  success: boolean
+  updatedCount: number
+}
+
+export type AdminTagBatchPolicyResponse = {
+  success: boolean
+  updatedCount: number
+  updatedMappings: number
+  affectedGames: number
+}
+
+export type AdminTagPurgeResponse = {
+  success: boolean
+  message: string
+  purgedCount: number
+  removedGameAssociations: number
+  resetVndbMappings: number
+}
+
+export type TagDetailResponse = TagItem & {
+  gamesCount: number
+  games: GameCardItem[]
+  pagination: Pagination
 }
 
 export type SeriesItem = {
@@ -146,6 +224,8 @@ export type AdminGameTag = {
   tagId?: number
   name?: string
   color?: string | null
+  isNsfw?: boolean
+  sources?: Array<'MANUAL' | 'VNDB' | 'SYSTEM'>
   tag?: { id: number; name: string; color?: string | null }
 }
 
@@ -184,6 +264,7 @@ export type AdminGameItem = GameCardItem & {
   language?: string | null
   companyId?: number | null
   vndbId?: string | null
+  vndbTagsSyncedAt?: string | Date | null
   bangumiId?: number | string | null
   aliases?: string[]
   screenshots?: AdminGameScreenshot[]
@@ -442,6 +523,9 @@ export type GameDetailTag = {
   name: string
   slug?: string | null
   color?: string | null
+  isNsfw?: boolean
+  displayTier?: 'PRIMARY' | 'SECONDARY'
+  sources?: Array<'MANUAL' | 'VNDB' | 'SYSTEM'>
 }
 
 export type GameDetailCompany = {
@@ -575,7 +659,6 @@ export type TrafficStatsItem = {
 }
 
 export type HomeResponse = {
-  monthlyReleasedGames: GameCardItem[]
   latestGames: GameCardItem[]
   recentlyUpdated: GameCardItem[]
   popularGames: GameCardItem[]

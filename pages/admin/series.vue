@@ -2,12 +2,11 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">游戏系列管理</h1>
-      <button 
+      <AdminKumoButton variant="primary"
         @click="showCreateModal = true"
-        class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 flex items-center gap-1.5"
       >
-        <i class="fa-solid fa-plus"></i>创建系列
-      </button>
+        <Icon name="fa6-solid:plus" />创建系列
+      </AdminKumoButton>
     </div>
 
     <!-- 筛选 -->
@@ -17,21 +16,20 @@
           v-model="searchQuery"
           type="text" 
           placeholder="搜索系列名称..." 
-          class="w-full px-4 py-2 pl-10 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+          class="admin-input w-full pl-10"
           @keyup.enter="handleSearch"
         />
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
       </div>
     </div>
 
     <div v-if="selectedIds.length" class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6 flex items-center justify-between">
       <span class="text-sm text-gray-500">已选择 {{ selectedIds.length }} 个系列</span>
-      <button
+      <AdminKumoButton variant="danger" size="toolbar"
         @click="batchDelete"
-        class="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600"
       >
-        <i class="fa-solid fa-trash mr-1"></i>批量删除
-      </button>
+        <Icon name="fa6-solid:trash" />批量删除
+      </AdminKumoButton>
     </div>
 
     <!-- 系列列表 -->
@@ -62,7 +60,7 @@
                   class="w-10 h-10 rounded object-cover"
                 />
                 <div v-else class="w-10 h-10 rounded bg-gray-200 dark:bg-zinc-700 flex items-center justify-center">
-                  <i class="fa-solid fa-layer-group text-gray-400"></i>
+                  <Icon name="fa6-solid:layer-group" class="text-gray-400" />
                 </div>
                 <div>
                   <div class="font-medium">{{ series.name }}</div>
@@ -106,7 +104,7 @@
     </div>
 
     <!-- 分页 -->
-    <Pagination 
+    <Pagination admin
       v-if="seriesData && seriesData.pagination.totalPages > 1"
       :current-page="currentPage"
       :total-pages="seriesData.pagination.totalPages"
@@ -122,7 +120,7 @@
           <input 
             v-model="form.name"
             type="text"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-input w-full"
             placeholder="输入系列名称"
           />
         </div>
@@ -131,7 +129,7 @@
           <input 
             v-model="form.nameOriginal"
             type="text"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-input w-full"
             placeholder="输入原名（可选）"
           />
         </div>
@@ -140,7 +138,7 @@
           <textarea 
             v-model="form.description"
             rows="3"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-textarea w-full"
             placeholder="输入系列简介（可选）"
           ></textarea>
         </div>
@@ -156,19 +154,17 @@
           <p class="text-xs text-gray-500 mt-1">SFW 模式下将不显示此系列</p>
         </div>
         <div class="flex justify-end gap-3 pt-2">
-          <button 
+          <AdminKumoButton variant="secondary"
             @click="showCreateModal = false"
-            class="px-4 py-2 text-sm border dark:border-zinc-600 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700"
           >
             取消
-          </button>
-          <button 
+          </AdminKumoButton>
+          <AdminKumoButton variant="primary"
             @click="saveSeries"
             :disabled="!form.name || saving"
-            class="px-4 py-2 text-sm bg-gray-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50"
           >
             {{ saving ? '保存中...' : '保存' }}
-          </button>
+          </AdminKumoButton>
         </div>
       </div>
     </Modal>

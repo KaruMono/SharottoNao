@@ -11,7 +11,7 @@
         <div class="flex items-start justify-between gap-4">
           <div class="flex items-start gap-4 flex-1 min-w-0">
             <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" :class="task.color">
-              <i :class="task.icon"></i>
+              <FaIcon :icon="task.icon" />
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
@@ -60,7 +60,7 @@ const tasks = [
     schedule: '每小时一次',
     condition: '启动后 30 秒执行首次，之后每小时循环',
     file: 'cleanup-codes.ts',
-    icon: 'fa-solid fa-broom text-green-600 dark:text-green-400',
+    icon: 'fa6-solid:broom text-green-600 dark:text-green-400',
     color: 'bg-green-50 dark:bg-green-900/20',
     statusLabel: '运行中',
     statusClass: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
@@ -72,7 +72,7 @@ const tasks = [
     schedule: '每分钟检查，每天触发一次',
     condition: '当前时间 ≥ 23:00，且今日尚未执行，且未达每日提交上限',
     file: 'indexnow-scheduled.ts',
-    icon: 'fa-solid fa-bolt text-blue-600 dark:text-blue-400',
+    icon: 'fa6-solid:bolt text-blue-600 dark:text-blue-400',
     color: 'bg-blue-50 dark:bg-blue-900/20',
     statusLabel: '运行中',
     statusClass: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',

@@ -2,13 +2,13 @@
   <div class="pb-20">
     <div class="flex items-center gap-4 mb-6">
       <NuxtLink to="/admin/games" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-        <i class="fa-solid fa-arrow-left"></i>
+        <Icon name="fa6-solid:arrow-left" />
       </NuxtLink>
       <h1 class="text-2xl font-bold">创建游戏条目（管理员）</h1>
     </div>
 
     <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 mb-6 text-sm text-yellow-700 dark:text-yellow-300">
-      <i class="fa-solid fa-shield-halved mr-2"></i>
+      <Icon name="fa6-solid:shield-halved" class="mr-2" />
       管理员创建模式：可以创建不在 VNDB 或 Bangumi 的游戏条目，并设置开发商、标签等信息。
     </div>
 
@@ -24,18 +24,17 @@
               <input 
                 v-model="vndbId"
                 type="text" 
-                class="flex-1 px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input flex-1"
                 placeholder="如：v27448"
               />
-              <button 
+              <AdminKumoButton variant="primary"
                 type="button"
                 @click="fetchVNDBData"
                 :disabled="fetchingVndb || !vndbId"
-                class="px-3 py-2.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-500 disabled:opacity-50"
               >
-                <i v-if="fetchingVndb" class="fa-solid fa-spinner fa-spin"></i>
-                <i v-else class="fa-solid fa-cloud-arrow-down"></i>
-              </button>
+                <Icon name="fa6-solid:spinner" v-if="fetchingVndb" />
+                <Icon name="fa6-solid:cloud-arrow-down" v-else />
+              </AdminKumoButton>
             </div>
           </div>
 
@@ -44,24 +43,23 @@
             <input 
               v-model="bangumiId"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：297264"
             />
           </div>
         </div>
 
         <div v-if="vndbError" class="text-sm text-red-500">
-          <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ vndbError }}
+          <Icon name="fa6-solid:circle-exclamation" class="mr-1" />{{ vndbError }}
         </div>
         <div v-if="vndbFetched" class="text-sm text-green-600 dark:text-green-400">
-          <i class="fa-solid fa-circle-check mr-1"></i>已从 VNDB 获取数据
+          <Icon name="fa6-solid:circle-check" class="mr-1" />已从 VNDB 获取数据
         </div>
       </div>
 
       <!-- 封面图片 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-5">
         <h2 class="font-semibold text-lg border-b pb-3 dark:border-zinc-700">封面图片 *</h2>
-        
         <div class="flex gap-6">
           <div class="w-40 flex-shrink-0">
             <div 
@@ -74,12 +72,11 @@
                 class="w-full h-full object-cover"
               />
               <div v-else class="text-center text-gray-400 p-4">
-                <i class="fa-solid fa-image text-3xl mb-2"></i>
+                <Icon name="fa6-solid:image" class="text-3xl mb-2" />
                 <p class="text-xs">封面预览</p>
               </div>
             </div>
           </div>
-          
           <div class="flex-1 space-y-4">
             <div 
               class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition hover:border-gray-400 dark:hover:border-zinc-500"
@@ -96,17 +93,17 @@
                 @change="handleFileSelect"
               />
               <div v-if="uploading" class="text-blue-600 dark:text-blue-400">
-                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                <Icon name="fa6-solid:spinner" class="fa-spin text-2xl mb-2" />
                 <p>上传中...</p>
               </div>
               <div v-else>
-                <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+                <Icon name="fa6-solid:cloud-arrow-up" class="text-2xl text-gray-400 mb-2" />
                 <p class="text-sm text-gray-600 dark:text-gray-400">点击或拖拽图片到此处上传</p>
                 <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF、WebP，最大 10MB</p>
               </div>
             </div>
             <div v-if="uploadError" class="text-sm text-red-500">
-              <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ uploadError }}
+              <Icon name="fa6-solid:circle-exclamation" class="mr-1" />{{ uploadError }}
             </div>
           </div>
         </div>
@@ -118,7 +115,6 @@
           游戏标题 *
           <span class="text-sm font-normal text-gray-500 ml-2">（至少填写一个语言）</span>
         </h2>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label class="block text-sm font-medium mb-2">
@@ -130,7 +126,7 @@
             <input 
               v-model="form.titleJa"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：クラナド"
             />
           </div>
@@ -145,7 +141,7 @@
             <input 
               v-model="form.titleEn"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：CLANNAD"
             />
           </div>
@@ -160,7 +156,7 @@
             <input 
               v-model="form.titleZhHans"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：团子大家族"
             />
           </div>
@@ -175,7 +171,7 @@
             <input 
               v-model="form.titleZhHant"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：團子大家族"
             />
           </div>
@@ -188,88 +184,102 @@
           游戏简介 *
           <span class="text-sm font-normal text-gray-500 ml-2">（至少填写一个语言）</span>
         </h2>
-        
-        <div class="flex border-b dark:border-zinc-700">
-          <button 
-            v-for="lang in descriptionLangs" 
-            :key="lang.key"
-            type="button"
-            @click="activeDescLang = lang.key"
-            class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition"
-            :class="activeDescLang === lang.key 
-              ? 'border-gray-800 dark:border-white text-gray-800 dark:text-white' 
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
-          >
-            <span class="inline-flex items-center gap-1.5">
-              <span 
-                class="w-5 h-5 rounded text-xs flex items-center justify-center font-bold"
-                :class="lang.badgeClass"
-              >{{ lang.badge }}</span>
-              {{ lang.label }}
-              <i v-if="form[lang.key as keyof typeof form]" class="fa-solid fa-check text-green-500 text-xs"></i>
-            </span>
-          </button>
+        <div class="overflow-x-auto border-b dark:border-zinc-700">
+          <div ref="descTabsRef" class="relative flex w-max">
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute bottom-0 left-0 h-0.5 bg-gray-800 dark:bg-white transition-[transform,width] duration-200 ease-out motion-reduce:transition-none"
+              :style="descIndicatorStyle"
+            />
+            <button
+              v-for="lang in descriptionLangs"
+              :key="lang.key"
+              type="button"
+              @click="activeDescLang = lang.key"
+              :aria-pressed="activeDescLang === lang.key"
+              class="shrink-0 px-4 py-2 text-sm font-medium border-b-2 border-transparent transition-colors duration-200 motion-reduce:transition-none whitespace-nowrap"
+              :class="activeDescLang === lang.key
+                ? 'text-gray-800 dark:text-white'
+                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+            >
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="w-5 h-5 rounded text-xs flex items-center justify-center font-bold"
+                  :class="lang.badgeClass"
+                >{{ lang.badge }}</span>
+                {{ lang.label }}
+                <Icon name="fa6-solid:check" class="text-green-500 text-xs" v-if="form[lang.key as keyof typeof form]" />
+              </span>
+            </button>
+          </div>
         </div>
-        
-        <div class="pt-2">
-          <textarea 
-            v-model="form[activeDescLang]"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            rows="6"
-            :placeholder="descriptionLangs.find(l => l.key === activeDescLang)?.placeholder"
-          ></textarea>
+        <div class="grid pt-2">
+          <Transition
+            v-for="lang in descriptionLangs"
+            :key="lang.key"
+            enter-active-class="transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none"
+            enter-from-class="opacity-0 translate-x-2 motion-reduce:transform-none"
+            leave-active-class="transition-[opacity,transform] duration-150 ease-in pointer-events-none motion-reduce:transition-none"
+            leave-to-class="opacity-0 -translate-x-2 motion-reduce:transform-none"
+          >
+            <textarea
+              v-show="activeDescLang === lang.key"
+              v-model="form[lang.key]"
+              :inert="activeDescLang !== lang.key"
+              :aria-hidden="activeDescLang !== lang.key"
+              :aria-label="`${lang.label}游戏简介`"
+              class="admin-textarea col-start-1 row-start-1 w-full"
+              rows="6"
+              :placeholder="lang.placeholder"
+            ></textarea>
+          </Transition>
         </div>
       </div>
 
       <!-- 其他信息 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-5">
         <h2 class="font-semibold text-lg border-b pb-3 dark:border-zinc-700">其他信息</h2>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label class="block text-sm font-medium mb-2">发售日期</label>
             <input 
               v-model="form.releaseDate"
               type="date" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
             />
           </div>
 
           <div class="md:col-span-2">
             <label class="block text-sm font-medium mb-2">开发商/发行商</label>
-            
             <!-- 已选择的会社 -->
             <div v-if="selectedCompanies.length" class="flex flex-wrap gap-2 mb-3">
               <div 
                 v-for="(sc, index) in selectedCompanies" :key="sc.companyId"
                 class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-zinc-700 rounded-lg"
               >
-                <select 
-                  v-model="sc.role" 
-                  class="text-xs bg-transparent border-none focus:outline-none cursor-pointer"
+                <AdminSelect aria-label="会社角色"
+                  v-model="sc.role"
                 >
                   <option value="DEVELOPER">开发商</option>
                   <option value="PUBLISHER">发行商</option>
-                </select>
+                </AdminSelect>
                 <span class="text-sm font-medium">{{ sc.name }}</span>
                 <button type="button" @click="removeCompany(index)" class="text-gray-400 hover:text-red-500">
-                  <i class="fa-solid fa-times text-xs"></i>
+                  <Icon name="fa6-solid:xmark" class="text-xs" />
                 </button>
               </div>
             </div>
-            
             <!-- 搜索添加会社 -->
             <div class="relative">
               <input 
                 v-model="companySearch"
                 type="text" 
-                class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input w-full"
                 placeholder="搜索会社名称或别名..."
                 @focus="showCompanyDropdown = true"
                 @input="searchCompanies"
               />
-              <i class="fa-solid fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-              
+              <Icon name="fa6-solid:magnifying-glass" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <div 
                 v-if="showCompanyDropdown && companyResults.length"
                 class="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-700 border dark:border-zinc-600 rounded-lg shadow-lg max-h-60 overflow-auto"
@@ -289,7 +299,7 @@
                       别名: {{ company.aliases.slice(0, 3).join(', ') }}
                     </div>
                   </div>
-                  <i v-if="isCompanySelected(company.id)" class="fa-solid fa-check text-green-500"></i>
+                  <Icon name="fa6-solid:check" class="text-green-500" v-if="isCompanySelected(company.id)" />
                 </button>
               </div>
             </div>
@@ -300,7 +310,7 @@
             <label class="block text-sm font-medium mb-2">别名（每行一个）</label>
             <textarea 
               v-model="aliasesText"
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-textarea w-full"
               rows="3"
               placeholder="其他名称或别名..."
             ></textarea>
@@ -311,33 +321,12 @@
       <!-- 标签 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-5">
         <h2 class="font-semibold text-lg border-b pb-3 dark:border-zinc-700">标签</h2>
-        <div class="flex flex-wrap gap-2">
-          <label 
-            v-for="tag in tags" 
-            :key="tag.id"
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition"
-            :class="form.tagIds.includes(tag.id) 
-              ? 'bg-gray-800 dark:bg-zinc-600 text-white border-transparent' 
-              : 'bg-gray-50 dark:bg-zinc-700 border-gray-200 dark:border-zinc-600 hover:bg-gray-100 dark:hover:bg-zinc-600'"
-          >
-            <input 
-              type="checkbox" 
-              :value="tag.id"
-              v-model="form.tagIds"
-              class="hidden"
-            />
-            {{ tag.name }}
-          </label>
-        </div>
-        <p v-if="tags.length === 0" class="text-sm text-gray-500">
-          暂无标签，请先在标签管理中创建
-        </p>
+        <TagAutocomplete v-model="selectedTags" admin appearance="admin" />
       </div>
 
       <!-- 设置 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-5">
         <h2 class="font-semibold text-lg border-b pb-3 dark:border-zinc-700">设置</h2>
-        
         <label class="flex items-center gap-3 cursor-pointer">
           <input 
             type="checkbox" 
@@ -355,19 +344,17 @@
 
     <!-- 底部固定操作栏 -->
     <div class="fixed bottom-0 right-0 lg:left-56 left-0 z-30 px-6 py-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur border-t border-gray-200 dark:border-zinc-700 flex justify-end gap-3">
-      <NuxtLink 
+      <AdminKumoButton variant="secondary"
         to="/admin/games"
-        class="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
       >
         取消
-      </NuxtLink>
-      <button 
+      </AdminKumoButton>
+      <AdminKumoButton variant="primary"
         :disabled="loading || !canSubmit"
-        class="px-6 py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50"
         @click="handleSubmit"
       >
         {{ loading ? '创建中...' : '创建条目' }}
-      </button>
+      </AdminKumoButton>
     </div>
 
     <!-- 封面裁剪器 -->
@@ -382,6 +369,7 @@
 </template>
 
 <script setup lang="ts">
+import { useTabIndicator } from '~/composables/useTabIndicator'
 definePageMeta({
   layout: 'admin',
   middleware: 'admin',
@@ -391,19 +379,14 @@ const router = useRouter()
 const { authFetch } = useAuthRequest()
 const toast = useToast()
 
-// 获取标签列表
-const { data: tagsData } = await useFetch('/api/tags', {
-  key: 'game-create-tags',
-  query: { limit: 100 },
-})
-
-const tags = computed(() => tagsData.value?.items || [])
+const selectedTags = ref<Array<{ id: number; name: string; color?: string | null }>>([])
 
 // 会社搜索
 const companySearch = ref('')
 const showCompanyDropdown = ref(false)
 const companyResults = ref<any[]>([])
 const selectedCompanies = ref<{ companyId: number; name: string; role: 'DEVELOPER' | 'PUBLISHER' }[]>([])
+const vndbAutoCompanies = ref<Array<{ name: string; nameOriginal: string | null }>>([])
 let companySearchTimer: ReturnType<typeof setTimeout>
 
 function searchCompanies() {
@@ -416,7 +399,7 @@ function searchCompanies() {
   }
   companySearchTimer = setTimeout(async () => {
     try {
-      const data = await $fetch<any>('/api/companies', { query: { search: q, limit: 20 } })
+      const data: any = await $fetch('/api/companies', { query: { search: q, limit: 20 } } as any)
       companyResults.value = data.items || []
     } catch {
       companyResults.value = []
@@ -460,6 +443,7 @@ const coverCropFile = ref<File | null>(null)
 
 // 简介语言切换
 const activeDescLang = ref<'descriptionEn' | 'descriptionJa' | 'descriptionZhHans' | 'descriptionZhHant'>('descriptionEn')
+const { tabContainer: descTabsRef, indicatorStyle: descIndicatorStyle } = useTabIndicator(activeDescLang)
 const descriptionLangs: Array<{
   key: typeof activeDescLang.value
   label: string
@@ -485,7 +469,6 @@ const form = reactive({
   descriptionZhHant: '',
   coverImage: '',
   releaseDate: '',
-  tagIds: [] as number[],
   isNsfw: false,
 })
 
@@ -580,25 +563,15 @@ async function fetchVNDBData() {
   vndbFetched.value = false
   
   try {
-    const data = await $fetch<{
-      titleEn: string | null
-      titleJa: string | null
-      titleZhHans: string | null
-      titleZhHant: string | null
-      aliases: string[]
-      descriptionEn: string | null
-      released: string | null
-      coverImage: string | null
-      isNsfw: boolean
-    }>(`/api/vndb/${id}`)
-    
+    const data: any = await ($fetch as any)(`/api/vndb/${id}`)
+
     form.titleEn = data.titleEn || ''
     form.titleJa = data.titleJa || ''
     form.titleZhHans = data.titleZhHans || ''
     form.titleZhHant = data.titleZhHant || ''
     form.descriptionEn = data.descriptionEn || ''
     form.isNsfw = data.isNsfw
-    
+
     if (data.released) {
       const parts = data.released.split('-')
       if (parts.length >= 3) {
@@ -609,8 +582,13 @@ async function fetchVNDBData() {
         form.releaseDate = `${parts[0]}-01-01`
       }
     }
-    
+
     aliasesText.value = data.aliases.join('\n')
+
+    // 保存从 VNDB 获取的厂商信息（不显示在前端界面）
+    if (data.developers && Array.isArray(data.developers)) {
+      vndbAutoCompanies.value = data.developers
+    }
 
     // 自动下载 VNDB 封面图到本地
     if (data.coverImage && !form.coverImage) {
@@ -631,7 +609,10 @@ async function fetchVNDBData() {
 
     vndbFetched.value = true
   } catch (error: any) {
-    vndbError.value = error.data?.message || '获取 VNDB 数据失败'
+    vndbError.value = error.data?.statusMessage
+      || error.statusMessage
+      || error.data?.message
+      || '获取 VNDB 数据失败'
   } finally {
     fetchingVndb.value = false
   }
@@ -665,11 +646,13 @@ async function handleSubmit() {
         companies: selectedCompanies.value.length > 0
           ? selectedCompanies.value.map(c => ({ companyId: c.companyId, role: c.role }))
           : undefined,
-        tagIds: form.tagIds,
+        tagIds: selectedTags.value.map(tag => tag.id),
         isNsfw: form.isNsfw,
         vndbId: vndbId.value || undefined,
         bangumiId: bangumiId.value ? parseInt(bangumiId.value) : undefined,
         skipExternalId: true, // 管理员跳过外部 ID 验证
+        // 传递从 VNDB 自动获取的厂商信息（后端会自动匹配）
+        vndbDevelopers: vndbAutoCompanies.value.length > 0 ? vndbAutoCompanies.value : undefined,
       },
     })
     toast.success('创建成功')

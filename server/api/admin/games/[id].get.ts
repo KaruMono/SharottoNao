@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
       tags: {
         include: {
           tag: true,
+          sources: { select: { source: true } },
         },
       },
       staff: {
@@ -61,6 +62,9 @@ export default defineEventHandler(async (event) => {
       id: t.tag.id,
       tagId: t.tagId,
       name: t.tag.name,
+      color: t.tag.color,
+      isNsfw: t.tag.isNsfw,
+      sources: t.sources.map(source => source.source),
     })),
     staff: game.staff.map(s => ({
       role: s.role,

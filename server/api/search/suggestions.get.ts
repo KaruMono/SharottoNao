@@ -46,6 +46,15 @@ export default defineEventHandler(async (event) => {
           { titleZhHans: { contains: q, mode: 'insensitive' } },
           { titleZhHant: { contains: q, mode: 'insensitive' } },
           ...(aliasIds.length > 0 ? [{ id: { in: aliasIds } }] : []),
+          {
+            resources: {
+              some: {
+                deletedAt: null,
+                status: 'APPROVED' as any,
+                title: { contains: q, mode: 'insensitive' as const },
+              },
+            },
+          },
         ],
       },
       select: {

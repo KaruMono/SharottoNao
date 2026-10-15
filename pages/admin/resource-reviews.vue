@@ -1,62 +1,54 @@
 <template>
   <div>
     <h1 class="text-2xl font-bold mb-6">资源审核</h1>
-    
     <!-- 筛选器 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
           <span class="text-sm text-gray-500">状态</span>
-          <select 
+          <AdminSelect aria-label="状态筛选"
             v-model="filterStatus"
-            class="px-3 py-1.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
           >
             <option value="">全部</option>
             <option value="PENDING">待审核</option>
             <option value="APPROVED">已通过</option>
             <option value="REJECTED">已拒绝</option>
-          </select>
+          </AdminSelect>
         </div>
         <div v-if="pendingCount > 0" class="text-sm text-orange-500">
-          <i class="fa-solid fa-circle-exclamation mr-1"></i>
+          <Icon name="fa6-solid:circle-exclamation" class="mr-1" />
           {{ pendingCount }} 个资源待审核
         </div>
       </div>
-      
       <!-- 批量操作 -->
       <div v-if="selectedIds.length > 0" class="flex items-center gap-4 mt-4 pt-4 border-t dark:border-zinc-700">
         <span class="text-sm text-gray-500">已选择 {{ selectedIds.length }} 项</span>
-        <button
+        <AdminKumoButton variant="primary" size="toolbar"
           @click="batchApprove"
-          class="px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
         >
-          <i class="fa-solid fa-check mr-1"></i>批量通过
-        </button>
-        <button
+          <Icon name="fa6-solid:check" />批量通过
+        </AdminKumoButton>
+        <AdminKumoButton variant="danger" size="toolbar"
           @click="showBatchRejectModal"
-          class="px-3 py-1.5 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
         >
-          <i class="fa-solid fa-xmark mr-1"></i>批量拒绝
-        </button>
-        <button
+          <Icon name="fa6-solid:xmark" />批量拒绝
+        </AdminKumoButton>
+        <AdminKumoButton variant="ghost" size="toolbar"
           @click="clearSelection"
-          class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition"
         >
           取消选择
-        </button>
+        </AdminKumoButton>
       </div>
     </div>
 
     <!-- 资源列表 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
       <div v-if="pending" class="text-center py-12">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+        <Icon name="fa6-solid:spinner" class="fa-spin text-2xl text-gray-400" />
       </div>
-      
       <div v-else-if="!resources?.length" class="text-center py-12 text-gray-500">
         暂无资源需要审核
       </div>
-      
       <div v-else class="divide-y dark:divide-zinc-700">
         <!-- 全选操作 -->
         <div v-if="pendingResources.length > 0" class="px-4 py-2 bg-gray-50 dark:bg-zinc-700/50 flex items-center gap-2">
@@ -68,7 +60,6 @@
           />
           <span class="text-sm text-gray-500">选择全部待审核资源</span>
         </div>
-        
         <div 
           v-for="resource in resources"
           :key="resource.id"
@@ -96,7 +87,7 @@
                   {{ statusLabels[resource.status] }}
                 </span>
                 <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded">
-                  <i :class="resource.type?.icon || 'fa-solid fa-file'" class="mr-1"></i>
+                  <FaIcon :icon="resource.type?.icon || 'fa6-solid:file'" class="mr-1" />
                   {{ resource.type?.name || '未知类型' }}
                 </span>
                 <span
@@ -108,9 +99,7 @@
                   <template v-if="resource.issueCount"> · {{ resource.issueCount }}</template>
                 </span>
               </div>
-              
               <h3 class="font-medium mb-1">{{ resource.title }}</h3>
-              
               <div class="text-sm text-gray-500 mb-2">
                 所属游戏
                 <NuxtLink 
@@ -121,7 +110,6 @@
                   {{ getGameTitle(resource.game) }}
                 </NuxtLink>
               </div>
-              
               <div class="text-sm space-y-1">
                 <div class="flex items-center gap-2">
                   <span class="text-gray-500">链接</span>
@@ -158,42 +146,36 @@
                   机翻
                 </span>
               </div>
-              
               <div class="text-xs text-gray-500 mt-3">
                 上传者：{{ resource.uploader?.username }} · {{ formatDate(resource.createdAt) }}
               </div>
               </div>
             </div>
-            
             <div class="flex flex-col gap-2">
               <template v-if="resource.status === 'PENDING'">
-                <button
+                <AdminKumoButton variant="primary"
                   @click="showReviewModal(resource, 'approve')"
-                  class="px-4 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
                 >
-                  <i class="fa-solid fa-check mr-1"></i>通过
-                </button>
-                <button
+                  <Icon name="fa6-solid:check" />通过
+                </AdminKumoButton>
+                <AdminKumoButton variant="danger"
                   @click="showReviewModal(resource, 'reject')"
-                  class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                 >
-                  <i class="fa-solid fa-xmark mr-1"></i>拒绝
-                </button>
+                  <Icon name="fa6-solid:xmark" />拒绝
+                </AdminKumoButton>
               </template>
-              <button
+              <AdminKumoButton variant="primary"
                 v-if="resource.healthStatus && resource.healthStatus !== 'AVAILABLE'"
                 @click="updateResourceHealth(resource, 'AVAILABLE')"
-                class="px-4 py-2 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"
               >
-                <i class="fa-solid fa-circle-check mr-1"></i>标记可用
-              </button>
-              <button
+                <Icon name="fa6-solid:circle-check" />标记可用
+              </AdminKumoButton>
+              <AdminKumoButton variant="danger"
                 v-if="resource.healthStatus !== 'UNAVAILABLE'"
                 @click="showHealthModal(resource)"
-                class="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition"
               >
-                <i class="fa-solid fa-ban mr-1"></i>标记失效
-              </button>
+                <Icon name="fa6-solid:ban" />标记失效
+              </AdminKumoButton>
             </div>
           </div>
         </div>
@@ -201,7 +183,7 @@
     </div>
 
     <!-- 分页 -->
-    <Pagination 
+    <Pagination admin
       v-if="totalPages > 1"
       :current="page"
       :total="totalPages"
@@ -218,36 +200,30 @@
             上传者：{{ currentResource?.uploader?.username }}
           </div>
         </div>
-        
         <p class="text-sm text-gray-600 dark:text-gray-400">
           {{ reviewAction === 'approve' ? '确认通过该资源？通过后用户可以在游戏页面看到并下载。' : '确认拒绝该资源？拒绝后该资源不会对用户展示。' }}
         </p>
-        
         <div v-if="reviewAction === 'reject'">
           <label class="block text-sm font-medium mb-2">拒绝原因</label>
           <textarea 
             v-model="reviewNote"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-textarea w-full"
             rows="3"
             placeholder="请输入拒绝原因，会通知上传者..."
           ></textarea>
         </div>
-        
         <div class="flex justify-end gap-3">
-          <button
+          <AdminKumoButton variant="secondary"
             @click="reviewModalVisible = false"
-            class="px-4 py-2 text-sm border dark:border-zinc-600 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700"
           >
             取消
-          </button>
-          <button
+          </AdminKumoButton>
+          <AdminKumoButton :variant="reviewAction === 'approve' ? 'primary' : 'danger'"
             @click="handleReview"
             :disabled="reviewing || (reviewAction === 'reject' && !reviewNote.trim())"
-            class="px-4 py-2 text-sm text-white rounded-lg disabled:opacity-50"
-            :class="reviewAction === 'approve' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'"
           >
             {{ reviewing ? '处理中...' : (reviewAction === 'approve' ? '确认通过' : '确认拒绝') }}
-          </button>
+          </AdminKumoButton>
         </div>
       </div>
     </Modal>
@@ -263,26 +239,24 @@
           <label class="block text-sm font-medium mb-2">拒绝原因</label>
           <textarea
             v-model="batchRejectNote"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-textarea w-full"
             rows="3"
             placeholder="请输入拒绝原因..."
           ></textarea>
         </div>
 
         <div class="flex justify-end gap-3">
-          <button
+          <AdminKumoButton variant="secondary"
             @click="batchRejectModalVisible = false"
-            class="px-4 py-2 text-sm border dark:border-zinc-600 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700"
           >
             取消
-          </button>
-          <button
+          </AdminKumoButton>
+          <AdminKumoButton variant="danger"
             @click="batchReject"
             :disabled="batchRejecting || !batchRejectNote.trim()"
-            class="px-4 py-2 text-sm text-white rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50"
           >
             {{ batchRejecting ? '处理中...' : '确认拒绝' }}
-          </button>
+          </AdminKumoButton>
         </div>
       </div>
     </Modal>
@@ -301,26 +275,24 @@
           <label class="block text-sm font-medium mb-2">处理备注</label>
           <textarea
             v-model="healthNote"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            class="admin-textarea w-full"
             rows="3"
             placeholder="说明失效原因或复查结果，会通知上传者..."
           ></textarea>
         </div>
 
         <div class="flex justify-end gap-3">
-          <button
+          <AdminKumoButton variant="secondary"
             @click="healthModalVisible = false"
-            class="px-4 py-2 text-sm border dark:border-zinc-600 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700"
           >
             取消
-          </button>
-          <button
+          </AdminKumoButton>
+          <AdminKumoButton variant="danger"
             @click="confirmResourceUnavailable"
             :disabled="updatingHealth || !healthNote.trim()"
-            class="px-4 py-2 text-sm text-white rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50"
           >
             {{ updatingHealth ? '处理中...' : '确认标记失效' }}
-          </button>
+          </AdminKumoButton>
         </div>
       </div>
     </Modal>

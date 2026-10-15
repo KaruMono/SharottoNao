@@ -7,7 +7,7 @@
 
     <!-- 未登录 -->
     <div v-if="!isLoggedIn" class="bg-white dark:bg-zinc-800 rounded-xl p-12 text-center shadow">
-      <i class="fa-solid fa-users text-4xl text-gray-300 mb-4"></i>
+      <Icon name="fa6-solid:users" class="text-4xl text-gray-300 mb-4" />
       <p class="text-gray-500 mb-4">登录后查看你关注的人的动态</p>
       <NuxtLink to="/login" class="px-6 py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 transition">
         登录
@@ -17,7 +17,7 @@
     <template v-else>
       <!-- 无关注 -->
       <div v-if="!pending && items.length === 0 && !hasMore" class="bg-white dark:bg-zinc-800 rounded-xl p-12 text-center shadow">
-        <i class="fa-solid fa-user-group text-4xl text-gray-300 mb-4"></i>
+        <Icon name="fa6-solid:user-group" class="text-4xl text-gray-300 mb-4" />
         <p class="text-gray-500 mb-1">暂无动态</p>
         <p class="text-sm text-gray-400">去关注一些用户，这里会显示他们的最新动态</p>
       </div>
@@ -33,7 +33,7 @@
           <NuxtLink :to="`/user/${item.user.id}`" class="flex-shrink-0">
             <div class="w-9 h-9 rounded-full bg-gray-200 dark:bg-zinc-700 overflow-hidden">
               <img v-if="item.user.avatar" :src="item.user.avatar" class="w-full h-full object-cover" />
-              <i v-else class="fa-solid fa-user text-gray-400 text-sm flex items-center justify-center h-full w-full"></i>
+              <Icon name="fa6-solid:user" class="text-gray-400 text-sm flex items-center justify-center h-full w-full" v-else />
             </div>
           </NuxtLink>
 
@@ -87,14 +87,7 @@
               'bg-orange-100 text-orange-500 dark:bg-orange-900/30': item.type === 'RATE_GAME',
             }"
           >
-            <i :class="{
-              'fa-solid fa-plus': item.type === 'CREATE_GAME',
-              'fa-solid fa-pen': item.type === 'EDIT_GAME',
-              'fa-solid fa-comment': item.type === 'COMMENT',
-              'fa-solid fa-book': ['CREATE_GUIDE','EDIT_GUIDE'].includes(item.type),
-              'fa-solid fa-heart': item.type === 'FAVORITE_GAME',
-              'fa-solid fa-star': item.type === 'RATE_GAME',
-            }"></i>
+            <FaIcon :icon="activityIcon(item.type)" />
           </div>
         </div>
       </div>
@@ -190,6 +183,19 @@ function activityLabel(type: string) {
     FAVORITE_GAME: '收藏了',
   }
   return map[type] || type
+}
+
+function activityIcon(type: string) {
+  const map: Record<string, string> = {
+    CREATE_GAME: 'fa6-solid:plus',
+    EDIT_GAME: 'fa6-solid:pen',
+    COMMENT: 'fa6-solid:comment',
+    CREATE_GUIDE: 'fa6-solid:book',
+    EDIT_GUIDE: 'fa6-solid:book',
+    FAVORITE_GAME: 'fa6-solid:heart',
+    RATE_GAME: 'fa6-solid:star',
+  }
+  return map[type] || 'fa6-solid:bell'
 }
 
 function formatTime(date: string) {

@@ -1,5 +1,6 @@
-import { createReadStream, existsSync, statSync } from 'fs'
-import { join } from 'path'
+import { createReadStream, lstatSync, realpathSync } from 'node:fs'
+import { sep } from 'node:path'
+import { resolveUploadFile, resolveUploadRoot } from '~/server/utils/local-storage-path'
 import { sendStream, setHeader } from 'h3'
 
 export default defineEventHandler(async (event) => {
@@ -22,21 +23,34 @@ export default defineEventHandler(async (event) => {
     return
   }
 
-  const filePath = join(process.cwd(), config.localUploadPath, pathParam)
+  const filePath = resolveUploadFile(pathParam, config)
+  if (!filePath) return
 
   // 二次校验：确保解析后的路径仍在上传目录内
-  const uploadRoot = join(process.cwd(), config.localUploadPath)
-  if (!filePath.startsWith(uploadRoot)) {
+  const uploadRoot = resolveUploadRoot(config)
+  if (!filePath.startsWith(`${uploadRoot}${sep}`) && filePath !== uploadRoot) {
     return
   }
 
-  // 检查文件是否存在
-  if (!existsSync(filePath)) {
+  // Resolve symlinks before serving. Lexical traversal checks alone do not
+  // prevent a symlink inside uploads from pointing outside the shared root.
+  let realRoot: string
+  let realFile: string
+  try {
+    realRoot = realpathSync(uploadRoot)
+    realFile = realpathSync(filePath)
+  } catch {
     return
   }
+  if (realFile !== realRoot && !realFile.startsWith(`${realRoot}${sep}`)) return
 
   // 获取文件信息
-  const stat = statSync(filePath)
+  let stat: ReturnType<typeof lstatSync>
+  try {
+    stat = lstatSync(realFile)
+  } catch {
+    return
+  }
   if (!stat.isFile()) {
     return
   }
@@ -61,5 +75,5 @@ export default defineEventHandler(async (event) => {
   
   // 阻止其他处理器处理这个请求
   event.node.res.statusCode = 200
-  return sendStream(event, createReadStream(filePath))
+  return sendStream(event, createReadStream(realFile))
 })

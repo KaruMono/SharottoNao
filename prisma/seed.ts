@@ -72,13 +72,13 @@ async function main() {
     { name: '悬疑', color: '#6b7280' },
     { name: '治愈', color: '#14b8a6' },
     { name: '百合', color: '#f472b6' },
-    { name: '机器翻译', color: '#ef4444', description: '包含机器翻译资源的游戏' },
+    { name: '机器翻译', color: '#ef4444', description: '包含机器翻译资源的游戏', isSystem: true },
   ]
 
   for (const tag of defaultTags) {
     await prisma.tag.upsert({
       where: { name: tag.name },
-      update: {},
+      update: tag.isSystem ? { isSystem: true, archivedAt: null } : {},
       create: tag,
     })
   }

@@ -2,12 +2,11 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">表情包管理</h1>
-      <button 
+      <AdminKumoButton variant="primary"
         @click="showCreatePackModal = true"
-        class="px-4 py-2 bg-gray-800 dark:bg-zinc-600 text-white rounded-lg text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center gap-2"
       >
-        <i class="fa-solid fa-plus"></i>添加表情包
-      </button>
+        <Icon name="fa6-solid:plus" />添加表情包
+      </AdminKumoButton>
     </div>
 
     <!-- 表情包列表 -->
@@ -32,27 +31,25 @@
             <span class="text-sm text-gray-500">{{ pack.emojis?.length || 0 }} 个表情</span>
           </div>
           <div class="flex items-center gap-2">
-            <button 
+            <AdminKumoButton variant="secondary" size="toolbar"
               @click="openAddEmojiModal(pack)"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-zinc-600 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition"
             >
-              <i class="fa-solid fa-plus mr-1"></i>添加表情
-            </button>
+              <Icon name="fa6-solid:plus" />添加表情
+            </AdminKumoButton>
             <button 
               @click="editPack(pack)"
               class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
             >
-              <i class="fa-solid fa-pen"></i>
+              <Icon name="fa6-solid:pen" />
             </button>
             <button 
               @click="deletePack(pack)"
               class="p-2 text-red-500 hover:text-red-600"
             >
-              <i class="fa-solid fa-trash"></i>
+              <Icon name="fa6-solid:trash" />
             </button>
           </div>
         </div>
-        
         <!-- 表情列表 -->
         <div class="p-4">
           <div v-if="pack.emojis?.length" class="flex flex-wrap gap-2">
@@ -69,7 +66,7 @@
                   @click="deleteEmoji(emoji)"
                   class="w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
                 >
-                  <i class="fa-solid fa-times"></i>
+                  <Icon name="fa6-solid:xmark" />
                 </button>
               </div>
               <div class="text-xs text-center text-gray-500 mt-1 truncate w-12">{{ emoji.name }}</div>
@@ -80,7 +77,7 @@
       </div>
 
       <div v-if="!emojiPacks?.length" class="text-center py-16 text-gray-500">
-        <i class="fa-solid fa-face-smile text-4xl mb-4"></i>
+        <Icon name="fa6-solid:face-smile" class="text-4xl mb-4" />
         <p>暂无表情包</p>
       </div>
     </div>
@@ -101,7 +98,7 @@
               <input 
                 v-model="packForm.name"
                 type="text"
-                class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input w-full"
                 placeholder="表情包名称"
               />
             </div>
@@ -109,7 +106,7 @@
               <label class="block text-sm mb-1">描述</label>
               <textarea 
                 v-model="packForm.description"
-                class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-textarea w-full"
                 rows="2"
                 placeholder="可选"
               ></textarea>
@@ -119,7 +116,7 @@
               <input 
                 v-model.number="packForm.sortOrder"
                 type="number"
-                class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input w-full"
               />
             </div>
             <div class="flex items-center gap-2">
@@ -133,19 +130,17 @@
             </div>
           </div>
           <div class="flex justify-end gap-2 mt-6">
-            <button 
+            <AdminKumoButton variant="ghost"
               @click="closePackModal"
-              class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
             >
               取消
-            </button>
-            <button 
+            </AdminKumoButton>
+            <AdminKumoButton variant="primary"
               @click="savePack"
               :disabled="!packForm.name || saving"
-              class="px-4 py-2 text-sm bg-gray-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
             >
               {{ saving ? '保存中...' : '保存' }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
       </div>
@@ -170,15 +165,14 @@
                 <input 
                   v-model="emojiSearchQuery"
                   type="text"
-                  class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input w-full"
                   placeholder="输入表情名称，回车添加..."
                   @keyup.enter="addEmojiBySearch"
                 />
-                <i class="fa-solid fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <Icon name="fa6-solid:magnifying-glass" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
               <p class="text-xs text-gray-500 mt-1">输入名称后按回车，将自动创建表情条目</p>
             </div>
-            
             <!-- 待添加的表情列表 -->
             <div v-if="pendingEmojis.length" class="space-y-2">
               <label class="block text-sm dark:text-gray-200">待添加的表情</label>
@@ -190,7 +184,7 @@
                 >
                   <div class="w-10 h-10 rounded bg-gray-200 dark:bg-zinc-600 flex items-center justify-center overflow-hidden">
                     <img v-if="emoji.url" :src="emoji.url" class="w-8 h-8 object-contain" />
-                    <i v-else class="fa-solid fa-image text-gray-400"></i>
+                    <Icon name="fa6-solid:image" class="text-gray-400" v-else />
                   </div>
                   <div class="flex-1">
                     <div class="text-sm font-medium">{{ emoji.name }}</div>
@@ -213,31 +207,28 @@
                     @click="removePendingEmoji(index)"
                     class="p-1 text-gray-400 hover:text-red-500"
                   >
-                    <i class="fa-solid fa-times"></i>
+                    <Icon name="fa6-solid:xmark" />
                   </button>
                 </div>
               </div>
             </div>
-            
             <div v-else class="text-center py-8 text-gray-500">
-              <i class="fa-solid fa-face-smile text-3xl mb-2"></i>
+              <Icon name="fa6-solid:face-smile" class="text-3xl mb-2" />
               <p class="text-sm">输入表情名称并按回车添加</p>
             </div>
           </div>
           <div class="flex justify-end gap-2 mt-6">
-            <button 
+            <AdminKumoButton variant="ghost"
               @click="closeAddEmojiModal"
-              class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
             >
               取消
-            </button>
-            <button 
+            </AdminKumoButton>
+            <AdminKumoButton variant="primary"
               @click="savePendingEmojis"
               :disabled="!pendingEmojis.length || pendingEmojis.some(e => !e.url) || saving"
-              class="px-4 py-2 text-sm bg-gray-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
             >
               {{ saving ? '保存中...' : `添加 ${pendingEmojis.length} 个表情` }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
       </div>

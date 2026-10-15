@@ -4,75 +4,61 @@
       <h1 class="text-2xl font-bold text-center mb-8">注册账号</h1>
 
       <form @submit.prevent="handleRegister" class="space-y-5">
-        <div>
-          <label class="block text-sm font-medium mb-2">用户名</label>
-          <input 
-            v-model="form.username"
-            type="text" 
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            placeholder="2-20个字符"
-            required
-          />
-        </div>
+        <CloudInput
+          v-model="form.username"
+          type="text"
+          label="用户名"
+          placeholder="2-20个字符"
+          required
+        />
+
+        <CloudInput
+          v-model="form.email"
+          type="email"
+          label="邮箱"
+          placeholder="请输入邮箱"
+          required
+        />
+
+        <CloudInput
+          v-model="form.password"
+          type="password"
+          label="密码"
+          placeholder="至少8个字符，包含字母和数字"
+          autocomplete="new-password"
+          required
+        />
 
         <div>
-          <label class="block text-sm font-medium mb-2">邮箱</label>
-          <input 
-            v-model="form.email"
-            type="email" 
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            placeholder="your@email.com"
-            required
-          />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">密码</label>
-          <input 
-            v-model="form.password"
-            type="password"
-            autocomplete="new-password"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            placeholder="至少8个字符，包含字母和数字"
-            required
-          />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">确认密码</label>
-          <input 
+          <CloudInput
             v-model="form.confirmPassword"
             type="password"
-            autocomplete="new-password"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            :class="{ 'border-red-500 dark:border-red-500': passwordMismatch }"
+            label="确认密码"
             placeholder="再次输入密码"
+            autocomplete="new-password"
+            :error="passwordMismatch ? '两次输入的密码不一致' : ''"
             required
             @blur="checkPasswordMatch"
           />
-          <p v-if="passwordMismatch" class="text-red-500 text-xs mt-1">
-            <i class="fa-solid fa-circle-exclamation mr-1"></i>两次输入的密码不一致
-          </p>
         </div>
 
         <!-- 图片验证码 -->
         <div>
           <label class="block text-sm font-medium mb-2">图片验证码</label>
           <div class="flex gap-2 items-center">
-            <input
+            <CloudInput
               v-model="form.captcha"
               type="text"
               maxlength="5"
               autocomplete="off"
-              spellcheck="false"
-              class="flex-1 min-w-0 px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400 tracking-widest uppercase"
               placeholder="输入图中字符"
               required
+              class="flex-1 min-w-0"
             />
             <button
               type="button"
               @click="refreshCaptcha"
-              class="flex-shrink-0 rounded-lg overflow-hidden border border-gray-300 dark:border-zinc-600 hover:opacity-80 transition-opacity relative"
+              class="flex-shrink-0 rounded-lg overflow-hidden ring-1 ring-gray-200 dark:ring-zinc-700 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 relative"
               title="点击刷新"
             >
               <img
@@ -86,33 +72,35 @@
                 v-else
                 class="h-[44px] w-[140px] flex items-center justify-center bg-gray-100 dark:bg-zinc-700 text-xs text-gray-400"
               >
-                <i class="fa-solid fa-spinner fa-spin"></i>
+                <Icon name="fa6-solid:spinner" class="fa-spin" />
               </div>
             </button>
           </div>
-          <p class="text-xs text-gray-400 mt-1">不区分大小写，点击图片可刷新</p>
         </div>
 
         <!-- 邮件验证码 -->
         <div>
           <label class="block text-sm font-medium mb-2">邮箱验证码</label>
           <div class="flex gap-2">
-            <input 
+            <CloudInput
               v-model="form.code"
-              type="text" 
+              type="text"
               maxlength="6"
-              class="flex-1 min-w-0 px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
               placeholder="6位验证码"
               required
+              class="flex-1 min-w-0"
             />
-            <button 
+            <CloudButton
               type="button"
+              variant="secondary"
+              size="large"
+              class="w-28"
               @click="sendCode"
-              :disabled="codeSending || codeCountdown > 0"
-              class="flex-shrink-0 w-28 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              :disabled="codeCountdown > 0"
+              :loading="codeSending"
             >
               {{ codeCountdown > 0 ? `${codeCountdown}s` : (codeSending ? '发送中...' : '发送验证码') }}
-            </button>
+            </CloudButton>
           </div>
         </div>
 
@@ -124,20 +112,22 @@
           {{ successMessage }}
         </div>
 
-        <button 
+        <CloudButton
           type="submit"
-          :disabled="loading"
-          class="w-full py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white font-medium hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50 transition"
+          variant="primary"
+          size="large"
+          :loading="loading"
+          full-width
         >
           {{ loading ? '注册中...' : '注册' }}
-        </button>
+        </CloudButton>
       </form>
 
-      <div class="mt-6 text-center text-sm text-gray-500">
-        已有账号？
-        <NuxtLink to="/login" class="text-gray-800 dark:text-gray-200 hover:underline">
+      <div class="mt-6 border-t border-gray-100 pt-5 text-center dark:border-zinc-700">
+        <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">已有账号？</p>
+        <CloudButton to="/login" full-width>
           立即登录
-        </NuxtLink>
+        </CloudButton>
       </div>
     </div>
     
@@ -208,7 +198,7 @@ async function sendCode() {
   codeSending.value = true
 
   try {
-    await $fetch('/api/auth/send-code', {
+    await ($fetch as any)('/api/auth/send-code', {
       method: 'POST',
       body: {
         email: form.email,
@@ -258,7 +248,7 @@ async function handleRegister() {
   successMessage.value = ''
 
   try {
-    await $fetch('/api/auth/register', {
+    await ($fetch as any)('/api/auth/register', {
       method: 'POST',
       body: {
         username: form.username,

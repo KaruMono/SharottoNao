@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const data = schema.parse(body)
 
   const series = await prisma.gameSeries.create({
-    data,
+    data: data as any,
   })
 
   // 只有非 NSFW 系列才提交到 IndexNow

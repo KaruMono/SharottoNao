@@ -1,28 +1,18 @@
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import prisma from '~/server/utils/prisma'
 import { markImageAsUsed } from '~/server/utils/image'
 import { recordActivity } from '~/server/utils/activity'
 import { submitGameToIndexNow } from '~/server/utils/indexnow'
 import { updateMachineTranslationTag } from '~/server/utils/machine-translation-tag'
 import { invalidateGameCaches } from '~/server/utils/redis'
+import { fetchVndbGame, type VndbGameData } from '~/server/utils/vndb-client'
+import { ensureGameStaffRelation } from '~/server/utils/game-staff'
+import {
+  lockVndbTagSyncInTransaction,
+  syncVndbTagsForGameInTransaction,
+} from '~/server/utils/vndb-tag-sync'
 
 const DEFAULT_COVER_IMAGE = '/images/placeholder.png'
-
-type VndbData = {
-  vndbId: string
-  titleEn?: string | null
-  titleJa?: string | null
-  titleZhHans?: string | null
-  titleZhHant?: string | null
-  aliases?: string[]
-  descriptionEn?: string | null
-  released?: string | null
-  coverImage?: string | null
-  isNsfw?: boolean
-  lengthMinutes?: number | null
-  developers?: Array<{ name: string; nameOriginal?: string | null }>
-  staff?: Array<{ name: string; nameOriginal?: string | null; role: string; characterName?: string | null }>
-}
 
 export type ResourceSyncPayload = {
   vndbId: string
@@ -60,17 +50,13 @@ function getNameIndex(name: string): string {
   return /[A-Z]/.test(firstChar) ? firstChar : '#'
 }
 
-function pickTitle(data: VndbData): string {
+function pickTitle(data: VndbGameData): string {
   return data.titleZhHans || data.titleZhHant || data.titleJa || data.titleEn || data.vndbId
-}
-
-async function fetchVndbData(vndbId: string): Promise<VndbData> {
-  return await $fetch<VndbData>(`/api/vndb/${vndbId}`)
 }
 
 async function uploadImageFromUrl(url: string): Promise<string | null> {
   try {
-    const result = await $fetch<{ url: string }>('/api/upload/from-url', {
+    const result: any = await ($fetch as any)('/api/upload/from-url', {
       method: 'POST',
       body: { url, folder: 'covers' },
     })
@@ -138,11 +124,47 @@ async function attachCompany(gameId: number, companyId: number): Promise<void> {
 }
 
 export async function findExistingGame(vndbId: string) {
-  return prisma.game.findFirst({ where: { vndbId, deletedAt: null } })
+  // Soft-deleted games still own their unique VNDB ID.
+  return prisma.game.findUnique({ where: { vndbId } })
+}
+
+async function resolveGameForResourceSync(vndbId: string, creatorId: number) {
+  let game = await findExistingGame(vndbId)
+  if (!game) {
+    try {
+      return await createGameFromVndb(vndbId, creatorId)
+    } catch (error) {
+      // Another request may create the game while VNDB data is being fetched.
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError)
+        || error.code !== 'P2002'
+        || (error.meta?.modelName && error.meta.modelName !== 'Game')
+        || !Array.isArray(error.meta?.target)
+        || !error.meta.target.includes('vndbId')) {
+        throw error
+      }
+
+      game = await findExistingGame(vndbId)
+      if (!game) throw error
+    }
+  }
+
+  if (!game.deletedAt) return game
+
+  const restored = await prisma.game.update({
+    where: { id: game.id },
+    data: { deletedAt: null },
+  })
+
+  invalidateGameCaches(restored.id).catch(() => {})
+  submitGameToIndexNow(restored.id, 'ADD').catch(err => {
+    console.error('IndexNow submission failed:', err)
+  })
+
+  return restored
 }
 
 export async function createGameFromVndb(vndbId: string, creatorId: number, activitySource = 'resource-sync') {
-  const vndbData = await fetchVndbData(vndbId)
+  const vndbData = await fetchVndbGame(vndbId)
   const hasTitle = vndbData.titleEn || vndbData.titleJa || vndbData.titleZhHans || vndbData.titleZhHant
   if (!hasTitle) {
     throw createError({ statusCode: 422, message: 'VNDB 条目缺少可用标题，无法自动创建游戏条目' })
@@ -153,22 +175,33 @@ export async function createGameFromVndb(vndbId: string, creatorId: number, acti
     coverImage = await uploadImageFromUrl(vndbData.coverImage) || vndbData.coverImage
   }
 
-  const game = await prisma.game.create({
-    data: {
-      vndbId: vndbData.vndbId,
-      titleEn: vndbData.titleEn || null,
-      titleJa: vndbData.titleJa || null,
-      titleZhHans: vndbData.titleZhHans || null,
-      titleZhHant: vndbData.titleZhHant || null,
-      aliases: vndbData.aliases || [],
-      descriptionEn: vndbData.descriptionEn || '-',
-      descriptionZhHans: null,
-      coverImage,
-      releaseDate: parseReleaseDate(vndbData.released),
-      isNsfw: vndbData.isNsfw || false,
-      lengthMinutes: vndbData.lengthMinutes || null,
-      creatorId,
-    },
+  const game = await prisma.$transaction(async (tx) => {
+    await lockVndbTagSyncInTransaction(tx)
+
+    const created = await tx.game.create({
+      data: {
+        vndbId: vndbData.vndbId,
+        titleEn: vndbData.titleEn || null,
+        titleJa: vndbData.titleJa || null,
+        titleZhHans: vndbData.titleZhHans || null,
+        titleZhHant: vndbData.titleZhHant || null,
+        aliases: vndbData.aliases || [],
+        descriptionEn: vndbData.descriptionEn || '-',
+        descriptionZhHans: null,
+        coverImage,
+        releaseDate: parseReleaseDate(vndbData.released),
+        isNsfw: vndbData.isNsfw || false,
+        lengthMinutes: vndbData.lengthMinutes || null,
+        creatorId,
+      },
+    })
+
+    await syncVndbTagsForGameInTransaction(tx, {
+      gameId: created.id,
+      tags: vndbData.tags,
+    })
+
+    return created
   })
 
   if (coverImage) {
@@ -188,14 +221,12 @@ export async function createGameFromVndb(vndbId: string, creatorId: number, acti
       const staffRecord = existingStaff || await prisma.staff.create({
         data: { name: staff.name, nameOriginal: staff.nameOriginal || null },
       })
-      await prisma.gameStaff.create({
-        data: {
-          gameId: game.id,
-          staffId: staffRecord.id,
-          role: staff.role as any,
-          characterName: staff.characterName || null,
-        },
-      }).catch(() => {})
+      await ensureGameStaffRelation(prisma, {
+        gameId: game.id,
+        staffId: staffRecord.id,
+        role: staff.role,
+        characterName: staff.characterName,
+      })
     }
   }
 
@@ -223,7 +254,7 @@ export async function syncPublishedResource(payload: ResourceSyncPayload, option
   const typeId = await ensureResourceTypeId(payload.typeId)
   const normalizedVndbId = payload.vndbId.toLowerCase()
 
-  const game = await findExistingGame(normalizedVndbId) || await createGameFromVndb(normalizedVndbId, uploaderId)
+  const game = await resolveGameForResourceSync(normalizedVndbId, uploaderId)
 
   const existingResource = await prisma.resource.findFirst({
     where: {
@@ -254,7 +285,7 @@ export async function syncPublishedResource(payload: ResourceSyncPayload, option
   }
 
   const resource = existingResource
-    ? await prisma.resource.update({ where: { id: existingResource.id }, data })
+    ? await prisma.resource.update({ where: { id: existingResource.id }, data: { ...data, updatedAt: new Date() } })
     : await prisma.resource.create({ data })
 
   recordActivity({

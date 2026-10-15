@@ -3,30 +3,27 @@
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">网盘类型管理</h1>
       <div class="flex items-center gap-2">
-        <button
+        <AdminKumoButton variant="secondary"
           @click="() => refreshResourceMatches()"
           :disabled="refreshingResources"
-          class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 transition disabled:opacity-50"
         >
-          <i class="fa-solid fa-rotate mr-1.5" :class="{ 'fa-spin': refreshingResources }"></i>{{ refreshingResources ? '识别中...' : '刷新识别' }}
-        </button>
-        <button
+          <Icon name="fa6-solid:rotate"  :class="{ 'fa-spin': refreshingResources }" />{{ refreshingResources ? '识别中...' : '刷新识别' }}
+        </AdminKumoButton>
+        <AdminKumoButton variant="primary"
           @click="showModal = true"
-          class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
         >
-          <i class="fa-solid fa-plus mr-1.5"></i>添加网盘
-        </button>
+          <Icon name="fa6-solid:plus" />添加网盘
+        </AdminKumoButton>
       </div>
     </div>
 
     <div v-if="selectedIds.length" class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6 flex items-center justify-between">
       <span class="text-sm text-gray-500">已选择 {{ selectedIds.length }} 个网盘类型</span>
-      <button
+      <AdminKumoButton variant="danger" size="toolbar"
         @click="batchDelete"
-        class="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600"
       >
-        <i class="fa-solid fa-trash mr-1"></i>批量删除
-      </button>
+        <Icon name="fa6-solid:trash" />批量删除
+      </AdminKumoButton>
     </div>
 
     <div class="bg-white dark:bg-zinc-800 rounded-xl shadow overflow-hidden">
@@ -51,7 +48,7 @@
               <input type="checkbox" :checked="selectedIds.includes(item.id)" @change="toggleSelect(item.id)" class="rounded" />
             </td>
             <td class="px-4 py-3">
-              <i :class="item.icon || 'fa-solid fa-cloud'" class="text-xl"></i>
+              <FaIcon :icon="item.icon || 'fa6-solid:cloud'" class="text-xl" />
             </td>
             <td class="px-4 py-3 font-medium">{{ item.name }}</td>
             <td class="px-4 py-3 text-sm text-gray-500 max-w-sm">
@@ -85,28 +82,28 @@
             <div class="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h3 class="font-semibold">{{ editingItem ? '编辑网盘类型' : '添加网盘类型' }}</h3>
               <button @click="closeModal" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-                <i class="fa-solid fa-xmark"></i>
+                <Icon name="fa6-solid:xmark" />
               </button>
             </div>
 
             <form @submit.prevent="handleSubmit" class="p-4 space-y-4">
               <div>
                 <label class="block text-sm font-medium mb-1">名称 *</label>
-                <input v-model="form.name" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如：百度网盘" required />
+                <input v-model="form.name" type="text" class="admin-input w-full" placeholder="如：百度网盘" required />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">图标（FontAwesome类名）</label>
-                <input v-model="form.icon" type="text" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如：fa-solid fa-cloud" />
+                <input v-model="form.icon" type="text" class="admin-input w-full" placeholder="如：fa-solid fa-cloud" />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">域名规则 *</label>
-                <textarea v-model="domainsText" rows="4" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="每行一个域名，如：&#10;pan.baidu.com&#10;quark.cn"></textarea>
+                <textarea v-model="domainsText" rows="4" class="admin-textarea w-full" placeholder="每行一个域名，如：&#10;pan.baidu.com&#10;quark.cn"></textarea>
                 <p class="text-xs text-gray-500 mt-1">支持子域名后缀匹配，例如填 baidu.com 可匹配 pan.baidu.com。</p>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium mb-1">排序</label>
-                  <input v-model.number="form.sortOrder" type="number" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" />
+                  <input v-model.number="form.sortOrder" type="number" class="admin-input w-full" />
                 </div>
                 <label class="flex items-center gap-2 pt-7 cursor-pointer">
                   <input v-model="form.isActive" type="checkbox" class="rounded border-gray-300 dark:border-zinc-600" />
@@ -114,10 +111,10 @@
                 </label>
               </div>
               <div class="flex justify-end gap-3 pt-2">
-                <button type="button" @click="closeModal" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm">取消</button>
-                <button type="submit" :disabled="loading" class="px-4 py-2 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm disabled:opacity-50">
+                <AdminKumoButton variant="secondary" type="button" @click="closeModal" >取消</AdminKumoButton>
+                <AdminKumoButton variant="primary" type="submit" :disabled="loading" >
                   {{ loading ? '保存中...' : '保存' }}
-                </button>
+                </AdminKumoButton>
               </div>
             </form>
           </div>

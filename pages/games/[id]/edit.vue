@@ -2,19 +2,19 @@
   <div class="max-w-3xl mx-auto px-2.5 sm:px-4 md:px-6 pb-28 md:pb-24">
     <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
       <NuxtLink :to="`/games/${gameId}`" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-        <i class="fa-solid fa-arrow-left"></i>
+        <Icon name="fa6-solid:arrow-left" />
       </NuxtLink>
       <h1 class="text-xl sm:text-2xl font-bold truncate">编辑游戏条目</h1>
     </div>
 
     <div v-if="pending" class="text-center py-16">
-      <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-2xl" />
       <p class="mt-2 text-gray-500">加载中...</p>
     </div>
 
     <div v-else-if="error" class="text-center py-16">
-      <i class="fa-solid fa-circle-exclamation text-4xl text-red-500 mb-4"></i>
-      <p class="text-gray-500">{{ error.data?.message || '加载失败' }}</p>
+      <Icon name="fa6-solid:circle-exclamation" class="text-4xl text-red-500 mb-4" />
+      <p class="text-gray-500">{{ (error as any).data?.message || '加载失败' }}</p>
     </div>
 
     <form v-else @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-6">
@@ -69,7 +69,7 @@
                 class="w-full h-full object-cover"
               />
               <div v-else class="text-center text-gray-400 p-4">
-                <i class="fa-solid fa-image text-3xl mb-2"></i>
+                <Icon name="fa6-solid:image" class="text-3xl mb-2" />
                 <p class="text-xs">封面预览</p>
               </div>
             </div>
@@ -91,17 +91,17 @@
                 @change="handleFileSelect"
               />
               <div v-if="uploading" class="text-blue-600 dark:text-blue-400">
-                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                <Icon name="fa6-solid:spinner" class="fa-spin text-2xl mb-2" />
                 <p>上传中...</p>
               </div>
               <div v-else>
-                <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+                <Icon name="fa6-solid:cloud-arrow-up" class="text-2xl text-gray-400 mb-2" />
                 <p class="text-sm text-gray-600 dark:text-gray-400">点击或拖拽图片到此处上传</p>
                 <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF、WebP，最大 10MB</p>
               </div>
             </div>
             <div v-if="uploadError" class="text-sm text-red-500">
-              <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ uploadError }}
+              <Icon name="fa6-solid:circle-exclamation" class="mr-1" />{{ uploadError }}
             </div>
           </div>
         </div>
@@ -201,7 +201,7 @@
                 :class="lang.badgeClass"
               >{{ lang.badge }}</span>
               {{ lang.label }}
-              <i v-if="form[lang.key as keyof typeof form]" class="fa-solid fa-check text-green-500 text-xs"></i>
+              <Icon name="fa6-solid:check" class="text-green-500 text-xs" v-if="form[lang.key as keyof typeof form]" />
             </span>
           </button>
         </div>
@@ -248,7 +248,7 @@
                 </select>
                 <span class="text-sm font-medium">{{ sc.name }}</span>
                 <button type="button" @click="removeCompany(index)" class="text-gray-400 hover:text-red-500">
-                  <i class="fa-solid fa-times text-xs"></i>
+                  <Icon name="fa6-solid:xmark" class="text-xs" />
                 </button>
               </div>
             </div>
@@ -263,7 +263,7 @@
                 @focus="showCompanyDropdown = true"
                 @input="searchCompanies"
               />
-              <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               
               <!-- 下拉列表 -->
               <div 
@@ -285,7 +285,7 @@
                       别名: {{ company.aliases.slice(0, 3).join(', ') }}
                     </div>
                   </div>
-                  <i v-if="isCompanySelected(company.id)" class="fa-solid fa-check text-green-500"></i>
+                  <Icon name="fa6-solid:check" class="text-green-500" v-if="isCompanySelected(company.id)" />
                 </button>
               </div>
             </div>
@@ -309,7 +309,7 @@
         <div class="flex items-center justify-between border-b pb-3 dark:border-zinc-700">
           <h2 class="font-semibold text-base sm:text-lg">相关链接</h2>
           <button type="button" @click="addPurchaseLink" class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500">
-            <i class="fa-solid fa-plus mr-1"></i>添加
+            <Icon name="fa6-solid:plus" class="mr-1" />添加
           </button>
         </div>
         
@@ -328,7 +328,7 @@
               placeholder="https://..."
             />
             <button type="button" @click="removePurchaseLink(index)" class="self-end sm:self-auto p-2 text-red-500 hover:text-red-600 transition">
-              <i class="fa-solid fa-trash"></i>
+              <Icon name="fa6-solid:trash" />
             </button>
           </div>
         </div>
@@ -345,7 +345,7 @@
             @click="addStaff" 
             class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
           >
-            <i class="fa-solid fa-plus mr-1"></i>添加
+            <Icon name="fa6-solid:plus" class="mr-1" />添加
           </button>
         </div>
         
@@ -379,7 +379,7 @@
               @click="removeStaff(index)" 
               class="justify-self-end sm:justify-self-auto p-2 text-red-500 hover:text-red-600 transition"
             >
-              <i class="fa-solid fa-trash"></i>
+              <Icon name="fa6-solid:trash" />
             </button>
           </div>
         </div>
@@ -389,87 +389,12 @@
       <!-- 标签 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-3.5 sm:p-6 shadow space-y-4">
         <h2 class="font-semibold text-base sm:text-lg border-b pb-3 dark:border-zinc-700">标签</h2>
-
-        <!-- 已选标签（词表中已有的） -->
-        <div v-if="selectedTags.length || pendingNewTags.length" class="flex flex-wrap gap-2">
-          <span
-            v-for="tag in selectedTags" :key="tag.id"
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium"
-            :style="tag.color ? { backgroundColor: tag.color + '20', color: tag.color } : { backgroundColor: 'rgba(107,114,128,0.12)', color: 'inherit' }"
-          >
-            {{ tag.name }}
-            <button type="button" @click="removeTag(tag.id)" class="opacity-60 hover:opacity-100 ml-0.5">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </span>
-          <!-- 待创建的新标签：虚线边框区分，提示需要管理员审核后才正式生效 -->
-          <span
-            v-for="name in pendingNewTags" :key="'new-' + name"
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border border-dashed border-gray-400 dark:border-zinc-500 text-gray-600 dark:text-zinc-300"
-            :title="'新标签「' + name + '」将在审核通过后创建'"
-          >
-            <i class="fa-solid fa-plus text-xs opacity-60"></i>
-            {{ name }}
-            <button type="button" @click="removePendingTag(name)" class="opacity-60 hover:opacity-100 ml-0.5">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </span>
-        </div>
-        <p v-else class="text-sm text-gray-400">暂未添加任何标签</p>
-
-        <!-- 搜索输入 -->
-        <div class="relative" ref="tagDropdownRef">
-          <div class="flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-zinc-600 bg-gray-50 dark:bg-zinc-700 focus-within:ring-2 focus-within:ring-blue-500">
-            <i class="fa-solid fa-magnifying-glass text-gray-400 text-sm"></i>
-            <input
-              v-model="tagSearch"
-              type="text"
-              placeholder="搜索标签，或直接输入名称创建新标签..."
-              class="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
-              @input="searchTags"
-              @focus="onTagFocus"
-              @keydown.enter.prevent="onTagInputEnter"
-            />
-          </div>
-          <div
-            v-if="showTagDropdown && (tagResults.length || canCreateNewTag)"
-            class="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border dark:border-zinc-700 max-h-56 overflow-y-auto"
-          >
-            <!-- 已有标签结果 -->
-            <button
-              v-for="tag in tagResults"
-              :key="tag.id"
-              type="button"
-              class="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-700 text-sm flex items-center gap-2.5 transition"
-              @click="addTag(tag)"
-            >
-              <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="tag.color ? { backgroundColor: tag.color } : { backgroundColor: '#9ca3af' }"></span>
-              <span>{{ tag.name }}</span>
-            </button>
-            <!-- 分割线（有已有结果且可新建时） -->
-            <div v-if="tagResults.length && canCreateNewTag" class="border-t dark:border-zinc-700" />
-            <!-- 新建标签选项 -->
-            <button
-              v-if="canCreateNewTag"
-              type="button"
-              class="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-700 text-sm flex items-center gap-2.5 transition text-blue-500"
-              @click="createPendingTag"
-            >
-              <i class="fa-solid fa-plus text-xs"></i>
-              <span>创建新标签「{{ tagSearch.trim() }}」</span>
-              <span class="ml-auto text-xs text-gray-400">审核后生效</span>
-            </button>
-          </div>
-          <div
-            v-else-if="showTagDropdown && tagSearch && !tagResults.length && !canCreateNewTag"
-            class="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border dark:border-zinc-700 px-4 py-3 text-sm text-gray-400"
-          >
-            已添加该标签
-          </div>
-        </div>
-        <p v-if="pendingNewTags.length" class="text-xs text-gray-400">
-          <i class="fa-solid fa-circle-info mr-1"></i>虚线标签为新标签提案，审核通过后正式生效
-        </p>
+        <TagAutocomplete
+          v-model="selectedTags"
+          v-model:pending-names="pendingNewTags"
+          :admin="isAdmin"
+          :creation-mode="isAdmin ? 'immediate' : 'proposal'"
+        />
       </div>
 
       <!-- 设置 -->
@@ -544,19 +469,12 @@ const { data: gameData, pending, error } = await useAuthFetch<AdminGameItem>(`/a
   key: `game-edit-data-${gameId.value}`,
 })
 
-// 获取标签列表
-const { data: tagsData } = await useFetch<ListResponse<TagItem>>('/api/tags', {
-  key: 'game-edit-tags',
-  query: { limit: 100 },
-})
-
 // 获取开发商列表
-const { data: companiesData } = await useFetch<ListResponse<CompanyItem>>('/api/companies', {
+const { data: companiesData } = await (useFetch as any)('/api/companies', {
   key: 'game-edit-companies',
   query: { limit: 100 },
 })
 
-const tags = computed(() => tagsData.value?.items || [])
 const companies = computed(() => companiesData.value?.items || [])
 
 // 会社搜索相关
@@ -567,23 +485,13 @@ const selectedCompanies = ref<{ companyId: number; name: string; role: string }[
 const companyDropdownRef = ref<HTMLElement | null>(null)
 let companySearchTimer: ReturnType<typeof setTimeout>
 
-// 标签搜索相关
-const tagSearch = ref('')
-const showTagDropdown = ref(false)
-const tagResults = ref<TagItem[]>([])
 const selectedTags = ref<TagItem[]>([])
 // 玩家自由输入的新标签（词表里没有的），以虚线边框区分显示
 const pendingNewTags = ref<string[]>([])
-const tagDropdownRef = ref<HTMLElement | null>(null)
-let tagSearchTimer: ReturnType<typeof setTimeout>
 
 // 点击外部关闭下拉菜单
 onClickOutside(companyDropdownRef, () => {
   showCompanyDropdown.value = false
-})
-
-onClickOutside(tagDropdownRef, () => {
-  showTagDropdown.value = false
 })
 
 // 会社搜索
@@ -628,89 +536,6 @@ function removeCompany(index: number) {
   selectedCompanies.value.splice(index, 1)
 }
 
-// 标签搜索
-function searchTags() {
-  clearTimeout(tagSearchTimer)
-  const query = tagSearch.value.trim().toLowerCase()
-
-  if (!query) {
-    tagResults.value = []
-    showTagDropdown.value = false
-    return
-  }
-
-  showTagDropdown.value = true
-  tagSearchTimer = setTimeout(() => {
-    tagResults.value = tags.value.filter(t => {
-      // 过滤掉"机器翻译"标签（普通用户不能手动添加）
-      if (t.name === '机器翻译') return false
-      return t.name.toLowerCase().includes(query) && !selectedTags.value.some(st => st.id === t.id)
-    }).slice(0, 10)
-  }, 200)
-}
-
-/** 是否可以把当前输入作为新标签创建（未被已选中或待创建列表收录） */
-const canCreateNewTag = computed(() => {
-  const q = tagSearch.value.trim()
-  if (!q || q.length < 1 || q.length > 100) return false
-  if (selectedTags.value.some(t => t.name.toLowerCase() === q.toLowerCase())) return false
-  if (pendingNewTags.value.some(n => n.toLowerCase() === q.toLowerCase())) return false
-  // 若搜索结果里已有精确匹配，说明词表里有，不必新建
-  if (tagResults.value.some(t => t.name.toLowerCase() === q.toLowerCase())) return false
-  return true
-})
-
-function onTagFocus() {
-  showTagDropdown.value = true
-  if (tagSearch.value) {
-    searchTags()
-  }
-}
-
-function addTag(tag: TagItem) {
-  if (selectedTags.value.some(t => t.id === tag.id)) return
-  selectedTags.value.push(tag)
-  tagSearch.value = ''
-  tagResults.value = []
-  showTagDropdown.value = false
-}
-
-/** 将输入框内容作为新标签暂存 */
-function createPendingTag() {
-  const name = tagSearch.value.trim()
-  if (!name || name.length > 100) return
-  if (pendingNewTags.value.some(n => n.toLowerCase() === name.toLowerCase())) return
-  if (selectedTags.value.some(t => t.name.toLowerCase() === name.toLowerCase())) return
-  pendingNewTags.value.push(name)
-  tagSearch.value = ''
-  tagResults.value = []
-  showTagDropdown.value = false
-}
-
-function removeTag(tagId: number) {
-  const index = selectedTags.value.findIndex(t => t.id === tagId)
-  if (index > -1) {
-    selectedTags.value.splice(index, 1)
-  }
-}
-
-function removePendingTag(name: string) {
-  const index = pendingNewTags.value.indexOf(name)
-  if (index > -1) pendingNewTags.value.splice(index, 1)
-}
-
-/** Enter 键：若有精确匹配则选中，否则创建新标签 */
-function onTagInputEnter() {
-  const q = tagSearch.value.trim()
-  if (!q) return
-  const exact = tagResults.value.find(t => t.name.toLowerCase() === q.toLowerCase())
-  if (exact) {
-    addTag(exact)
-  } else if (canCreateNewTag.value) {
-    createPendingTag()
-  }
-}
-
 // 图片上传
 const fileInputRef = ref<HTMLInputElement>()
 const uploading = ref(false)
@@ -740,7 +565,6 @@ const form = reactive({
   coverImage: '',
   releaseDate: '',
   companyId: '' as number | '',
-  tagIds: [] as number[],
   isNsfw: false,
   vndbId: '',
   bangumiId: '',
@@ -783,7 +607,6 @@ watch(gameData, (data) => {
     form.coverImage = data.coverImage || ''
     form.releaseDate = data.releaseDate ? String(data.releaseDate).split('T')[0] : ''
     form.companyId = data.companyId || ''
-    form.tagIds = data.tags?.map(t => 'tag' in t ? t.tag?.id : t.id ?? t.tagId).filter((id): id is number => typeof id === 'number') || []
     form.isNsfw = data.isNsfw || false
     form.vndbId = data.vndbId || ''
     form.bangumiId = data.bangumiId?.toString() || ''
@@ -803,7 +626,8 @@ watch(gameData, (data) => {
     
     // 初始化标签（过滤掉"机器翻译"标签，普通用户不能手动编辑）
     if (data.tags?.length) {
-      selectedTags.value = data.tags
+      selectedTags.value = (data.tags as any[])
+        .filter(t => !('sources' in t) || !Array.isArray(t.sources) || t.sources.includes('MANUAL'))
         .map<TagItem>(t => {
           const tag = 'tag' in t ? t.tag : undefined
           return {
@@ -978,4 +802,3 @@ useHead({
   title: computed(() => gameData.value ? `编辑 ${gameData.value.title} - ${siteName.value}` : `编辑游戏 - ${siteName.value}`),
 })
 </script>
-script>

@@ -11,7 +11,7 @@
         >
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
+              <Icon name="fa6-solid:gamepad" class="text-blue-500 text-xl" />
             </div>
             <div>
               <div class="text-2xl font-bold">{{ stats.stats.totalGames }}</div>
@@ -26,7 +26,7 @@
         >
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-              <i class="fa-solid fa-users text-green-500 text-xl"></i>
+              <Icon name="fa6-solid:users" class="text-green-500 text-xl" />
             </div>
             <div class="min-w-0">
               <div class="text-2xl font-bold">{{ stats.stats.totalUsers }}</div>
@@ -46,7 +46,7 @@
         >
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <i class="fa-solid fa-building text-purple-500 text-xl"></i>
+              <Icon name="fa6-solid:building" class="text-purple-500 text-xl" />
             </div>
             <div>
               <div class="text-2xl font-bold">{{ stats.stats.totalCompanies }}</div>
@@ -61,7 +61,7 @@
         >
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-              <i class="fa-solid fa-image text-orange-500 text-xl"></i>
+              <Icon name="fa6-solid:image" class="text-orange-500 text-xl" />
             </div>
             <div>
               <div class="text-2xl font-bold">{{ stats.stats.totalImages }}</div>
@@ -76,7 +76,7 @@
         <div class="bg-white dark:bg-zinc-800 rounded-xl p-5 shadow">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-              <i class="fa-solid fa-download text-cyan-500 text-xl"></i>
+              <Icon name="fa6-solid:download" class="text-cyan-500 text-xl" />
             </div>
             <div>
               <div class="text-2xl font-bold">{{ stats.stats.todayDownloads }}</div>
@@ -88,7 +88,7 @@
         <div class="bg-white dark:bg-zinc-800 rounded-xl p-5 shadow">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-              <i class="fa-solid fa-right-to-bracket text-indigo-500 text-xl"></i>
+              <Icon name="fa6-solid:right-to-bracket" class="text-indigo-500 text-xl" />
             </div>
             <div>
               <div class="text-2xl font-bold">{{ stats.stats.todayLogins }}</div>
@@ -106,17 +106,17 @@
             v-model="vndbIds"
             type="text"
             placeholder="输入 VNDB ID，多个用逗号或空格分隔（如：v12345, v67890）"
-            class="flex-1 px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
+            class="admin-input flex-1"
             @keydown.enter="quickImport"
           />
-          <button
+          <AdminKumoButton
             @click="quickImport"
             :disabled="!vndbIds.trim() || quickImporting"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+            variant="emphasis"
           >
-            <i v-if="quickImporting" class="fa-solid fa-spinner fa-spin mr-1"></i>
+            <Icon name="fa6-solid:spinner" class="animate-spin" v-if="quickImporting" />
             {{ quickImporting ? '导入中...' : '快速导入' }}
-          </button>
+          </AdminKumoButton>
         </div>
         <p class="text-xs text-gray-500 mt-2">
           输入 VNDB ID 后获取数据并创建条目，多个 ID 会按每批 20 个连续导入；缺少简介会用“-”占位，缺少封面会使用默认封面图
@@ -159,22 +159,22 @@
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button
+            <AdminKumoButton
               @click="loadUpcomingReleases"
               :disabled="upcomingLoading || publishingUpcoming"
-              class="px-3 py-2 rounded-lg border dark:border-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+              variant="secondary"
             >
-              <i class="fa-solid fa-rotate-right mr-1" :class="{ 'fa-spin': upcomingLoading }"></i>
+              <Icon name="fa6-solid:rotate-right" :class="{ 'animate-spin': upcomingLoading }" />
               {{ upcomingLoading ? '获取中...' : '获取候选' }}
-            </button>
-            <button
+            </AdminKumoButton>
+            <AdminKumoButton
               @click="publishSelectedUpcoming"
               :disabled="selectedUpcomingIds.length === 0 || publishingUpcoming"
-              class="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+              variant="emphasis"
             >
-              <i v-if="publishingUpcoming" class="fa-solid fa-spinner fa-spin mr-1"></i>
+              <Icon name="fa6-solid:spinner" class="animate-spin" v-if="publishingUpcoming" />
               {{ publishingUpcoming ? '上架中...' : `上架选中 ${selectedUpcomingIds.length}` }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
 
@@ -193,7 +193,7 @@
         </div>
 
         <div v-if="upcomingLoading" class="py-8 text-center text-sm text-gray-500">
-          <i class="fa-solid fa-spinner fa-spin mr-1"></i>正在从 VNDB 获取候选...
+          <Icon name="fa6-solid:spinner" class="fa-spin mr-1" />正在从 VNDB 获取候选...
         </div>
         <div v-else-if="upcomingFetched && upcomingCandidates.length === 0" class="py-8 text-center text-sm text-gray-500">
           {{ upcomingRangeLabel }} 暂无可展示的候选条目
@@ -236,7 +236,7 @@
                 loading="lazy"
               />
               <div v-else class="w-12 h-16 rounded bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                <i class="fa-solid fa-image text-gray-400 text-sm"></i>
+                <Icon name="fa6-solid:image" class="text-gray-400 text-sm" />
               </div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium text-sm truncate">{{ candidate.title }}</div>
@@ -275,7 +275,7 @@
             >
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center">
-                  <i class="fa-solid fa-user text-xs text-gray-400"></i>
+                  <Icon name="fa6-solid:user" class="text-xs text-gray-400" />
                 </div>
                 <div>
                   <div class="font-medium">{{ user.username }}</div>

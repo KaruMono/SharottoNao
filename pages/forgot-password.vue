@@ -29,14 +29,16 @@
               placeholder="输入验证码"
               required
             />
-            <button 
+            <CloudButton
               type="button"
+              size="large"
+              class="w-28"
               @click="sendCode"
-              :disabled="codeCooldown > 0 || sendingCode"
-              class="flex-shrink-0 w-28 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-50 transition"
+              :disabled="codeCooldown > 0"
+              :loading="sendingCode"
             >
               {{ sendingCode ? '发送中...' : (codeCooldown > 0 ? `${codeCooldown}s` : '重新发送') }}
-            </button>
+            </CloudButton>
           </div>
         </div>
 
@@ -79,19 +81,22 @@
           {{ successMessage }}
         </div>
 
-        <button 
+        <CloudButton
           type="submit"
-          :disabled="loading || (step === 2 && form.password !== form.confirmPassword)"
-          class="w-full py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white font-medium hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50 transition"
+          variant="primary"
+          size="large"
+          :disabled="step === 2 && form.password !== form.confirmPassword"
+          :loading="loading"
+          full-width
         >
           {{ loading ? '处理中...' : (step === 1 ? '发送验证码' : '重置密码') }}
-        </button>
+        </CloudButton>
       </form>
 
-      <div class="mt-6 text-center text-sm text-gray-500">
-        <NuxtLink to="/login" class="text-gray-800 dark:text-gray-200 hover:underline">
-          <i class="fa-solid fa-arrow-left mr-1"></i>返回登录
-        </NuxtLink>
+      <div class="mt-6 border-t border-gray-100 pt-5 dark:border-zinc-700">
+        <CloudButton to="/login" variant="ghost" full-width>
+          <Icon name="fa6-solid:arrow-left" aria-hidden="true" />返回登录
+        </CloudButton>
       </div>
     </div>
   </div>
@@ -122,15 +127,15 @@ async function sendCode() {
   
   sendingCode.value = true
   errorMessage.value = ''
-  
+
   try {
-    await $fetch('/api/auth/send-code', {
+    await ($fetch as any)('/api/auth/send-code', {
       method: 'POST',
       body: {
         email: form.email,
         type: 'RESET_PASSWORD',
       },
-    })
+    } as any)
     
     toast.success('验证码已发送到您的邮箱')
     
@@ -158,7 +163,7 @@ async function handleSubmit() {
     // 第一步：发送验证码
     loading.value = true
     try {
-      await $fetch('/api/auth/send-code', {
+      await ($fetch as any)('/api/auth/send-code', {
         method: 'POST',
         body: {
           email: form.email,
@@ -189,10 +194,10 @@ async function handleSubmit() {
       errorMessage.value = '两次输入的密码不一致'
       return
     }
-    
+
     loading.value = true
     try {
-      await $fetch('/api/auth/reset-password', {
+      await ($fetch as any)('/api/auth/reset-password', {
         method: 'POST',
         body: {
           email: form.email,

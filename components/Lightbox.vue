@@ -11,7 +11,7 @@
           @click="emit('close')"
           class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
         >
-          <i class="fa-solid fa-xmark text-xl"></i>
+          <Icon name="fa6-solid:xmark" class="text-xl" />
         </button>
 
         <!-- 上一张 -->
@@ -20,7 +20,7 @@
           @click="prev"
           class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
         >
-          <i class="fa-solid fa-chevron-left text-xl"></i>
+          <Icon name="fa6-solid:chevron-left" class="text-xl" />
         </button>
 
         <!-- 图片 -->
@@ -48,7 +48,7 @@
           @click="next"
           class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
         >
-          <i class="fa-solid fa-chevron-right text-xl"></i>
+          <Icon name="fa6-solid:chevron-right" class="text-xl" />
         </button>
 
         <!-- 缩略图列表 -->

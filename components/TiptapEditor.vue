@@ -8,7 +8,7 @@
         :class="['toolbar-btn', { active: editor.isActive('bold') }]"
         title="加粗"
       >
-        <i class="fa-solid fa-bold"></i>
+        <Icon name="fa6-solid:bold" />
       </button>
       <button
         type="button"
@@ -16,7 +16,7 @@
         :class="['toolbar-btn', { active: editor.isActive('italic') }]"
         title="斜体"
       >
-        <i class="fa-solid fa-italic"></i>
+        <Icon name="fa6-solid:italic" />
       </button>
       <button
         type="button"
@@ -24,7 +24,7 @@
         :class="['toolbar-btn', { active: editor.isActive('strike') }]"
         title="删除线"
       >
-        <i class="fa-solid fa-strikethrough"></i>
+        <Icon name="fa6-solid:strikethrough" />
       </button>
       <button
         type="button"
@@ -32,7 +32,7 @@
         :class="['toolbar-btn', { active: editor.isActive('spoiler') }]"
         title="剧透"
       >
-        <i class="fa-solid fa-eye-slash"></i>
+        <Icon name="fa6-solid:eye-slash" />
       </button>
 
       <!-- 表情 -->
@@ -43,7 +43,7 @@
           class="toolbar-btn"
           title="表情"
         >
-          <i class="fa-regular fa-face-smile"></i>
+          <Icon name="fa6-regular:face-smile" />
         </button>
 
         <!-- 表情选择器 -->
@@ -99,7 +99,7 @@
           ? 'text-green-600 dark:text-green-400'
           : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
       >
-        <i class="fa-solid fa-clock text-[10px]"></i>
+        <Icon name="fa6-solid:clock" class="text-[10px]" />
         <span v-if="playTime > 0">{{ playTime }}小时</span>
         <span v-else>设置游玩时长</span>
       </button>
@@ -237,7 +237,7 @@ const showPlayTimeModal = ref(false)
 const playTime = ref(props.initialPlayTime)
 
 // 获取表情包
-const { data: emojiPacksData } = await useFetch('/api/emoji-packs', { key: 'emoji-packs' })
+const { data: emojiPacksData } = await (useFetch as any)('/api/emoji-packs', { key: 'emoji-packs' })
 watch(emojiPacksData, (data) => {
   if (data) {
     emojiPacks.value = data as EmojiPack[]

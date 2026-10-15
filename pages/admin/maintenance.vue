@@ -1,9 +1,9 @@
 <template>
-  <div class="max-w-6xl">
+  <div>
     <header class="mb-8 border-b border-gray-200 dark:border-zinc-700 pb-5">
       <div class="flex items-center gap-3">
         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-          <i class="fa-solid fa-screwdriver-wrench"></i>
+          <Icon name="fa6-solid:screwdriver-wrench" />
         </div>
         <div>
           <h1 class="text-2xl font-bold">系统维护</h1>
@@ -23,21 +23,21 @@
           <div class="flex flex-col items-start justify-between gap-4 sm:flex-row">
             <div>
               <h2 class="font-semibold text-lg flex items-center gap-2">
-                <i class="fa-solid fa-trash-can text-red-500"></i>
+                <Icon name="fa6-solid:trash-can" class="text-red-500" />
                 清理已删除的资源数据
               </h2>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 资源删除后数据仍保留在数据库中（软删除），此操作将永久清除这些残留数据，不可恢复。
               </p>
             </div>
-            <button
-              class="w-full shrink-0 px-4 py-2 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm hover:bg-gray-200 dark:hover:bg-zinc-600 disabled:opacity-50 sm:w-auto"
+            <AdminKumoButton
+              variant="secondary"
               :disabled="loadingDeleted"
               @click="loadDeletedResources"
             >
-              <i class="fa-solid fa-rotate mr-1" :class="{ 'fa-spin': loadingDeleted }"></i>
+              <Icon name="fa6-solid:rotate" :class="{ 'fa-spin': loadingDeleted }" />
               {{ loadingDeleted ? '查询中...' : '查询残留数据' }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
 
@@ -48,13 +48,13 @@
 
         <!-- 无残留 -->
         <div v-else-if="deletedResources.length === 0" class="p-6 text-sm text-green-600 dark:text-green-400 text-center">
-          <i class="fa-solid fa-circle-check mr-1"></i>没有残留的已删除资源，数据库干净
+          <Icon name="fa6-solid:circle-check" class="mr-1" />没有残留的已删除资源，数据库干净
         </div>
 
         <!-- 有残留 -->
         <template v-else>
           <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-sm text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <Icon name="fa6-solid:triangle-exclamation" />
             共找到 <strong>{{ deletedResources.length }}</strong> 条软删除残留数据
           </div>
 
@@ -78,14 +78,14 @@
               <input type="checkbox" :checked="allSelected" @change="toggleAll" class="rounded" />
               全选（{{ selectedCount }}/{{ deletedResources.length }}）
             </label>
-            <button
+            <AdminKumoButton
+              variant="danger"
               :disabled="selectedCount === 0 || purging"
-              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               @click="confirmPurge"
             >
-              <i class="fa-solid fa-fire mr-1"></i>
+              <Icon name="fa6-solid:fire" />
               {{ purging ? '清理中...' : `永久删除所选 (${selectedCount})` }}
-            </button>
+            </AdminKumoButton>
           </div>
         </template>
       </div>
@@ -96,21 +96,21 @@
           <div class="flex flex-col items-start justify-between gap-4 sm:flex-row">
             <div>
               <h2 class="font-semibold text-lg flex items-center gap-2">
-                <i class="fa-solid fa-comment-slash text-red-500"></i>
+                <Icon name="fa6-solid:comment-slash" class="text-red-500" />
                 清理空壳评论
               </h2>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 历史遗留的空内容评论（正文实质为空，仅显示头像和用户名），此操作将永久删除，不可恢复。仍挂有有效回复的顶级评论会自动保留。
               </p>
             </div>
-            <button
-              class="w-full shrink-0 px-4 py-2 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm hover:bg-gray-200 dark:hover:bg-zinc-600 disabled:opacity-50 sm:w-auto"
+            <AdminKumoButton variant="secondary"
+              class="w-full shrink-0 sm:w-auto"
               :disabled="loadingEmptyComments"
               @click="loadEmptyComments"
             >
-              <i class="fa-solid fa-rotate mr-1" :class="{ 'fa-spin': loadingEmptyComments }"></i>
+              <Icon name="fa6-solid:rotate"  :class="{ 'fa-spin': loadingEmptyComments }" />
               {{ loadingEmptyComments ? '查询中...' : '查询空壳评论' }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
 
@@ -121,13 +121,13 @@
 
         <!-- 无残留 -->
         <div v-else-if="emptyComments.length === 0" class="p-6 text-sm text-green-600 dark:text-green-400 text-center">
-          <i class="fa-solid fa-circle-check mr-1"></i>没有空壳评论，数据库干净
+          <Icon name="fa6-solid:circle-check" class="mr-1" />没有空壳评论，数据库干净
         </div>
 
         <!-- 有残留 -->
         <template v-else>
           <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-sm text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <Icon name="fa6-solid:triangle-exclamation" />
             共找到 <strong>{{ emptyComments.length }}</strong> 条空壳评论
           </div>
 
@@ -156,14 +156,13 @@
               <input type="checkbox" :checked="allEmptySelected" @change="toggleAllEmpty" class="rounded" />
               全选（{{ selectedEmptyCount }}/{{ emptyComments.length }}）
             </label>
-            <button
+            <AdminKumoButton variant="danger"
               :disabled="selectedEmptyCount === 0 || purgingEmpty"
-              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               @click="confirmPurgeEmpty"
             >
-              <i class="fa-solid fa-fire mr-1"></i>
+              <Icon name="fa6-solid:fire" />
               {{ purgingEmpty ? '清理中...' : `永久删除所选 (${selectedEmptyCount})` }}
-            </button>
+            </AdminKumoButton>
           </div>
         </template>
       </div>
@@ -174,21 +173,21 @@
           <div class="flex flex-col items-start justify-between gap-4 sm:flex-row">
             <div>
               <h2 class="font-semibold text-lg flex items-center gap-2">
-                <i class="fa-solid fa-broom text-yellow-500"></i>
+                <Icon name="fa6-solid:broom" class="text-yellow-500" />
                 清理孤立动态记录
               </h2>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 攻略被删除后，其对应的动态记录（贡献榜、我的动态）可能仍残留在数据库中，此操作将一并清除这些孤立记录。
               </p>
             </div>
-            <button
-              class="w-full shrink-0 px-4 py-2 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm hover:bg-gray-200 dark:hover:bg-zinc-600 disabled:opacity-50 sm:w-auto"
+            <AdminKumoButton variant="secondary"
+              class="w-full shrink-0 sm:w-auto"
               :disabled="cleaningActivity"
               @click="loadOrphanActivityCount"
             >
-              <i class="fa-solid fa-rotate mr-1" :class="{ 'fa-spin': cleaningActivity }"></i>
+              <Icon name="fa6-solid:rotate"  :class="{ 'fa-spin': cleaningActivity }" />
               {{ cleaningActivity ? '查询中...' : '查询孤立记录' }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
 
@@ -199,24 +198,23 @@
 
         <!-- 无残留 -->
         <div v-else-if="activityQueried === 0" class="p-6 text-sm text-green-600 dark:text-green-400 text-center">
-          <i class="fa-solid fa-circle-check mr-1"></i>没有孤立的动态记录，数据库干净
+          <Icon name="fa6-solid:circle-check" class="mr-1" />没有孤立的动态记录，数据库干净
         </div>
 
         <!-- 有残留 -->
         <template v-else-if="activityQueried > 0">
           <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-sm text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <Icon name="fa6-solid:triangle-exclamation" />
             共找到 <strong>{{ activityQueried }}</strong> 条孤立动态记录（攻略已删除但记录仍存在）
           </div>
           <div class="p-4 border-t dark:border-zinc-700 flex justify-end">
-            <button
+            <AdminKumoButton variant="danger"
               :disabled="cleaningActivity"
-              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               @click="confirmActivityCleanup"
             >
-              <i class="fa-solid fa-fire mr-1"></i>
+              <Icon name="fa6-solid:fire" />
               {{ cleaningActivity ? '清理中...' : `清理全部 (${activityQueried})` }}
-            </button>
+            </AdminKumoButton>
           </div>
         </template>
       </div>
@@ -234,21 +232,21 @@
           <div class="flex flex-col items-start justify-between gap-4 sm:flex-row">
             <div>
               <h2 class="flex items-center gap-2 text-lg font-semibold">
-                <i class="fa-solid fa-language text-amber-500"></i>
+                <Icon name="fa6-solid:language" class="text-amber-500" />
                 机翻资源标签修复
               </h2>
               <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 查找没有已审核机翻资源但仍带有“机器翻译”标签的游戏，并移除错误的标签关联。
               </p>
             </div>
-            <button
-              class="w-full shrink-0 rounded-lg bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 disabled:opacity-50 dark:bg-zinc-700 dark:hover:bg-zinc-600 sm:w-auto"
+            <AdminKumoButton variant="secondary"
+              class="w-full shrink-0 sm:w-auto"
               :disabled="checkingMachineTags || cleaningMachineTags"
               @click="previewMachineTranslationTags"
             >
-              <i class="fa-solid fa-rotate mr-1" :class="{ 'fa-spin': checkingMachineTags }"></i>
+              <Icon name="fa6-solid:rotate"  :class="{ 'fa-spin': checkingMachineTags }" />
               {{ checkingMachineTags ? '扫描中...' : '扫描异常标签' }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
 
@@ -257,12 +255,12 @@
         </div>
 
         <div v-else-if="staleMachineTagGames.length === 0" class="p-6 text-center text-sm text-green-600 dark:text-green-400">
-          <i class="fa-solid fa-circle-check mr-1"></i>机器翻译标签与资源状态一致
+          <Icon name="fa6-solid:circle-check" class="mr-1" />机器翻译标签与资源状态一致
         </div>
 
         <template v-else>
           <div class="flex items-center gap-2 bg-yellow-50 p-4 text-sm text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <Icon name="fa6-solid:triangle-exclamation" />
             共发现 <strong>{{ staleMachineTagGames.length }}</strong> 个游戏存在错误标签
           </div>
           <div class="max-h-72 divide-y overflow-y-auto dark:divide-zinc-700">
@@ -275,18 +273,17 @@
             >
               <span class="w-14 shrink-0 text-right text-xs text-gray-400">#{{ game.id }}</span>
               <span class="min-w-0 flex-1 truncate font-medium">{{ game.title }}</span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-300"></i>
+              <Icon name="fa6-solid:arrow-up-right-from-square" class="text-xs text-gray-300" />
             </NuxtLink>
           </div>
           <div class="flex justify-end border-t p-4 dark:border-zinc-700">
-            <button
-              class="rounded-lg bg-amber-600 px-4 py-2 text-sm text-white hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            <AdminKumoButton variant="primary"
               :disabled="cleaningMachineTags"
               @click="showMachineTagConfirm = true"
             >
-              <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+              <Icon name="fa6-solid:wand-magic-sparkles" />
               {{ cleaningMachineTags ? '修复中...' : `移除错误标签 (${staleMachineTagGames.length})` }}
-            </button>
+            </AdminKumoButton>
           </div>
         </template>
       </div>
@@ -296,21 +293,21 @@
           <div class="flex flex-col items-start justify-between gap-4 sm:flex-row">
             <div>
               <h2 class="font-semibold text-lg flex items-center gap-2">
-                <i class="fa-solid fa-at text-blue-500"></i>
+                <Icon name="fa6-solid:at" class="text-blue-500" />
                 邮箱大小写规范化
               </h2>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 将数据库中所有含大写字母的邮箱统一转为小写。若小写版本已被其他账号占用则自动跳过（需手动处理）。
               </p>
             </div>
-            <button
-              class="w-full shrink-0 px-4 py-2 rounded-lg bg-gray-100 dark:bg-zinc-700 text-sm hover:bg-gray-200 dark:hover:bg-zinc-600 disabled:opacity-50 sm:w-auto"
+            <AdminKumoButton variant="secondary"
+              class="w-full shrink-0 sm:w-auto"
               :disabled="checkingEmails"
               @click="previewNormalizeEmails"
             >
-              <i class="fa-solid fa-rotate mr-1" :class="{ 'fa-spin': checkingEmails }"></i>
+              <Icon name="fa6-solid:rotate"  :class="{ 'fa-spin': checkingEmails }" />
               {{ checkingEmails ? '扫描中...' : '扫描异常邮箱' }}
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
 
@@ -321,13 +318,13 @@
 
         <!-- 全部正常 -->
         <div v-else-if="emailsToNormalize.length === 0" class="p-6 text-sm text-green-600 dark:text-green-400 text-center">
-          <i class="fa-solid fa-circle-check mr-1"></i>所有邮箱已是小写格式，无需处理
+          <Icon name="fa6-solid:circle-check" class="mr-1" />所有邮箱已是小写格式，无需处理
         </div>
 
         <!-- 有需处理项 -->
         <template v-else>
           <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-sm text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <Icon name="fa6-solid:triangle-exclamation" />
             共发现 <strong>{{ emailsToNormalize.length }}</strong> 个含大写字母的邮箱
           </div>
           <div class="max-h-60 divide-y overflow-auto dark:divide-zinc-700">
@@ -336,19 +333,18 @@
               <span class="font-medium">{{ item.username }}</span>
               <span class="text-gray-400 mx-1">·</span>
               <code class="text-orange-500 dark:text-orange-400">{{ item.email }}</code>
-              <i class="fa-solid fa-arrow-right text-gray-300 text-xs mx-1"></i>
+              <Icon name="fa6-solid:arrow-right" class="text-gray-300 text-xs mx-1" />
               <code class="text-green-600 dark:text-green-400">{{ item.email.toLowerCase() }}</code>
             </div>
           </div>
           <div class="p-4 border-t dark:border-zinc-700 flex justify-end">
-            <button
+            <AdminKumoButton variant="primary"
               :disabled="normalizingEmails"
-              class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               @click="runNormalizeEmails"
             >
-              <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+              <Icon name="fa6-solid:wand-magic-sparkles" />
               {{ normalizingEmails ? '处理中...' : `一键转为小写 (${emailsToNormalize.length})` }}
-            </button>
+            </AdminKumoButton>
           </div>
         </template>
       </div>
@@ -364,18 +360,16 @@
             即将永久删除 <strong class="text-red-500">{{ selectedCount }}</strong> 条资源数据，此操作不可恢复，是否继续？
           </p>
           <div class="flex justify-end gap-3">
-            <button
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
+            <AdminKumoButton variant="secondary"
               @click="showConfirm = false"
             >
               取消
-            </button>
-            <button
-              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-500"
+            </AdminKumoButton>
+            <AdminKumoButton variant="danger"
               @click="executePurge"
             >
               确认删除
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
       </div>
@@ -391,18 +385,16 @@
             即将永久删除 <strong class="text-red-500">{{ selectedEmptyCount }}</strong> 条空壳评论，此操作不可恢复，是否继续？
           </p>
           <div class="flex justify-end gap-3">
-            <button
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
+            <AdminKumoButton variant="secondary"
               @click="showEmptyConfirm = false"
             >
               取消
-            </button>
-            <button
-              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-500"
+            </AdminKumoButton>
+            <AdminKumoButton variant="danger"
               @click="executePurgeEmpty"
             >
               确认删除
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
       </div>
@@ -418,18 +410,16 @@
             即将清理 <strong class="text-red-500">{{ activityQueried }}</strong> 条孤立动态记录，此操作不可恢复，是否继续？
           </p>
           <div class="flex justify-end gap-3">
-            <button
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
+            <AdminKumoButton variant="secondary"
               @click="showActivityConfirm = false"
             >
               取消
-            </button>
-            <button
-              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-500"
+            </AdminKumoButton>
+            <AdminKumoButton variant="danger"
               @click="executeActivityCleanup"
             >
               确认清理
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
       </div>
@@ -445,18 +435,16 @@
             即将从 <strong class="text-amber-600 dark:text-amber-400">{{ staleMachineTagGames.length }}</strong> 个没有有效机翻资源的游戏中移除“机器翻译”标签。
           </p>
           <div class="flex justify-end gap-3">
-            <button
-              class="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100 dark:border-zinc-600 dark:hover:bg-zinc-700"
+            <AdminKumoButton variant="secondary"
               @click="showMachineTagConfirm = false"
             >
               取消
-            </button>
-            <button
-              class="rounded-lg bg-amber-600 px-4 py-2 text-sm text-white hover:bg-amber-500"
+            </AdminKumoButton>
+            <AdminKumoButton variant="primary"
               @click="runMachineTranslationTagCleanup"
             >
               确认修复
-            </button>
+            </AdminKumoButton>
           </div>
         </div>
       </div>

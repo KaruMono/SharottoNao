@@ -1,0 +1,271 @@
+/* Source: SmartLab/cloudflare-ui-demo-20261009/cloudflare-ui-style/assets/
+ * tokens.css, components.css and interactions.css (2026-10-09).
+ * Button / Select / Tabs / Input recipes. Keep Charlotte's font family.
+ * Danger is the reference kit's adapted neutral button with danger text/tint.
+ */
+:where(.admin-button, .admin-select, .admin-select-popup, .admin-tabs, .admin-input, .admin-textarea, .admin-input-group) {
+  --cf-base: #fff;
+  --cf-control: #fff;
+  --cf-brand: oklch(57.72% .2324 260);
+  --cf-line: oklch(14.5% 0 0 / .1);
+  --cf-tint: oklch(97% 0 0);
+  --cf-recessed: oklch(96.5% 0 0);
+  --cf-focus: oklch(15% 0 0);
+  --cf-text-placeholder: oklch(70.8% 0 0);
+  --cf-text-default: oklch(20.5% 0 0);
+  --cf-text-subtle: oklch(55.6% 0 0);
+  --cf-text-danger: oklch(50.5% .213 27.518);
+  --cf-danger: oklch(63.7% .237 25.331);
+  --cf-danger-tint: oklch(93.6% .032 17.7 / .42);
+  --cf-shadow-xs: 0 1px 2px 0 #0000000d;
+  --cf-shadow-sm: 0 1px 3px 0 #0000001a, 0 1px 2px -1px #0000001a;
+  --cf-shadow-lg: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a;
+  --cf-button-top: color-mix(in oklch, var(--cf-brand), white 15%);
+  --cf-button-highlight: color-mix(in oklch, var(--cf-brand), white 30%);
+  --cf-button-ring: color-mix(in oklch, var(--cf-brand), black 10%);
+  box-sizing: border-box;
+  font-family: inherit;
+  letter-spacing: -.01em;
+  color-scheme: light;
+}
+
+.dark :where(.admin-button, .admin-select, .admin-select-popup, .admin-tabs, .admin-input, .admin-textarea, .admin-input-group) {
+  --cf-base: oklch(17% 0 0);
+  --cf-control: oklch(20.5% 0 0);
+  --cf-brand: oklch(51.948% .2324 260);
+  --cf-line: oklch(32% 0 0);
+  --cf-tint: oklch(26.9% 0 0);
+  --cf-recessed: oklch(15% 0 0);
+  --cf-focus: oklch(93.5% 0 0);
+  --cf-text-placeholder: oklch(55.6% 0 0);
+  --cf-text-default: oklch(97% 0 0);
+  --cf-text-subtle: oklch(70.8% 0 0);
+  --cf-text-danger: oklch(70.4% .191 22.216);
+  --cf-danger: oklch(57.7% .245 27.325);
+  --cf-danger-tint: oklch(42.9% .176 28.7 / .17);
+  color-scheme: dark;
+}
+
+.admin-button {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  flex-shrink: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 500;
+  color: var(--cf-text-default);
+  background: var(--cf-base);
+  box-shadow: 0 0 0 1px var(--cf-line), var(--cf-shadow-xs);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: none;
+}
+.admin-button--active { background: var(--cf-tint); }
+.admin-button--primary {
+  color: white;
+  background: linear-gradient(var(--cf-button-top), var(--cf-brand));
+  box-shadow: inset 0 1px 0 var(--cf-button-highlight), 0 0 0 1px var(--cf-button-ring), var(--cf-shadow-xs);
+}
+.admin-button--ghost { background: transparent; box-shadow: none; }
+.admin-button--danger { color: var(--cf-text-danger); }
+.admin-button--toolbar { height: 32px; }
+.admin-button--sm { height: 26px; border-radius: 6px; padding: 0 8px; font-size: 12px; line-height: 18px; gap: 4px; }
+.admin-button--icon { width: 36px; padding: 0; }
+.admin-button--icon.admin-button--toolbar { width: 32px; }
+.admin-button--icon.admin-button--sm { width: 26px; }
+.admin-button--full { width: 100%; }
+.admin-button:focus-visible { outline: 2px solid var(--cf-brand); outline-offset: 0; }
+.admin-button--primary:focus-visible { outline-color: var(--cf-button-ring); }
+.admin-button:is(:disabled, [aria-disabled=true]) { opacity: .5; cursor: not-allowed; color: var(--cf-text-subtle); }
+.admin-button--primary:is(:disabled, [aria-disabled=true]) { color: white; }
+.admin-button-content { display: inline-flex; align-items: center; justify-content: center; gap: inherit; }
+.admin-button-content--loading { opacity: 0; }
+.admin-button-content > :where(.iconify, svg) { flex-shrink: 0; }
+
+.admin-select { display: inline-grid; grid-template-columns: minmax(0, 1fr); position: relative; min-width: 0; max-width: 100%; vertical-align: middle; }
+/* Preserve native select's longest-option sizing. Reserve the popup recipe's
+ * 2×6 margin + 2×8 padding + 8 gap + 16 check, so short labels stay on one line. */
+.admin-select-measure { grid-area: 1 / 1; display: grid; height: 0; padding: 0 26px; overflow: hidden; visibility: hidden; pointer-events: none; font-size: 14px; font-weight: 400; letter-spacing: -.01em; }
+.admin-select-measure > span { grid-area: 1 / 1; white-space: nowrap; }
+.admin-select-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.admin-select-trigger {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--cf-control);
+  color: var(--cf-text-default);
+  box-shadow: 0 0 0 1px var(--cf-line), var(--cf-shadow-xs);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  text-align: left;
+  cursor: pointer;
+  transition: none;
+}
+.admin-select-trigger:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--cf-brand), 0 0 0 1px var(--cf-line); }
+.admin-select-trigger:disabled { opacity: .5; cursor: not-allowed; }
+.admin-select-trigger[aria-invalid=true] { box-shadow: 0 0 0 1px var(--cf-danger); }
+.admin-select-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.admin-select-chevron { flex-shrink: 0; width: 14px; height: 14px; color: var(--cf-text-subtle); }
+.admin-select-popup {
+  position: fixed;
+  width: max-content;
+  z-index: 110;
+  margin: 0;
+  padding: 6px 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--cf-text-default);
+  background: var(--cf-base);
+  box-shadow: 0 0 0 1px var(--cf-line), var(--cf-shadow-lg);
+  max-width: calc(100vw - 16px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+  transition: none;
+}
+.admin-select-options { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scroll-padding: 6px; scrollbar-width: thin; }
+.admin-select-option { margin: 0 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 33px; padding: 6px 8px; border-radius: 4px; cursor: pointer; outline: 0; user-select: none; }
+.admin-select-option[data-highlighted] { background: var(--cf-tint); }
+.admin-select-option[aria-disabled=true] { opacity: .5; cursor: not-allowed; }
+.admin-select-option > span { min-width: 0; overflow-wrap: anywhere; }
+.admin-select-check { width: 16px; height: 16px; flex-shrink: 0; visibility: hidden; }
+.admin-select-option[aria-selected=true] .admin-select-check { visibility: visible; }
+.admin-select-group { font-size: 13px; font-weight: 600; padding: 8px 14px 6px; color: var(--cf-text-subtle); }
+.admin-select-empty { padding: 12px 14px; color: var(--cf-text-subtle); }
+
+/* references/components.md: 36px track / 32px tab / 2px inset / r8 + r6.
+ * interactions.css: move and resize the selected surface over 200ms. */
+.admin-tabs {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+  height: 36px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--cf-recessed);
+  overflow-x: auto;
+  scrollbar-width: none;
+  font-size: 14px;
+  line-height: 21px;
+}
+.admin-tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--cf-text-subtle);
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  letter-spacing: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.admin-tab[aria-selected=true] { color: var(--cf-text-default); background: var(--cf-base); box-shadow: 0 0 0 1px var(--cf-line), var(--cf-shadow-sm); }
+.admin-tabs[data-indicator-ready] .admin-tab[aria-selected=true] { background: transparent; box-shadow: none; }
+.admin-tab:focus-visible { outline: 2px solid var(--cf-brand); outline-offset: -2px; }
+.admin-tab:disabled { opacity: .5; cursor: not-allowed; }
+.admin-tab-icon { width: 14px; height: 14px; flex-shrink: 0; }
+.admin-tab-badge { padding: 2px 8px; border-radius: 999px; font-size: 12px; line-height: 16px; background: var(--cf-danger-tint); color: var(--cf-text-danger); }
+.admin-tabs-indicator {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  z-index: 0;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--cf-base);
+  box-shadow: 0 0 0 1px var(--cf-line), var(--cf-shadow-sm);
+  pointer-events: none;
+  transition: transform 200ms cubic-bezier(.4, 0, .2, 1), width 200ms cubic-bezier(.4, 0, .2, 1);
+}
+.admin-tabs-indicator[data-instant] { transition: none; }
+
+/* Native fields keep v-model modifiers, refs, validation and DOM events.
+ * Two element selectors beat Preflight regardless of load order, while class
+ * utilities still preserve field widths, monospace text and icon insets. */
+body input:where(.admin-input), body textarea:where(.admin-textarea) {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--cf-text-default);
+  background: var(--cf-control);
+  box-shadow: 0 0 0 1px var(--cf-line);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+  outline: none;
+}
+body textarea:where(.admin-textarea) { height: auto; min-height: 88px; padding: 8px 12px; resize: vertical; }
+:is(.admin-input, .admin-textarea)::placeholder { color: var(--cf-text-placeholder); opacity: 1; }
+:is(.admin-input, .admin-textarea):focus { outline: none; box-shadow: 0 0 0 1.5px color-mix(in oklch, var(--cf-focus) 50%, transparent); }
+:is(.admin-input, .admin-textarea):is([aria-invalid=true], :user-invalid) { box-shadow: 0 0 0 1.5px var(--cf-danger); }
+:is(.admin-input, .admin-textarea):disabled { opacity: .5; cursor: not-allowed; }
+.admin-input-group { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 8px; background: var(--cf-control); box-shadow: 0 0 0 1px var(--cf-line); }
+.admin-input-group:focus-within { box-shadow: 0 0 0 1.5px color-mix(in oklch, var(--cf-focus) 50%, transparent); }
+.admin-input-group .admin-input { height: 100%; padding: 0; background: transparent; box-shadow: none; }
+.admin-input-group--wrap { flex-wrap: wrap; height: auto; min-height: 36px; padding: 4px 12px; }
+.admin-input-group--wrap .admin-input { height: 26px; }
+.admin-input--embedded { background: transparent; box-shadow: none; }
+.admin-input--embedded:focus { box-shadow: none; }
+.admin-control-spinner { position: absolute; inset: 0; margin: auto; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: admin-control-spin .8s linear infinite; }
+@keyframes admin-control-spin { to { transform: rotate(360deg); } }
+@media (hover: hover) {
+  .admin-tab:hover:not(:disabled) { color: var(--cf-text-default); }
+  .admin-button:hover:not(:disabled):not([aria-disabled=true]) { background: var(--cf-tint); }
+  .admin-button--primary:hover:not(:disabled):not([aria-disabled=true]) { background: linear-gradient(var(--cf-button-highlight), var(--cf-brand)); }
+  .admin-button--danger:hover:not(:disabled):not([aria-disabled=true]) { background: var(--cf-danger-tint); }
+  .admin-select-trigger:hover:not(:disabled) { background: var(--cf-tint); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-tabs-indicator { transition: none; }
+  .admin-button .animate-spin, .admin-control-spinner { animation: none; }
+}

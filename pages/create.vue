@@ -67,8 +67,8 @@
               :disabled="fetchingVndb || !vndbId"
               class="shrink-0 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
             >
-              <i v-if="fetchingVndb" class="fa-solid fa-spinner fa-spin"></i>
-              <i v-else class="fa-solid fa-cloud-arrow-down"></i>
+              <Icon name="fa6-solid:spinner" v-if="fetchingVndb" />
+              <Icon name="fa6-solid:cloud-arrow-down" v-else />
               {{ fetchingVndb ? '获取中...' : '获取数据' }}
             </button>
           </div>
@@ -76,11 +76,11 @@
             从 VNDB 网址获取 ID，如 https://vndb.org/<strong>v27448</strong>
           </p>
           <div v-if="vndbError" class="text-sm text-red-500">
-            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ vndbError }}
+            <Icon name="fa6-solid:circle-exclamation" class="mr-1" />{{ vndbError }}
             <NuxtLink v-if="duplicateGameId" :to="`/games/${duplicateGameId}`" class="ml-1 underline hover:text-red-400" target="_blank">查看游戏页面</NuxtLink>
           </div>
           <div v-if="vndbFetched" class="text-sm text-green-600 dark:text-green-400">
-            <i class="fa-solid fa-circle-check mr-1"></i>已从 VNDB 获取数据，请检查并补充信息
+            <Icon name="fa6-solid:circle-check" class="mr-1" />已从 VNDB 获取数据，请检查并补充信息
           </div>
         </div>
 
@@ -100,7 +100,7 @@
               disabled
               class="shrink-0 px-4 py-2.5 rounded-lg bg-pink-600 text-white text-sm opacity-50 cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
             >
-              <i class="fa-solid fa-clock"></i>
+              <Icon name="fa6-solid:clock" />
               即将支持
             </button>
           </div>
@@ -108,7 +108,7 @@
             从 Bangumi 网址获取 ID，如 https://bgm.tv/subject/<strong>297264</strong>
           </p>
           <div class="p-3.5 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm text-yellow-700 dark:text-yellow-300">
-            <i class="fa-solid fa-info-circle mr-2"></i>
+            <Icon name="fa6-solid:circle-info" class="mr-2" />
             Bangumi 自动填充功能正在开发中，请暂时使用 VNDB。
           </div>
         </div>
@@ -131,7 +131,7 @@
                 class="w-full h-full object-cover"
               />
               <div v-else class="text-center text-gray-400 p-4">
-                <i class="fa-solid fa-image text-3xl mb-2"></i>
+                <Icon name="fa6-solid:image" class="text-3xl mb-2" />
                 <p class="text-xs">封面预览</p>
               </div>
             </div>
@@ -154,17 +154,17 @@
                 @change.prevent.stop="handleFileSelect"
               />
               <div v-if="uploading" class="text-blue-600 dark:text-blue-400">
-                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                <Icon name="fa6-solid:spinner" class="fa-spin text-2xl mb-2" />
                 <p>上传中...</p>
               </div>
               <div v-else>
-                <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+                <Icon name="fa6-solid:cloud-arrow-up" class="text-2xl text-gray-400 mb-2" />
                 <p class="text-sm text-gray-600 dark:text-gray-400">点击或拖拽图片到此处上传</p>
                 <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF、WebP，最大 10MB</p>
               </div>
             </div>
             <div v-if="uploadError" class="text-sm text-red-500">
-              <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ uploadError }}
+              <Icon name="fa6-solid:circle-exclamation" class="mr-1" />{{ uploadError }}
             </div>
           </div>
         </div>
@@ -248,35 +248,56 @@
         </h2>
         
         <!-- 语言切换标签 -->
-        <div class="flex overflow-x-auto border-b dark:border-zinc-700 -mx-3.5 sm:mx-0 px-3.5 sm:px-0">
-          <button 
-            v-for="lang in descriptionLangs" 
-            :key="lang.key"
-            type="button"
-            @click="activeDescLang = lang.key"
-            class="shrink-0 px-3 sm:px-4 py-2 text-sm font-medium border-b-2 -mb-px transition whitespace-nowrap"
-            :class="activeDescLang === lang.key 
-              ? 'border-gray-800 dark:border-white text-gray-800 dark:text-white' 
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
-          >
-            <span class="inline-flex items-center gap-1.5">
-              <span 
-                class="w-5 h-5 rounded text-xs flex items-center justify-center font-bold"
-                :class="lang.badgeClass"
-              >{{ lang.badge }}</span>
-              {{ lang.label }}
-              <i v-if="form[lang.key as keyof typeof form]" class="fa-solid fa-check text-green-500 text-xs"></i>
-            </span>
-          </button>
+        <div class="overflow-x-auto border-b dark:border-zinc-700 -mx-3.5 sm:mx-0 px-3.5 sm:px-0">
+          <div ref="descTabsRef" class="relative flex w-max">
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute bottom-0 left-0 h-0.5 bg-gray-800 dark:bg-white transition-[transform,width] duration-200 ease-out motion-reduce:transition-none"
+              :style="descIndicatorStyle"
+            />
+            <button
+              v-for="lang in descriptionLangs"
+              :key="lang.key"
+              type="button"
+              @click="activeDescLang = lang.key"
+              :aria-pressed="activeDescLang === lang.key"
+              class="shrink-0 px-3 sm:px-4 py-2 text-sm font-medium border-b-2 border-transparent transition-colors duration-200 motion-reduce:transition-none whitespace-nowrap"
+              :class="activeDescLang === lang.key
+                ? 'text-gray-800 dark:text-white'
+                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+            >
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="w-5 h-5 rounded text-xs flex items-center justify-center font-bold"
+                  :class="lang.badgeClass"
+                >{{ lang.badge }}</span>
+                {{ lang.label }}
+                <Icon name="fa6-solid:check" class="text-green-500 text-xs" v-if="form[lang.key as keyof typeof form]" />
+              </span>
+            </button>
+          </div>
         </div>
         
-        <div class="pt-2">
-          <textarea 
-            v-model="(form as any)[activeDescLang]"
-            class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
-            rows="6"
-            :placeholder="descriptionLangs.find(l => l.key === activeDescLang)?.placeholder"
-          ></textarea>
+        <div class="grid pt-2">
+          <Transition
+            v-for="lang in descriptionLangs"
+            :key="lang.key"
+            enter-active-class="transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none"
+            enter-from-class="opacity-0 translate-x-2 motion-reduce:transform-none"
+            leave-active-class="transition-[opacity,transform] duration-150 ease-in pointer-events-none motion-reduce:transition-none"
+            leave-to-class="opacity-0 -translate-x-2 motion-reduce:transform-none"
+          >
+            <textarea
+              v-show="activeDescLang === lang.key"
+              v-model="(form as any)[lang.key]"
+              :inert="activeDescLang !== lang.key"
+              :aria-hidden="activeDescLang !== lang.key"
+              :aria-label="`${lang.label}游戏简介`"
+              class="col-start-1 row-start-1 w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              rows="6"
+              :placeholder="lang.placeholder"
+            ></textarea>
+          </Transition>
         </div>
       </div>
 
@@ -308,10 +329,19 @@
 
       <!-- 相关链接 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-3.5 sm:p-6 shadow space-y-4 sm:space-y-5">
-        <h2 class="font-semibold text-base sm:text-lg border-b pb-3 dark:border-zinc-700">
-          相关链接
-          <span class="block sm:inline text-sm font-normal text-gray-500 sm:ml-2 mt-1 sm:mt-0">（可选）</span>
-        </h2>
+        <div class="flex items-center justify-between border-b pb-3 dark:border-zinc-700">
+          <h2 class="font-semibold text-base sm:text-lg">
+            相关链接
+            <span class="block sm:inline text-sm font-normal text-gray-500 sm:ml-2 mt-1 sm:mt-0">（可选）</span>
+          </h2>
+          <button
+            type="button"
+            @click="addPurchaseLink"
+            class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
+          >
+            <Icon name="fa6-solid:plus" class="mr-1" />添加
+          </button>
+        </div>
         
         <div class="space-y-3">
           <div
@@ -337,18 +367,10 @@
                 @click="removePurchaseLink(index)"
                 class="shrink-0 p-2 text-red-500 hover:text-red-600 transition"
               >
-                <i class="fa-solid fa-trash"></i>
+                <Icon name="fa6-solid:trash" />
               </button>
             </div>
           </div>
-          
-          <button 
-            type="button"
-            @click="addPurchaseLink"
-            class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1.5"
-          >
-            <i class="fa-solid fa-plus"></i>添加链接
-          </button>
           
           <p class="text-xs text-gray-500">
             常见平台：Steam、DLsite、Getchu、DMM、官网等
@@ -382,7 +404,7 @@
             @click="addStaff" 
             class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
           >
-            <i class="fa-solid fa-plus mr-1"></i>添加
+            <Icon name="fa6-solid:plus" class="mr-1" />添加
           </button>
         </div>
         
@@ -419,7 +441,7 @@
                 @click="removeStaff(index)" 
                 class="shrink-0 p-2 text-red-500 hover:text-red-600 transition"
               >
-                <i class="fa-solid fa-trash"></i>
+                <Icon name="fa6-solid:trash" />
               </button>
             </div>
           </div>
@@ -429,7 +451,7 @@
 
       <!-- 管理员设置提示 -->
       <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-xl p-4 text-sm text-gray-500 dark:text-gray-400">
-        <i class="fa-solid fa-info-circle mr-2"></i>
+        <Icon name="fa6-solid:circle-info" class="mr-2" />
         开发商、标签、游戏截图等信息将由管理员在后台添加。
       </div>
 
@@ -466,6 +488,7 @@
 </template>
 
 <script setup lang="ts">
+import { useTabIndicator } from '~/composables/useTabIndicator'
 import { nextTick } from 'vue'
 
 definePageMeta({
@@ -495,6 +518,7 @@ const coverCropFile = ref<File | null>(null)
 
 // 简介语言切换
 const activeDescLang = ref('descriptionEn')
+const { tabContainer: descTabsRef, indicatorStyle: descIndicatorStyle } = useTabIndicator(activeDescLang)
 const descriptionLangs = [
   { key: 'descriptionEn', label: '英文', badge: 'EN', badgeClass: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400', placeholder: 'English description...' },
   { key: 'descriptionJa', label: '日文', badge: 'JP', badgeClass: 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400', placeholder: '日本語の説明...' },
@@ -612,7 +636,7 @@ async function handleCoverCropped(blob: Blob) {
     formData.append('folder', 'covers')
 
     const { token } = useAuth()
-    const result = await $fetch<{ url: string }>('/api/upload/image', {
+    const result: any = await ($fetch as any)('/api/upload/image', {
       method: 'POST',
       body: formData,
       headers: token.value ? { Authorization: token.value } : {},
@@ -656,9 +680,9 @@ async function fetchVNDBData() {
   try {
     // 先检查站内是否已有相同 VNDB ID 的游戏
     try {
-      const existing = await $fetch<{ id: number }>('/api/games/lookup', {
+      const existing: any = await ($fetch as any)('/api/games/lookup', {
         query: { vndbId: id },
-      })
+      } as any)
       if (existing?.id) {
         duplicateGameId.value = existing.id
         vndbError.value = `站内已存在 VNDB ID 为 ${id} 的游戏条目，请勿重复创建`
@@ -672,20 +696,8 @@ async function fetchVNDBData() {
       }
     }
 
-    const data = await $fetch<{
-      vndbId: string
-      titleEn: string | null
-      titleJa: string | null
-      titleZhHans: string | null
-      titleZhHant: string | null
-      aliases: string[]
-      descriptionEn: string | null
-      released: string | null
-      coverImage: string | null
-      isNsfw: boolean
-      staff: { name: string; nameOriginal: string | null; role: string; characterName: string | null }[]
-    }>(`/api/vndb/${id}`)
-    
+    const data: any = await ($fetch as any)(`/api/vndb/${id}`)
+
     // 填充表单
     form.titleEn = data.titleEn || ''
     form.titleJa = data.titleJa || ''
@@ -737,7 +749,10 @@ async function fetchVNDBData() {
 
     vndbFetched.value = true
   } catch (error: any) {
-    vndbError.value = error.data?.message || '获取 VNDB 数据失败'
+    vndbError.value = error.data?.statusMessage
+      || error.statusMessage
+      || error.data?.message
+      || '获取 VNDB 数据失败'
   } finally {
     fetchingVndb.value = false
   }

@@ -23,9 +23,10 @@ export default defineEventHandler(async (event) => {
   // 支持 ID 或 slug 查询
   const id = parseInt(idOrSlug)
   const tag = await prisma.tag.findFirst({
-    where: isNaN(id) 
-      ? { slug: idOrSlug } 
-      : { id },
+    where: {
+      ...(isNaN(id) ? { slug: idOrSlug } : { id }),
+      archivedAt: null,
+    },
     include: {
       _count: {
         select: {

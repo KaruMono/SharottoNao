@@ -6,7 +6,7 @@
       <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-700 flex-shrink-0">
         <h3 class="font-semibold">添加下载资源</h3>
         <button @click="emit('close')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
-          <i class="fa-solid fa-xmark"></i>
+          <Icon name="fa6-solid:xmark" />
         </button>
       </div>
       
@@ -49,7 +49,7 @@
               @paste="onUrlPaste"
             />
             <span v-if="fetchingAlist" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-              <i class="fa-solid fa-spinner fa-spin mr-1"></i>获取信息...
+              <Icon name="fa6-solid:spinner" class="fa-spin mr-1" />获取信息...
             </span>
           </div>
         </div>
@@ -161,10 +161,11 @@ const emit = defineEmits<{
 const { authFetch } = useAuthRequest()
 const toast = useToast()
 
-const { data: resourceTypes } = await useFetch('/api/resource-types', {
+const { data: resourceTypesData } = await (useFetch as any)('/api/resource-types', {
   key: 'add-resource-types',
   getCachedData: () => undefined as any,
 })
+const resourceTypes = computed(() => (resourceTypesData.value ?? []) as any[])
 
 const form = reactive({
   title: '',
@@ -185,9 +186,9 @@ async function tryFetchAlistInfo(url: string) {
   if (!url) return
   fetchingAlist.value = true
   try {
-    const result = await $fetch<{ name: string; sizeFormatted: string; isDir: boolean }>('/api/alist/file-info', {
+    const result: any = await $fetch('/api/alist/file-info', {
       params: { url },
-    })
+    } as any)
     if (result.name && !form.title) {
       form.title = result.name
     }
@@ -220,10 +221,10 @@ async function handleSubmit() {
     toast.error('文件大小必须以M或G结尾，如：1.2G、800M')
     return
   }
-  
+
   loading.value = true
   try {
-    const result = await authFetch<{ status: 'PENDING' | 'APPROVED' }>(`/api/games/${props.gameId}/resource`, {
+    const result: any = await (authFetch as any)(`/api/games/${props.gameId}/resource`, {
       method: 'POST',
       body: {
         typeId: parseInt(form.typeId),

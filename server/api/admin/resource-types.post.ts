@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const type = await prisma.resourceType.create({
-    data,
+    data: data as any,
   })
 
   return type

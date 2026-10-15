@@ -1,4 +1,5 @@
 import prisma from '~/server/utils/prisma'
+import { withDistributedLock } from '~/server/utils/distributed-lock'
 import { isPrimaryInstance } from '~/server/utils/instance'
 
 /**
@@ -14,7 +15,7 @@ export default defineNitroPlugin((nitroApp) => {
   // 记录今天是否已执行过定时提交（内存标记，重启后重置）
   let lastScheduledDate = ''
 
-  async function runScheduledSubmission() {
+  async function runScheduledSubmissionLocked() {
     const now = new Date()
     const hour = now.getHours()
 
@@ -139,6 +140,18 @@ export default defineNitroPlugin((nitroApp) => {
 
     // 无论成功失败都标记今天已执行，避免反复重试
     lastScheduledDate = today
+  }
+
+  async function runScheduledSubmission() {
+    try {
+      await withDistributedLock(
+        'indexnow-scheduled',
+        runScheduledSubmissionLocked,
+        { ttlMs: 15 * 60 * 1000 },
+      )
+    } catch (error) {
+      console.error('[IndexNow Scheduler] 分布式锁失败:', error)
+    }
   }
 
   const intervalTimer = setInterval(runScheduledSubmission, CHECK_INTERVAL)

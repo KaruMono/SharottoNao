@@ -5,6 +5,7 @@ import { getDisplayTitle } from '~/server/utils/game'
 import { buildNsfwFilterFromUser } from '~/server/utils/nsfw'
 import { cachedFetch } from '~/server/utils/redis'
 import pinyinModule from 'pinyin'
+import { buildTagVisibilityWhere } from '~/server/utils/tag-visibility'
 
 const pinyin = (pinyinModule as any).default || pinyinModule
 const searchTypes = ['all', 'games', 'companies', 'tags', 'staff'] as const
@@ -54,6 +55,7 @@ export default defineEventHandler(async (event) => {
   const user = await getAuthUser(event)
   const nsfwFilter = buildNsfwFilterFromUser(user)
   const nsfwMode = user?.nsfwMode || 'SFW'
+  const tagVisibilityFilter = buildTagVisibilityWhere(nsfwMode)
 
   // 使用缓存（按搜索词+类型+NSFW模式+分页缓存，30秒）
   const cacheKey = `search:${q}:${type}:${sort}:${nsfwMode}:${limit}:${page}`
@@ -85,7 +87,7 @@ export default defineEventHandler(async (event) => {
       `
       const aliasIds = aliasMatchIds.map(r => r.id)
 
-      const gameWhere = {
+      const gameWhere: any = {
         deletedAt: null,
         ...nsfwFilter,
         OR: [
@@ -117,8 +119,24 @@ export default defineEventHandler(async (event) => {
             tags: {
               some: {
                 tag: {
-                  name: { contains: q, mode: 'insensitive' as const },
+                  ...tagVisibilityFilter,
+                  OR: [
+                    { name: { contains: q, mode: 'insensitive' as const } },
+                    { slug: { contains: q, mode: 'insensitive' as const } },
+                    { aliases: { some: { name: { contains: q, mode: 'insensitive' as const } } } },
+                    { vndbTags: { some: { nameEn: { contains: q, mode: 'insensitive' as const } } } },
+                  ],
                 },
+              },
+            },
+          },
+          // 资源名称命中时返回所属游戏条目，避免把下载资源单独暴露成搜索结果。
+          {
+            resources: {
+              some: {
+                deletedAt: null,
+                status: 'APPROVED' as any,
+                title: { contains: q, mode: 'insensitive' as const },
               },
             },
           },
@@ -268,10 +286,13 @@ export default defineEventHandler(async (event) => {
     // 搜索标签
     if (type === 'all' || type === 'tags') {
       const tagWhere = {
-        ...nsfwFilter,
+        ...tagVisibilityFilter,
         OR: [
           { name: { contains: q, mode: 'insensitive' as const } },
           { slug: { contains: q, mode: 'insensitive' as const } },
+          { aliases: { some: { name: { contains: q, mode: 'insensitive' as const } } } },
+          { vndbTags: { some: { nameEn: { contains: q, mode: 'insensitive' as const } } } },
+          { vndbTags: { some: { id: { contains: q, mode: 'insensitive' as const } } } },
         ],
       }
 

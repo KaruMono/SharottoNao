@@ -5,34 +5,31 @@
         <h1 class="text-2xl font-bold">系统错误日志</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">记录邮件发送等后台异常</p>
       </div>
-      <button
+      <AdminKumoButton variant="danger"
         @click="clearLogs"
         :disabled="clearing || !data?.items?.length"
-        class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 disabled:opacity-40 text-sm transition"
       >
-        <i v-if="clearing" class="fa-solid fa-spinner fa-spin"></i>
-        <i v-else class="fa-solid fa-trash"></i>
+        <Icon name="fa6-solid:spinner" v-if="clearing" />
+        <Icon name="fa6-solid:trash" v-else />
         清除日志
-      </button>
+      </AdminKumoButton>
     </div>
 
     <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow mb-6">
       <div class="flex flex-wrap items-center gap-3">
-        <select
+        <AdminSelect aria-label="类型"
           v-model="typeQuery"
-          class="px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 text-sm"
           @change="handleSearch"
         >
           <option value="">全部类型</option>
           <option value="MAIL">邮件错误</option>
-        </select>
-        <button
+        </AdminSelect>
+        <AdminKumoButton variant="secondary"
           @click="refreshLogs"
-          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 text-sm"
         >
-          <i class="fa-solid fa-rotate"></i>
+          <Icon name="fa6-solid:rotate" />
           刷新
-        </button>
+        </AdminKumoButton>
       </div>
     </div>
 
@@ -71,7 +68,7 @@
       暂无错误日志
     </div>
 
-    <Pagination
+    <Pagination admin
       v-if="data && data.pagination.totalPages > 1"
       :current-page="currentPage"
       :total-pages="data.pagination.totalPages"

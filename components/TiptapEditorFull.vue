@@ -9,7 +9,7 @@
         :class="['toolbar-btn', { active: editor.isActive('bold') }]"
         title="加粗"
       >
-        <i class="fa-solid fa-bold"></i>
+        <Icon name="fa6-solid:bold" />
       </button>
       <button
         type="button"
@@ -17,7 +17,7 @@
         :class="['toolbar-btn', { active: editor.isActive('italic') }]"
         title="斜体"
       >
-        <i class="fa-solid fa-italic"></i>
+        <Icon name="fa6-solid:italic" />
       </button>
       <button
         type="button"
@@ -25,7 +25,7 @@
         :class="['toolbar-btn', { active: editor.isActive('underline') }]"
         title="下划线"
       >
-        <i class="fa-solid fa-underline"></i>
+        <Icon name="fa6-solid:underline" />
       </button>
       <button
         type="button"
@@ -33,7 +33,7 @@
         :class="['toolbar-btn', { active: editor.isActive('strike') }]"
         title="删除线"
       >
-        <i class="fa-solid fa-strikethrough"></i>
+        <Icon name="fa6-solid:strikethrough" />
       </button>
       <button
         type="button"
@@ -41,7 +41,7 @@
         :class="['toolbar-btn', { active: editor.isActive('spoiler') }]"
         title="剧透"
       >
-        <i class="fa-solid fa-eye-slash"></i>
+        <Icon name="fa6-solid:eye-slash" />
       </button>
 
       <div class="toolbar-divider"></div>
@@ -73,7 +73,7 @@
         :class="['toolbar-btn', { active: editor.isActive('blockquote') }]"
         title="引用"
       >
-        <i class="fa-solid fa-quote-left"></i>
+        <Icon name="fa6-solid:quote-left" />
       </button>
       <button
         type="button"
@@ -81,7 +81,7 @@
         :class="['toolbar-btn', { active: editor.isActive('code') }]"
         title="行内代码"
       >
-        <i class="fa-solid fa-code"></i>
+        <Icon name="fa6-solid:code" />
       </button>
       <button
         type="button"
@@ -89,7 +89,7 @@
         :class="['toolbar-btn', { active: editor.isActive('codeBlock') }]"
         title="代码块"
       >
-        <i class="fa-solid fa-file-code"></i>
+        <Icon name="fa6-solid:file-code" />
       </button>
 
       <div class="toolbar-divider"></div>
@@ -101,7 +101,7 @@
         :class="['toolbar-btn', { active: editor.isActive('bulletList') }]"
         title="无序列表"
       >
-        <i class="fa-solid fa-list-ul"></i>
+        <Icon name="fa6-solid:list-ul" />
       </button>
       <button
         type="button"
@@ -109,7 +109,7 @@
         :class="['toolbar-btn', { active: editor.isActive('orderedList') }]"
         title="有序列表"
       >
-        <i class="fa-solid fa-list-ol"></i>
+        <Icon name="fa6-solid:list-ol" />
       </button>
 
       <div class="toolbar-divider"></div>
@@ -121,7 +121,7 @@
         :class="['toolbar-btn', { active: editor.isActive('link') }]"
         title="链接"
       >
-        <i class="fa-solid fa-link"></i>
+        <Icon name="fa6-solid:link" />
       </button>
       <button
         type="button"
@@ -129,7 +129,7 @@
         class="toolbar-btn"
         title="图片"
       >
-        <i class="fa-solid fa-image"></i>
+        <Icon name="fa6-solid:image" />
       </button>
       <button
         type="button"
@@ -137,7 +137,7 @@
         class="toolbar-btn"
         title="分割线"
       >
-        <i class="fa-solid fa-minus"></i>
+        <Icon name="fa6-solid:minus" />
       </button>
 
       <!-- 表情 -->
@@ -148,7 +148,7 @@
           class="toolbar-btn"
           title="表情"
         >
-          <i class="fa-regular fa-face-smile"></i>
+          <Icon name="fa6-regular:face-smile" />
         </button>
 
         <!-- 表情选择器 -->
@@ -200,7 +200,7 @@
         class="toolbar-btn"
         title="撤销"
       >
-        <i class="fa-solid fa-rotate-left"></i>
+        <Icon name="fa6-solid:rotate-left" />
       </button>
       <button
         type="button"
@@ -209,7 +209,7 @@
         class="toolbar-btn"
         title="重做"
       >
-        <i class="fa-solid fa-rotate-right"></i>
+        <Icon name="fa6-solid:rotate-right" />
       </button>
     </div>
 
@@ -275,7 +275,7 @@
                   ? 'border-gray-800 dark:border-gray-300 text-gray-800 dark:text-gray-200'
                   : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'"
               >
-                <i class="fa-solid fa-upload mr-1"></i>上传图片
+                <Icon name="fa6-solid:upload" class="mr-1" />上传图片
               </button>
               <button
                 type="button"
@@ -285,7 +285,7 @@
                   ? 'border-gray-800 dark:border-gray-300 text-gray-800 dark:text-gray-200'
                   : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'"
               >
-                <i class="fa-solid fa-link mr-1"></i>图片地址
+                <Icon name="fa6-solid:link" class="mr-1" />图片地址
               </button>
             </div>
 
@@ -298,17 +298,17 @@
                 @drop.prevent="handleFileDrop"
               >
                 <div v-if="!imageUploading && !imagePreview">
-                  <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+                  <Icon name="fa6-solid:cloud-arrow-up" class="text-2xl text-gray-400 mb-2" />
                   <p class="text-sm text-gray-500">点击或拖拽图片到此处</p>
                   <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF、WebP，最大 10MB</p>
                 </div>
                 <div v-else-if="imageUploading" class="py-2">
-                  <i class="fa-solid fa-spinner fa-spin text-xl text-gray-400 mb-2"></i>
+                  <Icon name="fa6-solid:spinner" class="fa-spin text-xl text-gray-400 mb-2" />
                   <p class="text-sm text-gray-500">上传中...</p>
                 </div>
                 <div v-else-if="imagePreview">
                   <img :src="imagePreview" class="max-h-40 mx-auto rounded" />
-                  <p class="text-xs text-green-500 mt-2"><i class="fa-solid fa-check mr-1"></i>上传成功，点击重新选择</p>
+                  <p class="text-xs text-green-500 mt-2"><Icon name="fa6-solid:check" class="mr-1" />上传成功，点击重新选择</p>
                 </div>
               </div>
               <input
@@ -450,7 +450,7 @@ function plainTextToParagraphs(text: string) {
     .map(line => line ? `<p>${escapePastedText(line)}</p>` : '<p></p>')
     .join('')
 }
-const { data: emojiPacksData } = await useFetch('/api/emoji-packs', { key: 'emoji-packs' })
+const { data: emojiPacksData } = await (useFetch as any)('/api/emoji-packs', { key: 'emoji-packs' })
 watch(emojiPacksData, (data) => {
   if (data) {
     emojiPacks.value = data as EmojiPack[]
@@ -586,7 +586,7 @@ async function uploadFile(file: File) {
     formData.append('file', file)
     formData.append('folder', 'guides')
 
-    const result = await authFetch<{ url: string }>('/api/upload/image', {
+    const result: any = await (authFetch as any)('/api/upload/image', {
       method: 'POST',
       body: formData,
     })

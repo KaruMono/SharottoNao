@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: '分类不存在' })
   }
 
-  const tool = await prisma.tool.create({ data })
+  const tool = await prisma.tool.create({ data: data as any })
 
   if (data.icon) {
     await markImageAsUsed(data.icon)

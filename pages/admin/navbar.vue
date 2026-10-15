@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold mb-6">导航栏设置</h1>
 
     <div v-if="loading" class="text-center py-12 text-gray-400">
-      <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-2xl" />
     </div>
 
     <template v-else>
@@ -12,12 +12,11 @@
         <div class="flex items-center justify-between border-b pb-3 dark:border-zinc-700 mb-4">
           <h2 class="font-semibold text-lg">导航链接（左侧文字按钮）</h2>
           <div class="flex gap-2">
-            <button 
+            <AdminKumoButton variant="primary" size="toolbar"
               @click="addNavLink"
-              class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
             >
-              <i class="fa-solid fa-plus mr-1"></i>添加链接
-            </button>
+              <Icon name="fa6-solid:plus" />添加链接
+            </AdminKumoButton>
           </div>
         </div>
 
@@ -29,7 +28,7 @@
             >
               <!-- 拖拽手柄 -->
               <div class="cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <i class="fa-solid fa-grip-vertical"></i>
+                <Icon name="fa6-solid:grip-vertical" />
               </div>
 
               <!-- 显示/隐藏 -->
@@ -43,7 +42,7 @@
 
               <!-- 图标预览 -->
               <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                <i :class="link.icon" class="text-gray-500 dark:text-gray-400"></i>
+                <FaIcon :icon="link.icon" class="text-gray-500 dark:text-gray-400" />
               </div>
 
               <!-- 内容 -->
@@ -55,17 +54,17 @@
                 <input 
                   v-model="link.label" 
                   placeholder="显示名称"
-                  class="w-20 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input w-20"
                 />
                 <input 
                   v-model="link.to" 
                   placeholder="/path 或 https://..."
-                  class="flex-1 min-w-0 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input flex-1 min-w-0"
                 />
                 <input 
                   v-model="link.icon" 
                   placeholder="图标 class"
-                  class="w-40 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="admin-input w-40"
                 />
                 <label class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap cursor-pointer">
                   <input type="checkbox" v-model="link.requireAuth" class="w-3.5 h-3.5" />
@@ -88,14 +87,14 @@
                   :disabled="index === 0"
                   class="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30"
                 >
-                  <i class="fa-solid fa-chevron-up text-[10px]"></i>
+                  <Icon name="fa6-solid:chevron-up" class="text-[10px]" />
                 </button>
                 <button 
                   @click="moveItem(config.navLinks, index, 1)"
                   :disabled="index === config.navLinks.length - 1"
                   class="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30"
                 >
-                  <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                  <Icon name="fa6-solid:chevron-down" class="text-[10px]" />
                 </button>
               </div>
 
@@ -105,7 +104,7 @@
                 @click="removeNavLink(index)"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
               >
-                <i class="fa-solid fa-trash text-xs"></i>
+                <Icon name="fa6-solid:trash" class="text-xs" />
               </button>
               <div v-else class="w-8 flex-shrink-0"></div>
             </div>
@@ -114,7 +113,7 @@
         </div>
 
         <p class="text-xs text-gray-400 mt-3">
-          <i class="fa-solid fa-circle-info mr-1"></i>
+          <Icon name="fa6-solid:circle-info" class="mr-1" />
           内置链接只能设置显示/隐藏和排序，自定义链接可以编辑所有属性
         </p>
       </div>
@@ -123,12 +122,11 @@
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow mb-6">
         <div class="flex items-center justify-between border-b pb-3 dark:border-zinc-700 mb-4">
           <h2 class="font-semibold text-lg">图标按钮（右侧）</h2>
-          <button 
+          <AdminKumoButton variant="primary" size="toolbar"
             @click="addIconButton"
-            class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
           >
-            <i class="fa-solid fa-plus mr-1"></i>添加按钮
-          </button>
+            <Icon name="fa6-solid:plus" />添加按钮
+          </AdminKumoButton>
         </div>
 
         <div class="space-y-2">
@@ -139,7 +137,7 @@
             :class="btn.visible ? 'bg-white dark:bg-zinc-800' : 'bg-gray-50 dark:bg-zinc-900 opacity-60'"
           >
             <div class="cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <i class="fa-solid fa-grip-vertical"></i>
+              <Icon name="fa6-solid:grip-vertical" />
             </div>
 
             <label class="flex items-center cursor-pointer">
@@ -147,7 +145,7 @@
             </label>
 
             <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-              <i :class="btn.icon" class="text-gray-500 dark:text-gray-400"></i>
+              <FaIcon :icon="btn.icon" class="text-gray-500 dark:text-gray-400" />
             </div>
 
             <div v-if="btn.isBuiltin" class="flex-1 min-w-0">
@@ -158,17 +156,17 @@
               <input 
                 v-model="btn.label" 
                 placeholder="按钮名称"
-                class="w-24 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input w-24"
               />
               <input 
                 v-model="btn.action" 
                 placeholder="链接 URL 或路径"
-                class="flex-1 min-w-0 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input flex-1 min-w-0"
               />
               <input 
                 v-model="btn.icon" 
                 placeholder="图标 class"
-                class="w-40 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input w-40"
               />
               <label class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap cursor-pointer">
                 <input type="checkbox" v-model="btn.requireAuth" class="w-3.5 h-3.5" />
@@ -189,14 +187,14 @@
                 :disabled="index === 0"
                 class="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30"
               >
-                <i class="fa-solid fa-chevron-up text-[10px]"></i>
+                <Icon name="fa6-solid:chevron-up" class="text-[10px]" />
               </button>
               <button 
                 @click="moveItem(config.iconButtons, index, 1)"
                 :disabled="index === config.iconButtons.length - 1"
                 class="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30"
               >
-                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                <Icon name="fa6-solid:chevron-down" class="text-[10px]" />
               </button>
             </div>
 
@@ -205,14 +203,14 @@
               @click="removeIconButton(index)"
               class="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
             >
-              <i class="fa-solid fa-trash text-xs"></i>
+              <Icon name="fa6-solid:trash" class="text-xs" />
             </button>
             <div v-else class="w-8 flex-shrink-0"></div>
           </div>
         </div>
 
         <p class="text-xs text-gray-400 mt-3">
-          <i class="fa-solid fa-circle-info mr-1"></i>
+          <Icon name="fa6-solid:circle-info" class="mr-1" />
           自定义按钮的"动作"填写链接地址（如 https://... 或 /path），内置按钮有特殊行为不可修改
         </p>
       </div>
@@ -221,12 +219,11 @@
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow mb-6">
         <div class="flex items-center justify-between border-b pb-3 dark:border-zinc-700 mb-4">
           <h2 class="font-semibold text-lg">页脚链接</h2>
-          <button 
+          <AdminKumoButton variant="primary" size="toolbar"
             @click="addFooterLink"
-            class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500"
           >
-            <i class="fa-solid fa-plus mr-1"></i>添加链接
-          </button>
+            <Icon name="fa6-solid:plus" />添加链接
+          </AdminKumoButton>
         </div>
 
         <div class="space-y-2">
@@ -238,7 +235,7 @@
           >
             <!-- 拖拽手柄 -->
             <div class="cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <i class="fa-solid fa-grip-vertical"></i>
+              <Icon name="fa6-solid:grip-vertical" />
             </div>
 
             <!-- 显示/隐藏 -->
@@ -248,7 +245,7 @@
 
             <!-- 图标预览 -->
             <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-              <i :class="link.icon || 'fa-solid fa-link'" class="text-gray-500 dark:text-gray-400"></i>
+              <FaIcon :icon="link.icon || 'fa6-solid:link'" class="text-gray-500 dark:text-gray-400" />
             </div>
 
             <!-- 内容 -->
@@ -262,17 +259,17 @@
               <input 
                 v-model="link.label" 
                 placeholder="显示名称"
-                class="w-24 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input w-24"
               />
               <input 
                 v-model="link.url" 
                 placeholder="链接地址 https://..."
-                class="flex-1 min-w-0 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input flex-1 min-w-0"
               />
               <input 
                 v-model="link.icon" 
                 placeholder="图标 class"
-                class="w-40 px-2 py-1 text-sm rounded border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                class="admin-input w-40"
               />
               <label class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap cursor-pointer">
                 <input type="checkbox" v-model="link.openInNewTab" class="w-3.5 h-3.5" />
@@ -299,14 +296,14 @@
                 :disabled="index === 0"
                 class="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30"
               >
-                <i class="fa-solid fa-chevron-up text-[10px]"></i>
+                <Icon name="fa6-solid:chevron-up" class="text-[10px]" />
               </button>
               <button 
                 @click="moveItem(config.footerLinks, index, 1)"
                 :disabled="index === config.footerLinks.length - 1"
                 class="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30"
               >
-                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                <Icon name="fa6-solid:chevron-down" class="text-[10px]" />
               </button>
             </div>
 
@@ -316,14 +313,14 @@
               @click="removeFooterLink(index)"
               class="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
             >
-              <i class="fa-solid fa-trash text-xs"></i>
+              <Icon name="fa6-solid:trash" class="text-xs" />
             </button>
             <div v-else class="w-8 flex-shrink-0"></div>
           </div>
         </div>
 
         <p class="text-xs text-gray-400 mt-3">
-          <i class="fa-solid fa-circle-info mr-1"></i>
+          <Icon name="fa6-solid:circle-info" class="mr-1" />
           内置链接只能设置显示/隐藏和排序，自定义链接可以编辑所有属性
         </p>
       </div>
@@ -343,7 +340,7 @@
             class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-zinc-700/50 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700"
             @click="copyIconClass(icon.class)"
           >
-            <i :class="icon.class" class="w-4 text-center text-gray-500"></i>
+            <FaIcon :icon="icon.class" class="w-4 text-center text-gray-500" />
             <span class="text-xs text-gray-500">{{ icon.label }}</span>
           </div>
         </div>
@@ -351,13 +348,12 @@
 
       <!-- 保存 -->
       <div class="flex justify-end">
-        <button 
+        <AdminKumoButton variant="primary"
           @click="handleSave"
           :disabled="saving"
-          class="px-6 py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50"
         >
           {{ saving ? '保存中...' : '保存设置' }}
-        </button>
+        </AdminKumoButton>
       </div>
     </template>
   </div>
@@ -416,22 +412,22 @@ const config = reactive<{ navLinks: NavLink[]; iconButtons: IconButton[]; footer
 const publicNavConfig = useNavConfig()
 
 const sampleIcons = [
-  { class: 'fa-solid fa-house', label: 'house' },
-  { class: 'fa-solid fa-gamepad', label: 'gamepad' },
-  { class: 'fa-solid fa-book', label: 'book' },
-  { class: 'fa-solid fa-star', label: 'star' },
-  { class: 'fa-solid fa-heart', label: 'heart' },
-  { class: 'fa-solid fa-link', label: 'link' },
-  { class: 'fa-solid fa-globe', label: 'globe' },
-  { class: 'fa-solid fa-envelope', label: 'envelope' },
-  { class: 'fa-solid fa-circle-info', label: 'info' },
-  { class: 'fa-solid fa-question', label: 'question' },
-  { class: 'fa-solid fa-fire', label: 'fire' },
-  { class: 'fa-solid fa-bolt', label: 'bolt' },
-  { class: 'fa-brands fa-github', label: 'github' },
-  { class: 'fa-brands fa-discord', label: 'discord' },
-  { class: 'fa-brands fa-telegram', label: 'telegram' },
-  { class: 'fa-brands fa-twitter', label: 'twitter' },
+  { class: 'fa6-solid:house', label: 'house' },
+  { class: 'fa6-solid:gamepad', label: 'gamepad' },
+  { class: 'fa6-solid:book', label: 'book' },
+  { class: 'fa6-solid:star', label: 'star' },
+  { class: 'fa6-solid:heart', label: 'heart' },
+  { class: 'fa6-solid:link', label: 'link' },
+  { class: 'fa6-solid:globe', label: 'globe' },
+  { class: 'fa6-solid:envelope', label: 'envelope' },
+  { class: 'fa6-solid:circle-info', label: 'info' },
+  { class: 'fa6-solid:question', label: 'question' },
+  { class: 'fa6-solid:fire', label: 'fire' },
+  { class: 'fa6-solid:bolt', label: 'bolt' },
+  { class: 'fa6-brands:github', label: 'github' },
+  { class: 'fa6-brands:discord', label: 'discord' },
+  { class: 'fa6-brands:telegram', label: 'telegram' },
+  { class: 'fa6-brands:twitter', label: 'twitter' },
 ]
 
 async function loadConfig() {
@@ -454,7 +450,7 @@ function addNavLink() {
     id,
     label: '新链接',
     to: '',
-    icon: 'fa-solid fa-link',
+    icon: 'fa6-solid:link',
     visible: true,
     isBuiltin: false,
     requireAuth: false,
@@ -472,7 +468,7 @@ function addIconButton() {
     id,
     label: '新按钮',
     action: 'https://',
-    icon: 'fa-solid fa-link',
+    icon: 'fa6-solid:link',
     visible: true,
     isBuiltin: false,
     requireAuth: false,
@@ -490,7 +486,7 @@ function addFooterLink() {
     id,
     label: '新链接',
     url: 'https://',
-    icon: 'fa-solid fa-link',
+    icon: 'fa6-solid:link',
     visible: true,
     isBuiltin: false,
     openInNewTab: true,
@@ -532,7 +528,7 @@ async function handleSave() {
       },
     })
     await refreshNuxtData()
-    publicNavConfig.value = await $fetch<{ navLinks: NavLink[]; iconButtons: IconButton[]; footerLinks: FooterLink[] }>('/api/nav-config')
+    publicNavConfig.value = await ($fetch as any)('/api/nav-config') as any
     toast.success('配置已保存，前台缓存已失效')
   } catch (err: any) {
     toast.error(err.data?.message || '保存失败')

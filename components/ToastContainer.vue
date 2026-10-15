@@ -8,13 +8,13 @@
           class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg backdrop-blur-sm min-w-64 max-w-sm"
           :class="toastClasses[toast.type]"
         >
-          <i :class="toastIcons[toast.type]"></i>
+          <FaIcon :icon="toastIcons[toast.type]" />
           <span class="flex-1 text-sm">{{ toast.message }}</span>
           <button 
             @click="remove(toast.id)"
             class="p-1 hover:bg-white/20 rounded transition"
           >
-            <i class="fa-solid fa-xmark text-xs"></i>
+            <Icon name="fa6-solid:xmark" class="text-xs" />
           </button>
         </div>
       </TransitionGroup>

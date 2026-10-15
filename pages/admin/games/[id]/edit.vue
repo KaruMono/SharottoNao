@@ -2,22 +2,22 @@
   <div class="pb-20">
     <div class="flex items-center gap-4 mb-6">
       <NuxtLink to="/admin/games" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-        <i class="fa-solid fa-arrow-left"></i>
+        <Icon name="fa6-solid:arrow-left" />
       </NuxtLink>
       <h1 class="text-2xl font-bold">编辑游戏条目（管理员）</h1>
       <NuxtLink :to="`/games/${gameId}`" target="_blank" class="text-sm text-blue-500 hover:underline">
-        <i class="fa-solid fa-external-link mr-1"></i>查看前台
+        <Icon name="fa6-solid:arrow-up-right-from-square" class="mr-1" />查看前台
       </NuxtLink>
     </div>
 
     <div v-if="pending" class="text-center py-16">
-      <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-2xl" />
       <p class="mt-2 text-gray-500">加载中...</p>
     </div>
 
     <div v-else-if="error" class="text-center py-16">
-      <i class="fa-solid fa-circle-exclamation text-4xl text-red-500 mb-4"></i>
-      <p class="text-gray-500">{{ error.data?.message || '加载失败' }}</p>
+      <Icon name="fa6-solid:circle-exclamation" class="text-4xl text-red-500 mb-4" />
+      <p class="text-gray-500">{{ (error as any).data?.message || '加载失败' }}</p>
     </div>
 
     <form v-else @submit.prevent="handleSubmit" class="space-y-6">
@@ -30,7 +30,7 @@
             <input 
               v-model="form.vndbId"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：v27448"
             />
           </div>
@@ -39,11 +39,18 @@
             <input 
               v-model="form.bangumiId"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               placeholder="如：297264"
             />
           </div>
         </div>
+        <VndbTagSyncPanel
+          v-if="gameData?.vndbId"
+          :game-id="gameId"
+          :vndb-id="gameData.vndbId"
+          :last-synced-at="gameData.vndbTagsSyncedAt"
+          @synced="handleVndbTagsSynced"
+        />
       </div>
 
       <!-- 封面图片 -->
@@ -57,7 +64,7 @@
             >
               <img v-if="form.coverImage" :src="form.coverImage" class="w-full h-full object-cover" />
               <div v-else class="text-center text-gray-400 p-4">
-                <i class="fa-solid fa-image text-3xl mb-2"></i>
+                <Icon name="fa6-solid:image" class="text-3xl mb-2" />
                 <p class="text-xs">封面预览</p>
               </div>
             </div>
@@ -72,16 +79,16 @@
             >
               <input ref="coverInputRef" type="file" accept="image/*" class="hidden" @change="e => handleFileSelect(e, 'cover')" />
               <div v-if="uploading === 'cover'" class="text-blue-600 dark:text-blue-400">
-                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                <Icon name="fa6-solid:spinner" class="fa-spin text-2xl mb-2" />
                 <p>上传中...</p>
               </div>
               <div v-else>
-                <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+                <Icon name="fa6-solid:cloud-arrow-up" class="text-2xl text-gray-400 mb-2" />
                 <p class="text-sm text-gray-600 dark:text-gray-400">点击或拖拽图片上传封面</p>
               </div>
             </div>
             <div v-if="uploadError" class="text-sm text-red-500">
-              <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ uploadError }}
+              <Icon name="fa6-solid:circle-exclamation" class="mr-1" />{{ uploadError }}
             </div>
           </div>
         </div>
@@ -96,28 +103,28 @@
               <span class="w-5 h-5 inline-flex items-center justify-center rounded bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-bold mr-1">JP</span>
               日文标题
             </label>
-            <input v-model="form.titleJa" type="text" class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如：クラナド" />
+            <input v-model="form.titleJa" type="text" class="admin-input w-full" placeholder="如：クラナド" />
           </div>
           <div>
             <label class="block text-sm font-medium mb-2">
               <span class="w-5 h-5 inline-flex items-center justify-center rounded bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-bold mr-1">EN</span>
               英文标题
             </label>
-            <input v-model="form.titleEn" type="text" class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如：CLANNAD" />
+            <input v-model="form.titleEn" type="text" class="admin-input w-full" placeholder="如：CLANNAD" />
           </div>
           <div>
             <label class="block text-sm font-medium mb-2">
               <span class="w-5 h-5 inline-flex items-center justify-center rounded bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 text-xs font-bold mr-1">简</span>
               简体中文标题
             </label>
-            <input v-model="form.titleZhHans" type="text" class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如：团子大家族" />
+            <input v-model="form.titleZhHans" type="text" class="admin-input w-full" placeholder="如：团子大家族" />
           </div>
           <div>
             <label class="block text-sm font-medium mb-2">
               <span class="w-5 h-5 inline-flex items-center justify-center rounded bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 text-xs font-bold mr-1">繁</span>
               繁体中文标题
             </label>
-            <input v-model="form.titleZhHant" type="text" class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" placeholder="如：團子大家族" />
+            <input v-model="form.titleZhHant" type="text" class="admin-input w-full" placeholder="如：團子大家族" />
           </div>
         </div>
       </div>
@@ -132,12 +139,12 @@
             :class="activeDescLang === lang.key ? 'border-gray-800 dark:border-white text-gray-800 dark:text-white' : 'border-transparent text-gray-500'"
           >
             {{ lang.label }}
-            <i v-if="form[lang.key as keyof typeof form]" class="fa-solid fa-check text-green-500 text-xs ml-1"></i>
+            <Icon name="fa6-solid:check" class="text-green-500 text-xs ml-1" v-if="form[lang.key as keyof typeof form]" />
           </button>
         </div>
         <textarea 
           v-model="(form as any)[activeDescLang]"
-          class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+          class="admin-textarea w-full"
           rows="6"
           :placeholder="descriptionLangs.find(l => l.key === activeDescLang)?.placeholder"
         ></textarea>
@@ -149,47 +156,42 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label class="block text-sm font-medium mb-2">发售日期</label>
-            <input v-model="form.releaseDate" type="date" class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" />
+            <input v-model="form.releaseDate" type="date" class="admin-input w-full" />
           </div>
-          
         </div>
 
         <!-- 开发商/发行商（多选） -->
         <div class="md:col-span-2">
           <label class="block text-sm font-medium mb-2">开发商/发行商</label>
-          
           <!-- 已选择的会社 -->
           <div v-if="selectedCompanies.length" class="flex flex-wrap gap-2 mb-3">
             <div 
               v-for="(sc, index) in selectedCompanies" :key="sc.companyId"
               class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-zinc-700 rounded-lg"
             >
-              <select 
-                v-model="sc.role" 
-                class="text-xs bg-transparent border-none focus:outline-none cursor-pointer"
+              <AdminSelect aria-label="会社角色"
+                v-model="sc.role"
               >
                 <option value="DEVELOPER">开发商</option>
                 <option value="PUBLISHER">发行商</option>
-              </select>
+              </AdminSelect>
               <span class="text-sm font-medium">{{ sc.name }}</span>
               <button type="button" @click="removeCompany(index)" class="text-gray-400 hover:text-red-500">
-                <i class="fa-solid fa-times text-xs"></i>
+                <Icon name="fa6-solid:xmark" class="text-xs" />
               </button>
             </div>
           </div>
-          
           <!-- 搜索添加会社 -->
           <div class="relative">
             <input 
               v-model="companySearch"
               type="text" 
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
+              class="admin-input w-full"
               placeholder="搜索会社名称或别名..."
               @focus="showCompanyDropdown = true"
               @input="searchCompanies"
             />
-            <i class="fa-solid fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            
+            <Icon name="fa6-solid:magnifying-glass" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <!-- 下拉列表 -->
             <div 
               v-if="showCompanyDropdown && filteredCompanies.length"
@@ -210,7 +212,7 @@
                     别名: {{ company.aliases.slice(0, 3).join(', ') }}
                   </div>
                 </div>
-                <i v-if="isCompanySelected(company.id)" class="fa-solid fa-check text-green-500"></i>
+                <Icon name="fa6-solid:check" class="text-green-500" v-if="isCompanySelected(company.id)" />
               </button>
             </div>
           </div>
@@ -218,7 +220,7 @@
 
           <div class="md:col-span-2">
             <label class="block text-sm font-medium mb-2">别名（每行一个）</label>
-            <textarea v-model="aliasesText" class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600" rows="3" placeholder="其他名称或别名..."></textarea>
+            <textarea v-model="aliasesText" class="admin-textarea w-full" rows="3" placeholder="其他名称或别名..."></textarea>
           </div>
         </div>
       </div>
@@ -226,105 +228,31 @@
       <!-- 标签 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-4">
         <h2 class="font-semibold text-lg border-b pb-3 dark:border-zinc-700">标签</h2>
-
-        <!-- 已选标签 -->
-        <div v-if="selectedTags.length || pendingNewTags.length" class="flex flex-wrap gap-2">
-          <span
-            v-for="tag in selectedTags" :key="tag.id"
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium"
-            :style="tag.color ? { backgroundColor: tag.color + '20', color: tag.color } : { backgroundColor: 'rgba(107,114,128,0.12)', color: 'inherit' }"
-          >
-            {{ tag.name }}
-            <button type="button" @click="removeTag(tag.id)" class="opacity-60 hover:opacity-100 ml-0.5">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </span>
-          <!-- 待即时创建的新标签（管理员保存时直接生效，无需审核） -->
-          <span
-            v-for="name in pendingNewTags" :key="'new-' + name"
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border border-dashed border-blue-400 text-blue-600 dark:text-blue-400"
-            :title="'新标签「' + name + '」将在保存时立即创建'"
-          >
-            <i class="fa-solid fa-plus text-xs opacity-70"></i>
-            {{ name }}
-            <button type="button" @click="removePendingTag(name)" class="opacity-60 hover:opacity-100 ml-0.5">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
-          </span>
-        </div>
-        <p v-else class="text-sm text-gray-400">暂未添加任何标签</p>
-
-        <!-- 搜索输入 -->
-        <div class="relative">
-          <div class="flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-zinc-600 bg-gray-50 dark:bg-zinc-700 focus-within:ring-2 focus-within:ring-blue-500">
-            <i class="fa-solid fa-magnifying-glass text-gray-400 text-sm"></i>
-            <input
-              v-model="tagSearch"
-              type="text"
-              placeholder="搜索标签，或输入新名称直接创建..."
-              class="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
-              @input="searchTags"
-              @focus="onTagFocus"
-              @blur="hideTagDropdown"
-              @keydown.enter.prevent="onTagInputEnter"
-            />
-          </div>
-          <div
-            v-if="showTagDropdown && (tagResults.length || canCreateNewTag)"
-            class="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border dark:border-zinc-700 max-h-56 overflow-y-auto"
-          >
-            <button
-              v-for="tag in tagResults"
-              :key="tag.id"
-              type="button"
-              class="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-700 text-sm flex items-center gap-2.5 transition"
-              @mousedown.prevent="addTag(tag)"
-            >
-              <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="tag.color ? { backgroundColor: tag.color } : { backgroundColor: '#9ca3af' }"></span>
-              <span>{{ tag.name }}</span>
-              <span class="text-xs text-gray-400 ml-auto">{{ tag.gamesCount }} 个游戏</span>
-            </button>
-            <div v-if="tagResults.length && canCreateNewTag" class="border-t dark:border-zinc-700" />
-            <button
-              v-if="canCreateNewTag"
-              type="button"
-              class="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-700 text-sm flex items-center gap-2.5 transition text-blue-500"
-              @mousedown.prevent="createPendingTag"
-            >
-              <i class="fa-solid fa-plus text-xs"></i>
-              <span>创建新标签「{{ tagSearch.trim() }}」</span>
-              <span class="ml-auto text-xs text-gray-400">保存时生效</span>
-            </button>
-          </div>
-          <div
-            v-else-if="showTagDropdown && tagSearch && !tagResults.length && !canCreateNewTag"
-            class="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border dark:border-zinc-700 px-4 py-3 text-sm text-gray-400"
-          >
-            已添加该标签
-          </div>
-        </div>
-        <p v-if="pendingNewTags.length" class="text-xs text-gray-400">
-          <i class="fa-solid fa-circle-info mr-1"></i>虚线标签为新标签，保存后立即创建并关联
-        </p>
+        <TagAutocomplete
+          appearance="admin"
+          v-model="selectedTags"
+          v-model:pending-names="pendingNewTags"
+          admin
+          creation-mode="immediate"
+        />
       </div>
 
       <!-- 游戏截图 -->
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-5">
         <h2 class="font-semibold text-lg border-b pb-3 dark:border-zinc-700">游戏截图</h2>
-        
         <!-- 已有截图 -->
         <div v-if="screenshots.length" class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div v-for="(screenshot, index) in screenshots" :key="screenshot._key" class="relative group">
             <img :src="screenshot.url" class="w-full aspect-video object-cover rounded-lg" />
             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
               <button type="button" v-if="index > 0" @click="moveScreenshot(index, -1)" class="w-8 h-8 bg-white/20 rounded-full text-white hover:bg-white/30">
-                <i class="fa-solid fa-arrow-left"></i>
+                <Icon name="fa6-solid:arrow-left" />
               </button>
               <button type="button" @click="removeScreenshot(index)" class="w-8 h-8 bg-red-500 rounded-full text-white hover:bg-red-600">
-                <i class="fa-solid fa-trash"></i>
+                <Icon name="fa6-solid:trash" />
               </button>
               <button type="button" v-if="index < screenshots.length - 1" @click="moveScreenshot(index, 1)" class="w-8 h-8 bg-white/20 rounded-full text-white hover:bg-white/30">
-                <i class="fa-solid fa-arrow-right"></i>
+                <Icon name="fa6-solid:arrow-right" />
               </button>
             </div>
             <div class="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
@@ -343,11 +271,11 @@
         >
           <input ref="screenshotInputRef" type="file" accept="image/*" multiple class="hidden" @change="e => handleFileSelect(e, 'screenshot')" />
           <div v-if="uploading === 'screenshot'" class="text-blue-600 dark:text-blue-400">
-            <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+            <Icon name="fa6-solid:spinner" class="fa-spin text-2xl mb-2" />
             <p>上传中... {{ uploadProgress }}</p>
           </div>
           <div v-else>
-            <i class="fa-solid fa-images text-2xl text-gray-400 mb-2"></i>
+            <Icon name="fa6-solid:images" class="text-2xl text-gray-400 mb-2" />
             <p class="text-sm text-gray-600 dark:text-gray-400">点击或拖拽图片上传截图（可多选）</p>
             <p class="text-xs text-gray-400 mt-1">支持排序，拖拽调整顺序</p>
           </div>
@@ -358,46 +286,44 @@
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-5">
         <div class="flex items-center justify-between border-b pb-3 dark:border-zinc-700">
           <h2 class="font-semibold text-lg">制作人员</h2>
-          <button type="button" @click="addStaff" class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500">
-            <i class="fa-solid fa-plus mr-1"></i>添加制作人员
-          </button>
+          <AdminKumoButton variant="primary" size="toolbar" type="button" @click="addStaff" >
+            <Icon name="fa6-solid:plus" />添加制作人员
+          </AdminKumoButton>
         </div>
-        
         <div v-if="staffList.length" class="space-y-3">
           <div v-for="(staff, index) in staffList" :key="staff._key" class="flex items-start gap-3 p-4 bg-gray-50 dark:bg-zinc-700 rounded-lg">
             <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
                 <label class="block text-xs text-gray-500 mb-1">职位 *</label>
-                <select v-model="staff.role" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-600 dark:border-zinc-500 text-sm">
+                <AdminSelect aria-label="职位 *" v-model="staff.role" class="w-full">
                   <option value="ARTIST">原画</option>
                   <option value="WRITER">剧本</option>
                   <option value="COMPOSER">音乐</option>
                   <option value="VOICE_ACTOR">声优</option>
                   <option value="DIRECTOR">导演</option>
                   <option value="OTHER">其他</option>
-                </select>
+                </AdminSelect>
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-1">姓名 *</label>
-                <input v-model="staff.name" type="text" placeholder="如：麻枝准" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-600 dark:border-zinc-500 text-sm" />
+                <input v-model="staff.name" type="text" placeholder="如：麻枝准" class="admin-input w-full" />
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-1">原名</label>
-                <input v-model="staff.nameOriginal" type="text" placeholder="如：麻枝 准" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-600 dark:border-zinc-500 text-sm" />
+                <input v-model="staff.nameOriginal" type="text" placeholder="如：麻枝 准" class="admin-input w-full" />
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-1">角色名（声优用）</label>
-                <input v-model="staff.characterName" type="text" placeholder="如：古河渚" class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-600 dark:border-zinc-500 text-sm" />
+                <input v-model="staff.characterName" type="text" placeholder="如：古河渚" class="admin-input w-full" />
               </div>
             </div>
             <button type="button" @click="removeStaff(index)" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg mt-5">
-              <i class="fa-solid fa-trash"></i>
+              <Icon name="fa6-solid:trash" />
             </button>
           </div>
         </div>
-        
         <div v-else class="text-center py-8 text-gray-500">
-          <i class="fa-solid fa-users text-3xl mb-2"></i>
+          <Icon name="fa6-solid:users" class="text-3xl mb-2" />
           <p>暂无制作人员信息，点击上方按钮添加</p>
         </div>
       </div>
@@ -406,27 +332,26 @@
       <div class="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow space-y-5">
         <div class="flex items-center justify-between border-b pb-3 dark:border-zinc-700">
           <h2 class="font-semibold text-lg">相关链接</h2>
-          <button type="button" @click="addPurchaseLink" class="px-3 py-1.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500">
-            <i class="fa-solid fa-plus mr-1"></i>添加链接
-          </button>
+          <AdminKumoButton variant="primary" size="toolbar" type="button" @click="addPurchaseLink" >
+            <Icon name="fa6-solid:plus" />添加链接
+          </AdminKumoButton>
         </div>
-        
         <div v-if="purchaseLinks.length" class="space-y-3">
           <div v-for="(link, index) in purchaseLinks" :key="link._key" class="flex items-center gap-3">
             <input 
               v-model="link.name"
               type="text" 
-              class="w-32 px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
+              class="admin-input w-32"
               placeholder="平台名称"
             />
             <input 
               v-model="link.url"
               type="url" 
-              class="flex-1 px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
+              class="admin-input flex-1"
               placeholder="https://..."
             />
             <button type="button" @click="removePurchaseLink(index)" class="p-2 text-red-500 hover:text-red-600 transition">
-              <i class="fa-solid fa-trash"></i>
+              <Icon name="fa6-solid:trash" />
             </button>
           </div>
         </div>
@@ -456,7 +381,7 @@
               <span v-if="selectedSeries.nameOriginal" class="text-sm text-gray-500 ml-2">{{ selectedSeries.nameOriginal }}</span>
             </div>
             <button type="button" @click="selectedSeries = null" class="text-red-500 hover:text-red-600 text-sm">
-              <i class="fa-solid fa-xmark"></i> 移除
+              <Icon name="fa6-solid:xmark" /> 移除
             </button>
           </div>
           <div v-else class="relative">
@@ -464,7 +389,7 @@
               v-model="seriesSearch"
               type="text"
               placeholder="搜索系列名称..."
-              class="w-full px-4 py-2.5 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              class="admin-input w-full"
               @input="searchSeries"
             />
             <div v-if="seriesResults.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border dark:border-zinc-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -489,16 +414,16 @@
 
     <!-- 底部固定操作栏 -->
     <div class="fixed bottom-0 right-0 lg:left-56 left-0 z-30 px-6 py-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur border-t border-gray-200 dark:border-zinc-700 flex justify-between">
-      <button type="button" @click="confirmDelete" class="px-6 py-2.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600">
-        <i class="fa-solid fa-trash mr-1"></i>删除条目
-      </button>
+      <AdminKumoButton variant="danger" type="button" @click="confirmDelete" >
+        <Icon name="fa6-solid:trash" />删除条目
+      </AdminKumoButton>
       <div class="flex gap-3">
-        <NuxtLink to="/admin/games" class="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700">
+        <AdminKumoButton variant="secondary" to="/admin/games" >
           取消
-        </NuxtLink>
-        <button :disabled="loading || !canSubmit" class="px-6 py-2.5 rounded-lg bg-gray-800 dark:bg-zinc-600 text-white text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50" @click="handleSubmit">
+        </AdminKumoButton>
+        <AdminKumoButton variant="primary" :disabled="loading || !canSubmit"  @click="handleSubmit">
           {{ loading ? '保存中...' : '保存修改' }}
-        </button>
+        </AdminKumoButton>
       </div>
     </div>
   </div>
@@ -524,86 +449,9 @@ const { data: gameData, pending, error } = await useAuthFetch<AdminGameItem>(`/a
   key: `admin-game-edit-${gameId.value}`,
 })
 
-// 获取标签列表
-const tagSearch = ref('')
-const tagResults = ref<{ id: number; name: string; color: string | null; gamesCount: number }[]>([])
-const showTagDropdown = ref(false)
-const selectedTags = ref<{ id: number; name: string; color: string | null }[]>([])
+const selectedTags = ref<Array<{ id: number; name: string; color?: string | null }>>([])
 // 管理员直接创建的新标签（不存在于词表，保存时立即创建无需审核）
 const pendingNewTags = ref<string[]>([])
-let tagSearchTimer: ReturnType<typeof setTimeout>
-
-function searchTags() {
-  clearTimeout(tagSearchTimer)
-  const q = tagSearch.value.trim()
-  if (!q) { tagResults.value = []; showTagDropdown.value = false; return }
-  showTagDropdown.value = true
-  tagSearchTimer = setTimeout(async () => {
-    try {
-      const data = await $fetch<any>('/api/tags', { query: { search: q, limit: 20 } })
-      tagResults.value = (data.items || []).filter((t: any) => !form.tagIds.includes(t.id))
-    } catch { tagResults.value = [] }
-  }, 300)
-}
-
-/** 输入框内容是否可以作为新标签（未选中且词表搜索无精确匹配） */
-const canCreateNewTag = computed(() => {
-  const q = tagSearch.value.trim()
-  if (!q || q.length < 1 || q.length > 100) return false
-  if (selectedTags.value.some(t => t.name.toLowerCase() === q.toLowerCase())) return false
-  if (pendingNewTags.value.some(n => n.toLowerCase() === q.toLowerCase())) return false
-  if (tagResults.value.some(t => t.name.toLowerCase() === q.toLowerCase())) return false
-  return true
-})
-
-function addTag(tag: { id: number; name: string; color: string | null; gamesCount?: number }) {
-  if (!form.tagIds.includes(tag.id)) {
-    form.tagIds.push(tag.id)
-    selectedTags.value.push({ id: tag.id, name: tag.name, color: tag.color })
-  }
-  tagSearch.value = ''
-  tagResults.value = []
-  showTagDropdown.value = false
-}
-
-function createPendingTag() {
-  const name = tagSearch.value.trim()
-  if (!name || name.length > 100) return
-  if (pendingNewTags.value.some(n => n.toLowerCase() === name.toLowerCase())) return
-  if (selectedTags.value.some(t => t.name.toLowerCase() === name.toLowerCase())) return
-  pendingNewTags.value.push(name)
-  tagSearch.value = ''
-  tagResults.value = []
-  showTagDropdown.value = false
-}
-
-function removeTag(id: number) {
-  form.tagIds = form.tagIds.filter(tid => tid !== id)
-  selectedTags.value = selectedTags.value.filter(t => t.id !== id)
-}
-
-function removePendingTag(name: string) {
-  pendingNewTags.value = pendingNewTags.value.filter(n => n !== name)
-}
-
-function onTagInputEnter() {
-  const q = tagSearch.value.trim()
-  if (!q) return
-  const exact = tagResults.value.find(t => t.name.toLowerCase() === q.toLowerCase())
-  if (exact) {
-    addTag(exact)
-  } else if (canCreateNewTag.value) {
-    createPendingTag()
-  }
-}
-
-function hideTagDropdown() {
-  setTimeout(() => { showTagDropdown.value = false }, 150)
-}
-
-function onTagFocus() {
-  if (tagSearch.value) showTagDropdown.value = true
-}
 
 // 会社搜索结果（通过 API 实时搜索）
 const companyResults = ref<any[]>([])
@@ -635,7 +483,7 @@ async function searchSeries() {
   }
   seriesSearchTimer = setTimeout(async () => {
     try {
-      const data = await $fetch<any[]>('/api/series/search', { query: { q, limit: 10 } })
+      const data: any = await $fetch('/api/series/search', { query: { q, limit: 10 } } as any)
       seriesResults.value = data
     } catch {
       seriesResults.value = []
@@ -690,11 +538,14 @@ const form = reactive({
   descriptionZhHant: '',
   coverImage: '',
   releaseDate: '',
-  tagIds: [] as number[],
   isNsfw: false,
   vndbId: '',
   bangumiId: '',
 })
+
+function handleVndbTagsSynced(result: { gameMarkedNsfw: boolean }) {
+  if (result.gameMarkedNsfw) form.isNsfw = true
+}
 
 const aliasesText = ref('')
 // 行唯一 key（仅用于 v-for，提交前会剥离）
@@ -725,12 +576,13 @@ watch(gameData, (data) => {
     form.descriptionZhHant = data.descriptionZhHant || ''
     form.coverImage = data.coverImage || ''
     form.releaseDate = data.releaseDate ? (typeof data.releaseDate === 'string' ? data.releaseDate.split('T')[0] : data.releaseDate.toISOString().split('T')[0]) : ''
-    form.tagIds = data.tags?.map((t: any) => t.tagId || t.id) || []
-    selectedTags.value = data.tags?.map((t: any) => ({
-      id: t.tagId || t.id,
-      name: t.tag?.name || t.name || '',
-      color: t.tag?.color || t.color || null,
-    })) || []
+    selectedTags.value = data.tags
+      ?.filter((t: any) => !Array.isArray(t.sources) || t.sources.includes('MANUAL'))
+      .map((t: any) => ({
+        id: t.tagId || t.id,
+        name: t.tag?.name || t.name || '',
+        color: t.tag?.color || t.color || null,
+      })) || []
     form.isNsfw = data.isNsfw || false
     form.vndbId = data.vndbId || ''
     form.bangumiId = data.bangumiId?.toString() || ''
@@ -810,7 +662,7 @@ function searchCompanies() {
   }
   companySearchTimer = setTimeout(async () => {
     try {
-      const data = await $fetch<any>('/api/companies', { query: { search: q, limit: 20 } })
+      const data: any = await $fetch('/api/companies', { query: { search: q, limit: 20 } } as any)
       companyResults.value = data.items || []
     } catch {
       companyResults.value = []
@@ -965,7 +817,7 @@ async function handleSubmit() {
           companyId: c.companyId,
           role: c.role,
         })),
-        tagIds: form.tagIds,
+        tagIds: selectedTags.value.map(tag => tag.id),
         newTagNames: pendingNewTags.value.length > 0 ? pendingNewTags.value : undefined,
         isNsfw: form.isNsfw,
         vndbId: form.vndbId || undefined,

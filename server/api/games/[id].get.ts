@@ -1,11 +1,12 @@
 import prisma from '~/server/utils/prisma'
 import { getAuthUser } from '~/server/utils/auth'
 import { getDisplayTitle, getDisplayDescription } from '~/server/utils/game'
-import { buildNsfwFilterFromUser } from '~/server/utils/nsfw'
+import { buildNsfwFilterFromUser, resolveNsfwMode } from '~/server/utils/nsfw'
 import { incrementViewCount } from '~/server/utils/view-counter'
 import { parseEmojis } from '~/server/utils/emoji'
 import { isEffectivelyEmptyHtml } from '~/server/utils/html'
-import { getSetting } from '~/server/utils/settings'
+import { buildGameTagVisibilityWhere } from '~/server/utils/tag-visibility'
+import { resolveGameTagDisplayTier } from '~/utils/tag-display-tier'
 
 export default defineEventHandler(async (event) => {
   const id = parseInt(getRouterParam(event, 'id') as string)
@@ -18,10 +19,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const user = await getAuthUser(event)
-
-  // 下载列表可见性设置
-  const downloadVisibility = await getSetting('download_visibility') ?? 'login_required'
-  const alwaysShowResources = downloadVisibility === 'always_show'
+  const nsfwMode = resolveNsfwMode(user)
 
   const game = await prisma.game.findUnique({
     where: { id, deletedAt: null },
@@ -40,8 +38,10 @@ export default defineEventHandler(async (event) => {
         select: { id: true, username: true, avatar: true },
       },
       tags: {
+        where: buildGameTagVisibilityWhere(nsfwMode),
         include: {
           tag: true,
+          sources: { select: { source: true, displayTier: true } },
         },
       },
       staff: {
@@ -146,10 +146,8 @@ export default defineEventHandler(async (event) => {
         gameId_userId: { gameId: id, userId: user.id },
       },
     }) : null,
-    // 获取下载资源
-    // always_show 模式：访客也能看到已审核通过的资源列表（但实际下载链接在下载页另行鉴权）
-    // login_required 模式：仅登录用户可见
-    (user || alwaysShowResources) ? prisma.resource.findMany({
+    // 获取资源元信息；未授权用户的实际下载地址会在响应整理阶段移除
+    prisma.resource.findMany({
       where: {
         gameId: id,
         deletedAt: null,
@@ -168,7 +166,7 @@ export default defineEventHandler(async (event) => {
         },
       },
       orderBy: { createdAt: 'desc' },
-    }) : [],
+    }),
     // 获取相关推荐（同会社相近年代的作品）
     game.companies.length > 0 ? (async () => {
       // 获取当前游戏的发售年份
@@ -347,7 +345,11 @@ export default defineEventHandler(async (event) => {
     })),
     // 兼容旧的单一 company 字段
     company: game.companies[0]?.company || null,
-    tags: game.tags.map(t => t.tag),
+    tags: game.tags.map(t => ({
+      ...t.tag,
+      sources: t.sources.map(source => source.source),
+      displayTier: resolveGameTagDisplayTier(t.sources),
+    })),
     staff: game.staff.map(s => ({
       ...s.staff,
       role: s.role,
@@ -360,12 +362,27 @@ export default defineEventHandler(async (event) => {
     isFavorited,
     favoriteStatus,
     userRating,
-    // 隐藏资源下载链接，管理员和上传者保留（用于编辑）
+    // 下载地址仍只对管理员和上传者保留；登录用户可以在游戏页看到提取码和解压密码。
     resources: sortedResources.map((r: any) => {
       if (user?.role === 'ADMIN' || r.uploaderId === user?.id) {
         return r
       }
-      const { url, ...safeResource } = r
+      if (user) {
+        const { url, ...authenticatedResource } = r
+        return authenticatedResource
+      }
+      // 访客只需要可索引的资源摘要；下载地址、提取码和解压密码
+      // 仍然必须通过下载页的鉴权流程获取。
+      const {
+        url,
+        extractCode,
+        unzipPassword,
+        healthStatus,
+        healthNote,
+        healthCheckedAt,
+        issueCount,
+        ...safeResource
+      } = r
       return safeResource
     }),
     relatedGames: relatedGames.map(g => ({

@@ -9,7 +9,7 @@
 
     <!-- 搜索栏 -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl px-3 sm:px-4 py-3 shadow mb-5 flex items-center gap-3">
-      <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+      <Icon name="fa6-solid:magnifying-glass" class="text-gray-400" />
       <input
         v-model="searchInput"
         type="text"
@@ -18,7 +18,7 @@
         @input="onSearchInput"
       />
       <button v-if="searchInput" @click="clearSearch" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
-        <i class="fa-solid fa-xmark"></i>
+        <Icon name="fa6-solid:xmark" />
       </button>
     </div>
 
@@ -46,7 +46,7 @@
       </div>
 
       <div v-else class="text-center text-gray-500 py-12">
-        <i class="fa-solid fa-tags text-4xl mb-3 opacity-30"></i>
+        <Icon name="fa6-solid:tags" class="text-4xl mb-3 opacity-30" />
         <p>{{ searchInput ? '没有找到匹配的标签' : '暂无标签' }}</p>
       </div>
     </div>
@@ -63,6 +63,8 @@
 </template>
 
 <script setup lang="ts">
+import type { ListResponse, TagItem } from '~/types/api'
+
 const route = useRoute()
 const router = useRouter()
 
@@ -71,7 +73,7 @@ const searchInput = ref((route.query.search as string) || '')
 const debouncedSearch = ref(searchInput.value)
 let searchTimer: ReturnType<typeof setTimeout>
 
-const { data: tagsData, pending } = await useFetch('/api/tags', {
+const { data: tagsData, pending } = await useAuthFetch<ListResponse<TagItem>>('/api/tags', {
   key: 'tags-list',
   query: computed(() => ({
     page: currentPage.value,

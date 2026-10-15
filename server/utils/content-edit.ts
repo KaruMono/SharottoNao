@@ -1,5 +1,11 @@
 import type { ContentEditType, Prisma } from '@prisma/client'
 import prisma from '~/server/utils/prisma'
+import { invalidateGameCaches } from '~/server/utils/redis'
+import { fetchVndbGame } from '~/server/utils/vndb-client'
+import {
+  lockVndbTagSyncInTransaction,
+  syncVndbTagsForGameInTransaction,
+} from '~/server/utils/vndb-tag-sync'
 
 /**
  * 在编辑前记录快照
@@ -49,6 +55,14 @@ export async function revertToSnapshot(editId: number, operatorId: number): Prom
     })
     if (!current) throw createError({ statusCode: 404, message: '游戏条目不存在' })
 
+    const snapshotVndbId = typeof snapshot.vndbId === 'string' && snapshot.vndbId
+      ? snapshot.vndbId
+      : null
+    const vndbChanged = snapshotVndbId !== current.vndbId
+    const vndbData = vndbChanged && snapshotVndbId
+      ? await fetchVndbGame(snapshotVndbId)
+      : null
+
     // 先保存当前版本为新快照
     await recordEdit({
       targetType: 'GAME',
@@ -59,29 +73,50 @@ export async function revertToSnapshot(editId: number, operatorId: number): Prom
       isRevert: true,
     })
 
-    // 写回快照数据（仅游戏基本字段）
-    await prisma.game.update({
-      where: { id: edit.targetId },
-      data: {
-        titleEn: (snapshot.titleEn as string) ?? null,
-        titleJa: (snapshot.titleJa as string) ?? null,
-        titleZhHans: (snapshot.titleZhHans as string) ?? null,
-        titleZhHant: (snapshot.titleZhHant as string) ?? null,
-        aliases: (snapshot.aliases as string[]) ?? [],
-        descriptionEn: (snapshot.descriptionEn as string) ?? null,
-        descriptionJa: (snapshot.descriptionJa as string) ?? null,
-        descriptionZhHans: (snapshot.descriptionZhHans as string) ?? null,
-        descriptionZhHant: (snapshot.descriptionZhHant as string) ?? null,
-        coverImage: (snapshot.coverImage as string) ?? null,
-        releaseDate: snapshot.releaseDate ? new Date(snapshot.releaseDate as string) : null,
-        isNsfw: (snapshot.isNsfw as boolean) ?? false,
-        vndbId: (snapshot.vndbId as string) ?? null,
-        bangumiId: (snapshot.bangumiId as number) ?? null,
-        seriesId: (snapshot.seriesId as number) ?? null,
-        purchaseLinks: (snapshot.purchaseLinks as object) ?? [],
-        lengthMinutes: (snapshot.lengthMinutes as number) ?? null,
-      },
+    // VNDB ID and its raw tag snapshot are one consistency boundary. Revert
+    // them in the same transaction so a historical ID cannot retain tags
+    // fetched from the newer entry.
+    await prisma.$transaction(async (tx) => {
+      if (vndbChanged) await lockVndbTagSyncInTransaction(tx)
+
+      await tx.game.update({
+        where: { id: edit.targetId },
+        data: {
+          titleEn: (snapshot.titleEn as string) ?? null,
+          titleJa: (snapshot.titleJa as string) ?? null,
+          titleZhHans: (snapshot.titleZhHans as string) ?? null,
+          titleZhHant: (snapshot.titleZhHant as string) ?? null,
+          aliases: (snapshot.aliases as string[]) ?? [],
+          descriptionEn: (snapshot.descriptionEn as string) ?? null,
+          descriptionJa: (snapshot.descriptionJa as string) ?? null,
+          descriptionZhHans: (snapshot.descriptionZhHans as string) ?? null,
+          descriptionZhHant: (snapshot.descriptionZhHant as string) ?? null,
+          coverImage: (snapshot.coverImage as string) ?? null,
+          releaseDate: snapshot.releaseDate ? new Date(snapshot.releaseDate as string) : null,
+          isNsfw: Boolean(snapshot.isNsfw) || Boolean(vndbData?.isNsfw),
+          vndbId: snapshotVndbId,
+          bangumiId: (snapshot.bangumiId as number) ?? null,
+          seriesId: (snapshot.seriesId as number) ?? null,
+          purchaseLinks: (snapshot.purchaseLinks as object) ?? [],
+          lengthMinutes: (snapshot.lengthMinutes as number) ?? null,
+        },
+      })
+
+      if (vndbChanged) {
+        await syncVndbTagsForGameInTransaction(tx, {
+          gameId: edit.targetId,
+          tags: vndbData?.tags || [],
+          expectedVndbId: snapshotVndbId,
+        })
+        if (!snapshotVndbId) {
+          await tx.game.update({
+            where: { id: edit.targetId },
+            data: { vndbTagsSyncedAt: null },
+          })
+        }
+      }
     })
+    await invalidateGameCaches(edit.targetId)
   } else if (edit.targetType === 'COMPANY') {
     const current = await prisma.company.findUnique({ where: { id: edit.targetId } })
     if (!current) throw createError({ statusCode: 404, message: '公司不存在' })
@@ -149,7 +184,9 @@ export async function revertToSnapshot(editId: number, operatorId: number): Prom
         extractCode: (snapshot.extractCode as string) ?? null,
         unzipPassword: (snapshot.unzipPassword as string) ?? null,
         remark: (snapshot.remark as string) ?? null,
+        updatedAt: new Date(),
       },
     })
+    await invalidateGameCaches(current.gameId)
   }
 }

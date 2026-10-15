@@ -12,7 +12,7 @@
       </div>
 
       <div class="relative w-full lg:w-80">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <Icon name="fa6-solid:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
         <input
           v-model="searchQuery"
           type="search"
@@ -31,7 +31,7 @@
           :class="{ active: selectedCategory === '' }"
           :data-active="selectedCategory === '' ? 'true' : undefined"
         >
-          <i class="fa-solid fa-layer-group"></i>
+          <Icon name="fa6-solid:layer-group" />
           <span>全部</span>
           <span class="text-xs opacity-60">{{ allTools?.length || 0 }}</span>
         </button>
@@ -43,7 +43,7 @@
           :class="{ active: selectedCategory === cat.slug }"
           :data-active="selectedCategory === cat.slug ? 'true' : undefined"
         >
-          <i :class="cat.icon || 'fa-solid fa-folder'"></i>
+          <FaIcon :icon="cat.icon || 'fa6-solid:folder'" />
           <span>{{ cat.name }}</span>
           <span class="text-xs opacity-60">{{ cat._count?.tools ?? 0 }}</span>
         </button>
@@ -55,7 +55,7 @@
       <aside class="hidden lg:block lg:sticky lg:top-28 lg:self-start">
         <div class="bg-white dark:bg-zinc-800 rounded-xl shadow p-4 max-h-[calc(100vh-140px)] overflow-y-auto">
           <h3 class="font-semibold text-sm mb-3 flex items-center gap-2 text-gray-500 dark:text-gray-400">
-            <i class="fa-solid fa-toolbox"></i>工具分类
+            <Icon name="fa6-solid:toolbox" />工具分类
           </h3>
           <nav class="space-y-1">
             <button
@@ -63,7 +63,7 @@
               class="tool-category-btn"
               :class="{ active: selectedCategory === '' }"
             >
-              <i class="fa-solid fa-folder-open"></i>
+              <Icon name="fa6-solid:folder-open" />
               <span class="flex-1 truncate text-left">全部工具</span>
               <span class="text-xs text-gray-400">{{ allTools?.length || 0 }}</span>
             </button>
@@ -74,7 +74,7 @@
               class="tool-category-btn"
               :class="{ active: selectedCategory === cat.slug }"
             >
-              <i :class="cat.icon || 'fa-solid fa-folder'"></i>
+              <FaIcon :icon="cat.icon || 'fa6-solid:folder'" />
               <span class="flex-1 truncate text-left">{{ cat.name }}</span>
               <span class="text-xs text-gray-400">{{ cat._count?.tools ?? 0 }}</span>
             </button>
@@ -103,7 +103,7 @@
                   class="w-12 h-12 md:w-14 md:h-14 rounded-xl object-cover border border-gray-100 dark:border-zinc-700"
                 />
                 <div v-else class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gray-100 dark:bg-zinc-700 flex items-center justify-center">
-                  <i class="fa-solid fa-wrench text-lg text-gray-400 dark:text-gray-500"></i>
+                  <Icon name="fa6-solid:wrench" class="text-lg text-gray-400 dark:text-gray-500" />
                 </div>
               </div>
 
@@ -114,10 +114,10 @@
                     <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-gray-400">
                       <span v-if="tool.version">v{{ tool.version }}</span>
                       <span v-if="tool.author" class="truncate">
-                        <i class="fa-solid fa-user mr-1"></i>{{ tool.author }}
+                        <Icon name="fa6-solid:user" class="mr-1" />{{ tool.author }}
                       </span>
                       <span v-if="tool.category" class="inline-flex items-center gap-1">
-                        <i v-if="tool.category.icon" :class="tool.category.icon"></i>{{ tool.category.name }}
+                        <FaIcon v-if="tool.category.icon" :icon="tool.category.icon" />{{ tool.category.name }}
                       </span>
                     </div>
                   </div>
@@ -138,21 +138,21 @@
                 rel="noopener noreferrer"
                 class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 transition"
               >
-                <i class="fa-brands fa-github"></i>GitHub
+                <Icon name="fa6-brands:github" />GitHub
               </a>
               <span v-else class="text-xs text-gray-400">外部下载</span>
               <NuxtLink
                 :to="`/tool-download/${tool.id}`"
                 class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-3 py-1.5 text-sm font-medium hover:bg-gray-700 dark:hover:bg-white transition"
               >
-                <i class="fa-solid fa-download"></i>下载
+                <Icon name="fa6-solid:download" />下载
               </NuxtLink>
             </div>
           </article>
         </div>
 
         <div v-else key="empty" class="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center text-gray-500 dark:text-gray-400 py-20">
-          <i class="fa-solid fa-box-open text-4xl mb-4 text-gray-300 dark:text-zinc-600"></i>
+          <Icon name="fa6-solid:box-open" class="text-4xl mb-4 text-gray-300 dark:text-zinc-600" />
           <p class="font-medium">没有找到工具</p>
           <p class="mt-1 text-sm">换个分类或搜索词试试看。</p>
         </div>
@@ -162,8 +162,8 @@
 </template>
 
 <script setup lang="ts">
-const { data: categories } = await useFetch('/api/tools/categories', { key: 'tools-categories' })
-const { data: allTools } = await useFetch('/api/tools', { key: 'tools-list' })
+const { data: categories } = await (useFetch as any)('/api/tools/categories', { key: 'tools-categories' })
+const { data: allTools } = await (useFetch as any)('/api/tools', { key: 'tools-list' })
 
 const selectedCategory = ref('')
 const searchQuery = ref('')
@@ -268,19 +268,19 @@ useHead({
   color: white;
 }
 
-:global(.dark) .mobile-category-pill {
+.dark .mobile-category-pill {
   border-color: rgb(63, 63, 70);
   background: rgb(39, 39, 42);
   color: rgb(212, 212, 216);
 }
 
-:global(.dark) .mobile-category-pill.active {
+.dark .mobile-category-pill.active {
   border-color: rgb(244, 244, 245);
   background: rgb(244, 244, 245);
   color: rgb(24, 24, 27);
 }
 
-:global(.dark) .mobile-category-pill.active i {
+.dark .mobile-category-pill.active i {
   color: rgb(24, 24, 27);
 }
 
@@ -317,21 +317,21 @@ useHead({
   color: rgb(156, 163, 175);
 }
 
-:global(.dark) .tool-category-btn {
+.dark .tool-category-btn {
   color: rgb(212, 212, 216);
 }
 
-:global(.dark) .tool-category-btn:hover {
+.dark .tool-category-btn:hover {
   background: rgb(63, 63, 70);
   color: white;
 }
 
-:global(.dark) .tool-category-btn.active {
+.dark .tool-category-btn.active {
   background: rgb(63, 63, 70);
   color: white;
 }
 
-:global(.dark) .tool-category-btn.active i {
+.dark .tool-category-btn.active i {
   color: rgb(156, 163, 175);
 }
 

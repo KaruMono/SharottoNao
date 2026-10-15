@@ -36,7 +36,7 @@
             ? 'text-gray-800 dark:text-white' 
             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
         >
-          <i :class="tab.icon"></i>
+          <FaIcon :icon="tab.icon" />
           <span class="hidden sm:inline">{{ tab.label }}</span>
         </button>
       </div>
@@ -55,7 +55,7 @@
             class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
             :class="getMessageIconBg(message.type)"
           >
-            <i :class="getMessageIcon(message.type)" class="text-white text-xs md:text-base"></i>
+            <FaIcon :icon="getMessageIcon(message.type)" class="text-white text-xs md:text-base" />
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
@@ -78,7 +78,7 @@
                 class="text-xs text-blue-500 hover:underline"
                 @click.stop
               >
-                查看详情 <i class="fa-solid fa-arrow-right ml-1"></i>
+                查看详情 <Icon name="fa6-solid:arrow-right" class="ml-1" />
               </NuxtLink>
             </div>
           </div>
@@ -87,7 +87,7 @@
     </div>
 
     <div v-if="!messagesData?.items?.length" class="text-center text-gray-500 py-16">
-      <i class="fa-solid fa-bell-slash text-4xl mb-4"></i>
+      <Icon name="fa6-solid:bell-slash" class="text-4xl mb-4" />
       <p>暂无{{ filterType ? filterTabs.find(t => t.key === filterType)?.label : '' }}消息</p>
     </div>
 
@@ -128,10 +128,10 @@ const filterType = ref(route.query.type as string || '')
 
 // 筛选标签
 const filterTabs = [
-  { key: '', label: '全部通知', icon: 'fa-solid fa-bell' },
-  { key: 'SYSTEM', label: '系统通知', icon: 'fa-solid fa-robot' },
-  { key: 'COMMENT_REPLY', label: '评论回复', icon: 'fa-solid fa-reply' },
-  { key: 'COMMENT_LIKE', label: '评论点赞', icon: 'fa-solid fa-heart' },
+  { key: '', label: '全部通知', icon: 'fa6-solid:bell' },
+  { key: 'SYSTEM', label: '系统通知', icon: 'fa6-solid:robot' },
+  { key: 'COMMENT_REPLY', label: '评论回复', icon: 'fa6-solid:reply' },
+  { key: 'COMMENT_LIKE', label: '评论点赞', icon: 'fa6-solid:heart' },
 ]
 
 const { data: messagesData, refresh } = await useAuthFetch<MessagesResponse>('/api/user/messages', {

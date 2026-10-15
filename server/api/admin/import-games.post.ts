@@ -1,8 +1,14 @@
 import { z } from 'zod'
+import { invalidateGameCaches } from '~/server/utils/redis'
 import { requireAdmin } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
 import { markImageAsUsed } from '~/server/utils/image'
 import { recordActivity } from '~/server/utils/activity'
+import { fetchVndbGame, type VndbGameData } from '~/server/utils/vndb-client'
+import {
+  lockVndbTagSyncInTransaction,
+  syncVndbTagsForGameInTransaction,
+} from '~/server/utils/vndb-tag-sync'
 
 function parseReleaseDate(dateStr: string): Date | null {
   if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
@@ -160,6 +166,7 @@ export default defineEventHandler(async (event) => {
                 status: 'APPROVED' as const,
               })),
             })
+            await invalidateGameCaches(existingGame.id)
             results.push({
               vndbId: item.vndbId,
               title: displayTitle,
@@ -205,7 +212,16 @@ export default defineEventHandler(async (event) => {
 
       // 5. 在事务中创建游戏 + 资源 + 编辑记录
       const uploaderId = item.uploaderId || data.defaultUploaderId
+      let vndbData: VndbGameData | null = null
+      if (item.vndbId) {
+        vndbData = await fetchVndbGame(item.vndbId)
+      }
+
       const game = await prisma.$transaction(async (tx) => {
+        if (vndbData) {
+          await lockVndbTagSyncInTransaction(tx)
+        }
+
         const g = await tx.game.create({
           data: {
             titleEn: item.titleEn || null,
@@ -217,7 +233,7 @@ export default defineEventHandler(async (event) => {
             descriptionZhHans: item.descriptionZhHans || null,
             coverImage: item.coverImage || null,
             releaseDate: item.releaseDate ? parseReleaseDate(item.releaseDate) : null,
-            isNsfw: item.isNsfw,
+            isNsfw: item.isNsfw || Boolean(vndbData?.isNsfw),
             vndbId: item.vndbId || null,
             lengthMinutes: item.lengthMinutes || null,
             creatorId: admin.id,
@@ -240,8 +256,17 @@ export default defineEventHandler(async (event) => {
           })
         }
 
+        if (vndbData) {
+          await syncVndbTagsForGameInTransaction(tx, {
+            gameId: g.id,
+            tags: vndbData.tags,
+          })
+        }
+
         return g
       })
+
+      await invalidateGameCaches(game.id)
 
       if (game.coverImage) {
         await markImageAsUsed(game.coverImage, game.id)

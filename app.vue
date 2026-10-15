@@ -9,22 +9,6 @@
 // 全局初始化
 const { data: session } = useAuth()
 
-// 捕获路由导航取消/中断错误，防止快速点击时白屏
-const router = useRouter()
-router.onError((err) => {
-  if (
-    err?.name === 'NavigationCancelled' ||
-    err?.name === 'NavigationAborted' ||
-    err?.name === 'NavigationDuplicated' ||
-    err?.message?.includes('navigation') ||
-    err?.message?.includes('cancelled') ||
-    err?.message?.includes('aborted')
-  ) {
-    return
-  }
-  throw err
-})
-
 // 获取站点基本信息 & 导航栏配置（并行请求，避免串行阻塞 SSR）
 const siteName = useSiteName()
 const navConfig = useNavConfig()
@@ -32,8 +16,8 @@ const downloadVisibility = useDownloadVisibility()
 const runtimeConfig = useRuntimeConfig()
 const buildId = runtimeConfig.public?.buildId as string | undefined
 const [{ data: homeInfo }, { data: navData }] = await Promise.all([
-  useFetch('/api/site-info', { key: 'site-info' }),
-  useFetch('/api/nav-config', { key: `nav-config-${buildId || 'local'}`, query: { v: buildId } }),
+  useFetch<any, any, string & {}>('/api/site-info', { key: 'site-info' }),
+  useFetch<any, any, string & {}>('/api/nav-config', { key: `nav-config-${buildId || 'local'}`, query: { v: buildId } }),
 ])
 if (homeInfo.value?.siteName) {
   siteName.value = homeInfo.value.siteName
@@ -66,7 +50,7 @@ useHead({
     return links
   }),
   meta: computed(() => {
-    const meta = parseMetaTags(homeInfo.value?.customMetaTags || '')
+    const meta: any[] = parseMetaTags(homeInfo.value?.customMetaTags || '')
     const path = route.path
     const hasQuery = Object.keys(route.query).length > 0
     const noindexPaths = ['/search', '/following']
@@ -114,17 +98,17 @@ useHead({
 // 注入底部自定义脚本 — SSR 直出到 </body> 前
 useHead({
   script: computed(() =>
-    parseScriptTags(homeInfo.value?.footerScripts || '').map(s => ({
+    parseScriptTags(homeInfo.value?.footerScripts || '').map((s: any) => ({
       ...s,
       tagPosition: 'bodyClose' as const,
-      key: s.key?.replace('custom-script-', 'custom-footer-script-'),
+      key: (s.key as string | undefined)?.replace('custom-script-', 'custom-footer-script-') ?? s.key,
     }))
   ),
   noscript: computed(() =>
-    parseNoscriptTags(homeInfo.value?.footerScripts || '').map(s => ({
+    parseNoscriptTags(homeInfo.value?.footerScripts || '').map((s: any) => ({
       ...s,
       tagPosition: 'bodyClose' as const,
-      key: s.key?.replace('custom-noscript-', 'custom-footer-noscript-'),
+      key: (s.key as string | undefined)?.replace('custom-noscript-', 'custom-footer-noscript-') ?? s.key,
     }))
   ),
 })
@@ -170,13 +154,14 @@ function parseNoscriptTags(html: string): Record<string, any>[] {
 }
 
 // 解析自定义 meta 标签 HTML 字符串，提取属性对象数组
-function parseMetaTags(html: string): Record<string, string>[] {
+function parseMetaTags(html: string): any[] {
   if (!html.trim()) return []
-  const result: Record<string, string>[] = []
+  const result: any[] = []
   const metaRegex = /<meta\s+([^>]*?)\/?>|<meta\s+([^>]*?)>/gi
   let match
   while ((match = metaRegex.exec(html)) !== null) {
     const attrStr = match[1] || match[2]
+    if (!attrStr) continue
     const attrs: Record<string, string> = {}
     const attrRegex = /(\w[\w-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+)))?/g
     let attrMatch

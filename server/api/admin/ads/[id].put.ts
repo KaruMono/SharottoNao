@@ -11,6 +11,7 @@ const schema = z.object({
   imageUrl: z.string().min(1).max(500).optional(),
   linkUrl: z.string().min(1).max(500).optional(),
   enabled: z.boolean().optional(),
+  showOnMobile: z.boolean().optional(),
   openInNewTab: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
 })

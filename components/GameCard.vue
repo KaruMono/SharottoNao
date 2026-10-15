@@ -18,7 +18,7 @@
         v-else
         class="w-full aspect-[3/4] flex items-center justify-center bg-gray-200 dark:bg-zinc-700"
       >
-        <i class="fa-solid fa-gamepad text-3xl md:text-4xl text-gray-400 dark:text-zinc-500"></i>
+        <Icon name="fa6-solid:gamepad" class="text-3xl md:text-4xl text-gray-400 dark:text-zinc-500" />
       </div>
       <!-- NSFW标记 -->
       <div 

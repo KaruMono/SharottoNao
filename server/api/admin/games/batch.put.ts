@@ -2,6 +2,8 @@ import { z } from 'zod'
 import { requireEditor } from '~/server/utils/auth'
 import prisma from '~/server/utils/prisma'
 import { recordEdit } from '~/server/utils/content-edit'
+import { GameTagSourceType } from '@prisma/client'
+import { setGameTagSource } from '~/server/utils/game-tag-source'
 
 const schema = z.object({
   ids: z.array(z.number()).min(1),
@@ -61,10 +63,11 @@ export default defineEventHandler(async (event) => {
     const tagNames = tags.map(t => t.name)
     for (const gameId of ids) {
       for (const tagId of tagIds) {
-        await prisma.gameTag.upsert({
-          where: { gameId_tagId: { gameId, tagId } },
-          update: {},
-          create: { gameId, tagId },
+        await setGameTagSource({
+          gameId,
+          tagId,
+          source: GameTagSourceType.MANUAL,
+          enabled: true,
         })
       }
       count++
@@ -94,13 +97,17 @@ export default defineEventHandler(async (event) => {
         changeSummary: `批量移除标签（${tagNames.join('，')}）`,
       }).catch(() => {})
     }
-    const result = await prisma.gameTag.deleteMany({
-      where: {
-        gameId: { in: ids },
-        tagId: { in: tagIds },
-      },
-    })
-    return { success: true, message: `已移除 ${result.count} 条标签关联` }
+    for (const gameId of ids) {
+      for (const tagId of tagIds) {
+        await setGameTagSource({
+          gameId,
+          tagId,
+          source: GameTagSourceType.MANUAL,
+          enabled: false,
+        })
+      }
+    }
+    return { success: true, message: `已移除所选游戏的人工标签关联` }
   }
 
   if (action === 'setSeries') {

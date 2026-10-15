@@ -1,9 +1,16 @@
 import prisma from './prisma'
+import { setSystemGameTag } from './game-tag-source'
+import {
+  assertTagNamesAvailableInTransaction,
+  lockTagNameNamespaceInTransaction,
+  prepareTagNames,
+} from './tag-name'
 
 export const MACHINE_TRANSLATION_TAG_NAME = '机器翻译'
 
 const getStaleMachineTranslationTagWhere = (tagId: number) => ({
   tagId,
+  sources: { some: { source: 'SYSTEM' as const } },
   game: {
     resources: {
       none: {
@@ -63,11 +70,16 @@ export async function removeStaleMachineTranslationTags(): Promise<number> {
 
   if (!tag) return 0
 
-  const result = await prisma.gameTag.deleteMany({
+  const relations = await prisma.gameTag.findMany({
     where: getStaleMachineTranslationTagWhere(tag.id),
+    select: { gameId: true },
   })
 
-  return result.count
+  for (const relation of relations) {
+    await setSystemGameTag(relation.gameId, tag.id, false)
+  }
+
+  return relations.length
 }
 
 /**
@@ -87,49 +99,36 @@ export async function updateMachineTranslationTag(gameId: number) {
       },
     })
 
-    // 查找或创建机翻标签
-    let tag = await prisma.tag.findFirst({
-      where: { name: MACHINE_TRANSLATION_TAG_NAME },
-    })
-
-    if (!tag) {
-      tag = await prisma.tag.create({
-        data: {
-          name: MACHINE_TRANSLATION_TAG_NAME,
-          description: '包含机器翻译资源的游戏',
-        },
+    // 查找或创建机翻标签。系统规范名不能与普通标签别名重名。
+    const tag = await prisma.$transaction(async (tx) => {
+      await lockTagNameNamespaceInTransaction(tx)
+      const existing = await tx.tag.findFirst({
+        where: { name: { equals: MACHINE_TRANSLATION_TAG_NAME, mode: 'insensitive' } },
       })
-    }
 
-    // 检查游戏是否已有机翻标签
-    const existingGameTag = await prisma.gameTag.findUnique({
-      where: {
-        gameId_tagId: {
-          gameId,
-          tagId: tag.id,
-        },
-      },
-    })
-
-    if (hasMachineTranslatedResource && !existingGameTag) {
-      // 有机翻资源但没有标签，添加标签
-      await prisma.gameTag.create({
-        data: {
-          gameId,
-          tagId: tag.id,
-        },
-      })
-    } else if (!hasMachineTranslatedResource && existingGameTag) {
-      // 没有机翻资源但有标签，移除标签
-      await prisma.gameTag.delete({
-        where: {
-          gameId_tagId: {
-            gameId,
-            tagId: tag.id,
+      if (!existing) {
+        const prepared = prepareTagNames(MACHINE_TRANSLATION_TAG_NAME, [])
+        await assertTagNamesAvailableInTransaction(tx, prepared)
+        return tx.tag.create({
+          data: {
+            name: prepared.name,
+            description: '包含机器翻译资源的游戏',
+            isSystem: true,
           },
-        },
-      })
-    }
+        })
+      }
+
+      if (!existing.isSystem || existing.archivedAt) {
+        return tx.tag.update({
+          where: { id: existing.id },
+          data: { isSystem: true, archivedAt: null },
+        })
+      }
+
+      return existing
+    })
+
+    await setSystemGameTag(gameId, tag.id, Boolean(hasMachineTranslatedResource))
   } catch (err) {
     console.error('Failed to update machine translation tag:', err)
   }

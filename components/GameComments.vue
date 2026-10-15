@@ -2,7 +2,7 @@
   <div class="bg-white dark:bg-zinc-800 rounded-xl p-5 shadow space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="font-medium flex items-center gap-2">
-        <i class="fa-solid fa-comments text-gray-400"></i>评论 ({{ totalComments }})
+        <Icon name="fa6-solid:comments" class="text-gray-400" />评论 ({{ totalComments }})
       </h2>
       <!-- 评论排序 -->
       <div v-if="totalComments > 0" class="flex items-center gap-2 text-sm">
@@ -25,21 +25,19 @@
         <div class="flex items-center gap-3">
           <span class="text-sm text-gray-500">我的评分：</span>
           <div class="flex items-center gap-1 text-lg cursor-pointer">
-            <i 
+            <FaIcon
               v-for="i in 5" 
               :key="i"
-              :class="[
-                i <= (hoverRating || pendingRating) ? 'fa-solid' : 'fa-regular',
-                'fa-star hover:text-gray-600 dark:hover:text-gray-300 transition cursor-pointer'
-              ]"
+              :icon="i <= (hoverRating || pendingRating) ? 'fa6-solid:star' : 'fa6-regular:star'"
+              class="hover:text-gray-600 dark:hover:text-gray-300 transition cursor-pointer"
               @mouseenter="hoverRating = i"
               @mouseleave="hoverRating = 0"
               @click="pendingRating = i"
-            ></i>
+            />
           </div>
           <span v-if="pendingRating" class="text-sm text-gray-500">{{ pendingRating }} 分</span>
           <span v-if="userRating && !pendingRating" class="text-xs text-green-600">
-            <i class="fa-solid fa-check mr-1"></i>已评 {{ userRating }} 分
+            <Icon name="fa6-solid:check" class="mr-1" />已评 {{ userRating }} 分
           </span>
         </div>
         <button 
@@ -76,7 +74,7 @@
           <NuxtLink :to="`/user/${comment.user.id}`" class="flex-shrink-0">
             <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-gray-500 overflow-hidden">
               <img v-if="comment.user.avatar" :src="comment.user.avatar" class="w-full h-full object-cover" />
-              <i v-else class="fa-solid fa-user"></i>
+              <Icon name="fa6-solid:user" v-else />
             </div>
           </NuxtLink>
           <div class="flex-1 min-w-0">
@@ -88,7 +86,7 @@
                 :style="{ color: (comment.user as any).titleColor || '#6366f1', borderColor: (comment.user as any).titleColor || '#6366f1' }"
               >{{ (comment.user as any).title }}</span>
               <span v-if="comment.playTime" class="inline-flex items-center gap-1 text-xs text-gray-400">
-                <i class="fa-solid fa-clock leading-none"></i>
+                <Icon name="fa6-solid:clock" class="leading-none" />
                 <span class="leading-none">{{ comment.playTime }} 小时</span>
               </span>
               <span class="text-xs text-gray-500">{{ formatDate(comment.createdAt) }}</span>
@@ -119,7 +117,7 @@
                 class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
                 :class="{ 'text-red-500': comment.isLiked }"
               >
-                <i :class="comment.isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+                <Icon :name="comment.isLiked ? 'fa6-solid:heart' : 'fa6-regular:heart'" />
                 <span v-if="comment.likeCount > 0">{{ comment.likeCount }}</span>
                 <span v-else>点赞</span>
               </button>
@@ -127,28 +125,28 @@
                 @click="startReply(comment)"
                 class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition"
               >
-                <i class="fa-solid fa-reply"></i><span>回复</span>
+                <Icon name="fa6-solid:reply" /><span>回复</span>
               </button>
               <button 
                 v-if="isLoggedIn && comment.user.id !== currentUserId"
                 @click="$emit('reportComment', comment)"
-                class="flex items-center gap-1 text-gray-400 hover:text-orange-500 transition opacity-0 group-hover:opacity-100"
+                class="flex items-center gap-1 text-gray-400 hover:text-orange-500 transition"
               >
-                <i class="fa-solid fa-flag"></i><span>举报</span>
+                <Icon name="fa6-solid:flag" /><span>举报</span>
               </button>
               <button 
                 v-if="isLoggedIn && comment.user.id === currentUserId && canEdit(comment)"
                 @click="startEdit(comment)"
-                class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition opacity-0 group-hover:opacity-100"
+                class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition"
               >
-                <i class="fa-solid fa-pen"></i><span>编辑</span>
+                <Icon name="fa6-solid:pen" /><span>编辑</span>
               </button>
               <button 
                 v-if="isLoggedIn && (comment.user.id === currentUserId || isAdmin)"
                 @click="$emit('deleteComment', comment)"
-                class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
               >
-                <i class="fa-solid fa-trash"></i><span>删除</span>
+                <Icon name="fa6-solid:trash" /><span>删除</span>
               </button>
             </div>
 
@@ -178,7 +176,7 @@
                 <NuxtLink :to="`/user/${reply.user.id}`" class="flex-shrink-0">
                   <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-gray-500 overflow-hidden">
                     <img v-if="reply.user.avatar" :src="reply.user.avatar" class="w-full h-full object-cover" />
-                    <i v-else class="fa-solid fa-user text-xs"></i>
+                    <Icon name="fa6-solid:user" class="text-xs" v-else />
                   </div>
                 </NuxtLink>
                 <div class="flex-1 min-w-0">
@@ -193,28 +191,28 @@
                       class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
                       :class="{ 'text-red-500': reply.isLiked }"
                     >
-                      <i :class="reply.isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-[10px]"></i>
+                      <Icon :name="reply.isLiked ? 'fa6-solid:heart' : 'fa6-regular:heart'" class="text-[10px]" />
                       <span v-if="reply.likeCount > 0">{{ reply.likeCount }}</span>
                     </button>
                     <button 
                       @click="startReplyToReply(comment, reply)"
                       class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition"
                     >
-                      <i class="fa-solid fa-reply text-[10px]"></i><span>回复</span>
+                      <Icon name="fa6-solid:reply" class="text-[10px]" /><span>回复</span>
                     </button>
                     <button 
                       v-if="isLoggedIn && reply.user.id !== currentUserId"
                       @click="$emit('reportComment', reply)"
-                      class="text-gray-400 hover:text-orange-500 transition opacity-0 group-hover/reply:opacity-100"
+                      class="text-gray-400 hover:text-orange-500 transition"
                     >
-                      <i class="fa-solid fa-flag text-[10px]"></i>
+                      <Icon name="fa6-solid:flag" class="text-[10px]" />
                     </button>
                     <button 
                       v-if="isLoggedIn && (reply.user.id === currentUserId || isAdmin)"
                       @click="$emit('deleteComment', reply)"
-                      class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition opacity-0 group-hover/reply:opacity-100"
+                      class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
                     >
-                      <i class="fa-solid fa-trash text-[10px]"></i><span>删除</span>
+                      <Icon name="fa6-solid:trash" class="text-[10px]" /><span>删除</span>
                     </button>
                   </div>
                   
@@ -331,7 +329,7 @@ async function submitEdit(comment: any) {
   if (isEmptyRichText(editContent.value)) return
   editSubmitting.value = true
   try {
-    await authFetch(`/api/comments/${comment.id}`, {
+    await (authFetch as any)(`/api/comments/${comment.id}`, {
       method: 'PUT',
       body: { content: editContent.value },
     })
@@ -347,13 +345,13 @@ async function submitEdit(comment: any) {
 
 async function loadComments() {
   try {
-    const data = await $fetch<any>(`/api/games/${props.gameId}/comments`, {
+    const data: any = await $fetch(`/api/games/${props.gameId}/comments`, {
       params: {
         page: commentPage.value,
         limit: 20,
         sort: commentSort.value,
       },
-    })
+    } as any)
     comments.value = data.items
     commentPagination.value = data.pagination
   } catch (error) {
@@ -386,7 +384,7 @@ function cancelReply() {
 async function submitReply(comment: any) {
   if (isEmptyRichText(replyContent.value)) return
   try {
-    await authFetch(`/api/games/${props.gameId}/comment`, {
+    await (authFetch as any)(`/api/games/${props.gameId}/comment`, {
       method: 'POST',
       body: { content: replyContent.value, parentId: comment.id },
     })
@@ -401,7 +399,7 @@ async function submitReply(comment: any) {
 async function submitReplyToReply(parentComment: any) {
   if (isEmptyRichText(replyContent.value)) return
   try {
-    await authFetch(`/api/games/${props.gameId}/comment`, {
+    await (authFetch as any)(`/api/games/${props.gameId}/comment`, {
       method: 'POST',
       body: { content: replyContent.value, parentId: parentComment.id },
     })

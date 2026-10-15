@@ -12,7 +12,7 @@
 
       <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div class="flex items-start gap-3">
-          <i class="fa-solid fa-info-circle text-blue-500 mt-0.5"></i>
+          <Icon name="fa6-solid:circle-info" class="text-blue-500 mt-0.5" />
           <div class="flex-1 text-sm">
             <p class="font-medium text-blue-900 dark:text-blue-100 mb-1">白名单规则</p>
             <ul class="text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
@@ -34,7 +34,7 @@
           :key="index"
           class="flex items-center gap-3 p-3 rounded-lg border dark:border-zinc-700"
         >
-          <i class="fa-solid fa-globe text-gray-400"></i>
+          <Icon name="fa6-solid:globe" class="text-gray-400" />
           <span class="flex-1 font-mono text-sm">{{ domain }}</span>
           <span 
             v-if="isOfficialDomain(domain)"
@@ -58,7 +58,7 @@
       </p>
       <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
         <div class="flex items-start gap-3">
-          <i class="fa-solid fa-exclamation-triangle text-yellow-500 mt-0.5"></i>
+          <Icon name="fa6-solid:triangle-exclamation" class="text-yellow-500 mt-0.5" />
           <div class="flex-1 text-sm">
             <p class="font-medium text-yellow-900 dark:text-yellow-100 mb-1">注意事项</p>
             <ul class="text-yellow-700 dark:text-yellow-300 space-y-1 list-disc list-inside">

@@ -28,7 +28,7 @@
       </div>
 
       <div v-if="!tagData.games?.length" class="text-center text-gray-500 py-16">
-        <i class="fa-solid fa-gamepad text-4xl mb-4"></i>
+        <Icon name="fa6-solid:gamepad" class="text-4xl mb-4" />
         <p>暂无相关游戏</p>
       </div>
 
@@ -44,12 +44,14 @@
 
     <!-- 加载中 -->
     <div v-else-if="pending" class="text-center py-20">
-      <i class="fa-solid fa-spinner fa-spin text-3xl text-gray-400"></i>
+      <Icon name="fa6-solid:spinner" class="fa-spin text-3xl text-gray-400" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { TagDetailResponse } from '~/types/api'
+
 const route = useRoute()
 const router = useRouter()
 
@@ -57,7 +59,7 @@ const router = useRouter()
 const tagIdOrSlug = computed(() => route.params.id as string)
 const currentPage = ref(parseInt(route.query.page as string) || 1)
 
-const { data: tagData, pending } = await useFetch(() => `/api/tags/${tagIdOrSlug.value}`, {
+const { data: tagData, pending } = await useAuthFetch<TagDetailResponse>(() => `/api/tags/${tagIdOrSlug.value}`, {
   key: `tag-${tagIdOrSlug.value}`,
   query: computed(() => ({
     page: currentPage.value,

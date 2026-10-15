@@ -25,6 +25,6 @@ export default defineEventHandler(async (event) => {
       ...data,
       icon: data.icon || null,
       domains: data.domains.map(domain => domain.trim().toLowerCase()).filter(Boolean),
-    },
+    } as any,
   })
 })

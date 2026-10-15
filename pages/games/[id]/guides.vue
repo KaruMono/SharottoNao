@@ -7,7 +7,7 @@
           :to="`/games/${gameId}`"
           class="p-2 -ml-2 sm:ml-0 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
         >
-          <i class="fa-solid fa-arrow-left"></i>
+          <Icon name="fa6-solid:arrow-left" />
         </NuxtLink>
         <div class="min-w-0">
           <h1 class="text-xl sm:text-2xl font-bold">攻略列表</h1>
@@ -19,7 +19,7 @@
         @click="openCreateModal"
         class="shrink-0 px-3 sm:px-4 py-2 bg-gray-800 dark:bg-zinc-600 text-white rounded-lg text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 transition flex items-center gap-2"
       >
-        <i class="fa-solid fa-plus"></i>发布攻略
+        <Icon name="fa6-solid:plus" />发布攻略
       </button>
     </div>
 
@@ -30,6 +30,9 @@
         :key="guide.id"
         class="bg-white dark:bg-zinc-800 rounded-xl p-4 sm:p-5 shadow hover:shadow-lg transition cursor-pointer"
         @click="openGuide(guide)"
+        @keydown.enter="openGuide(guide)"
+        tabindex="0"
+        role="link"
       >
         <div class="flex items-start justify-between gap-3 sm:gap-4">
           <div class="flex-1 min-w-0">
@@ -38,10 +41,10 @@
             <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-xs text-gray-400">
               <span class="flex items-center gap-1">
                 <img v-if="guide.user.avatar" :src="guide.user.avatar" class="w-4 h-4 rounded-full" />
-                <i v-else class="fa-solid fa-user"></i>
+                <Icon name="fa6-solid:user" v-else />
                 {{ guide.user.username }}
               </span>
-              <span><i class="fa-solid fa-eye mr-1"></i>{{ guide.viewCount }}</span>
+              <span><Icon name="fa6-solid:eye" class="mr-1" />{{ guide.viewCount }}</span>
               <span>{{ formatDate(guide.createdAt) }}</span>
             </div>
           </div>
@@ -51,21 +54,21 @@
               class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition"
               title="编辑攻略"
             >
-              <i class="fa-solid fa-pen"></i>
+              <Icon name="fa6-solid:pen" />
             </button>
             <button 
               @click.stop="handleDeleteGuide(guide)"
               class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
               title="删除攻略"
             >
-              <i class="fa-solid fa-trash"></i>
+              <Icon name="fa6-solid:trash" />
             </button>
           </div>
         </div>
       </div>
 
       <div v-if="!guides?.length" class="text-center py-16 text-gray-500">
-        <i class="fa-solid fa-book text-4xl mb-4"></i>
+        <Icon name="fa6-solid:book" class="text-4xl mb-4" />
         <p>暂无攻略</p>
         <p v-if="isLoggedIn" class="text-sm mt-2">点击上方按钮发布第一篇攻略</p>
       </div>
@@ -154,17 +157,17 @@
                     class="inline-flex min-w-0 max-w-full items-center gap-1.5 hover:text-gray-700 dark:hover:text-gray-300 transition"
                   >
                     <img v-if="selectedGuide.user.avatar" :src="selectedGuide.user.avatar" class="w-4 h-4 rounded-full" />
-                    <i v-else class="fa-solid fa-user text-gray-400"></i>
+                    <Icon name="fa6-solid:user" class="text-gray-400" v-else />
                     <span class="truncate">{{ selectedGuide.user.username }}</span>
                   </NuxtLink>
                   <span class="inline-flex items-center gap-1.5">
-                    <i class="fa-solid fa-calendar text-gray-400"></i>{{ formatDate(selectedGuide.createdAt) }}
+                    <Icon name="fa6-solid:calendar" class="text-gray-400" />{{ formatDate(selectedGuide.createdAt) }}
                   </span>
                   <span class="inline-flex items-center gap-1.5">
-                    <i class="fa-solid fa-eye text-gray-400"></i>{{ selectedGuide.viewCount }}
+                    <Icon name="fa6-solid:eye" class="text-gray-400" />{{ selectedGuide.viewCount }}
                   </span>
                   <span class="inline-flex items-center gap-1.5">
-                    <i class="fa-solid fa-heart text-gray-400"></i>{{ selectedGuide.likeCount || 0 }}
+                    <Icon name="fa6-solid:heart" class="text-gray-400" />{{ selectedGuide.likeCount || 0 }}
                   </span>
                 </div>
               </div>
@@ -177,7 +180,7 @@
                     title="编辑"
                     aria-label="编辑"
                   >
-                    <i class="fa-solid fa-pen"></i>
+                    <Icon name="fa6-solid:pen" />
                   </button>
                   <button
                     @click="handleDeleteGuide(selectedGuide)"
@@ -185,7 +188,7 @@
                     title="删除"
                     aria-label="删除"
                   >
-                    <i class="fa-solid fa-trash"></i>
+                    <Icon name="fa6-solid:trash" />
                   </button>
                 </template>
                 <button
@@ -194,7 +197,7 @@
                   title="关闭"
                   aria-label="关闭"
                 >
-                  <i class="fa-solid fa-xmark"></i>
+                  <Icon name="fa6-solid:xmark" />
                 </button>
               </div>
             </div>
@@ -212,7 +215,7 @@
                 class="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-zinc-600 hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center justify-center gap-2"
                 :class="selectedGuide.isLiked ? 'text-red-500 border-red-200 dark:border-red-800' : 'text-gray-600 dark:text-gray-300'"
               >
-                <i :class="selectedGuide.isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+                <Icon :name="selectedGuide.isLiked ? 'fa6-solid:heart' : 'fa6-regular:heart'" />
                 <span>{{ selectedGuide.likeCount || '点赞' }}</span>
               </button>
               <button
@@ -220,7 +223,7 @@
                 @click="openGuideReportModal(selectedGuide)"
                 class="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition flex items-center justify-center gap-2"
               >
-                <i class="fa-solid fa-flag"></i>
+                <Icon name="fa6-solid:flag" />
                 举报
               </button>
             </div>
@@ -264,8 +267,11 @@
                 v-model="reportForm.detail"
                 rows="3"
                 class="w-full px-3 py-2 rounded-lg border dark:bg-zinc-700 dark:border-zinc-600"
-                placeholder="可选"
+                :required="reportForm.reason === '其他'"
+                maxlength="1000"
+                :placeholder="reportForm.reason === '其他' ? '请详细说明举报理由（必填）' : '可选'"
               ></textarea>
+              <span v-if="reportDetailMissing" class="block mt-1 text-xs text-red-500">选择“其他”时，请填写具体举报理由</span>
             </label>
           </div>
           <div class="flex justify-end gap-2 mt-6">
@@ -277,7 +283,7 @@
             </button>
             <button
               @click="submitGuideReport"
-              :disabled="reportSubmitting"
+              :disabled="reportDetailMissing || reportSubmitting"
               class="px-4 py-2 bg-gray-800 dark:bg-zinc-600 text-white rounded-lg text-sm hover:bg-gray-700 dark:hover:bg-zinc-500 disabled:opacity-50"
             >
               {{ reportSubmitting ? '提交中...' : '提交举报' }}
@@ -324,13 +330,15 @@ const user = computed(() => session.value as any)
 
 // 获取游戏信息（使用独立的 key 避免与详情页缓存冲突）
 // 注意：不使用 pick 以避免缓存污染
-const { data: gameData } = await useAuthFetch<Pick<GameDetail, 'title'>>(`/api/games/${gameId.value}`, {
+const { data: gameData } = await useAuthFetch<Pick<GameDetail, 'title' | 'coverImage'>>(`/api/games/${gameId.value}`, {
   key: `game-guides-${gameId.value}`,
 })
-const game = computed(() => gameData.value ? { title: gameData.value.title } : null)
+const game = computed(() => gameData.value
+  ? { title: gameData.value.title, coverImage: gameData.value.coverImage }
+  : null)
 
 // 获取攻略列表
-const { data: guidesData, refresh } = await useFetch<GameGuidesResponse>(`/api/games/${gameId.value}/guides`, {
+const { data: guidesData, refresh } = await (useFetch as any)(`/api/games/${gameId.value}/guides`, {
   key: `game-${gameId.value}-guides`,
   query: computed(() => ({
     page: currentPage.value,
@@ -439,8 +447,14 @@ function closeReportModal() {
   reportingGuide.value = null
 }
 
+const reportDetailMissing = computed(() => reportForm.reason === '其他' && !reportForm.detail.trim())
+
 async function submitGuideReport() {
   if (!reportingGuide.value || reportSubmitting.value) return
+  if (reportDetailMissing.value) {
+    toast.error('选择“其他”时，请填写具体举报理由')
+    return
+  }
   reportSubmitting.value = true
   try {
     await authFetch('/api/reports', {
@@ -449,7 +463,7 @@ async function submitGuideReport() {
         type: 'GUIDE',
         targetId: reportingGuide.value.id,
         reason: reportForm.reason,
-        detail: reportForm.detail || null,
+        detail: reportForm.detail.trim() || null,
       },
     })
     toast.success('举报已提交')
@@ -462,15 +476,7 @@ async function submitGuideReport() {
 }
 
 async function openGuide(guide: GameGuideItem) {
-  // 增加浏览量
-  try {
-    await $fetch(`/api/guides/${guide.id}/view`, { method: 'POST' })
-  } catch {
-    // 忽略错误
-  }
-  selectedGuide.value = guide
-  await nextTick()
-  bindGuideImages()
+  await router.push(`/games/${gameId.value}/guides/${guide.id}`)
 }
 
 function bindGuideImages() {
@@ -580,7 +586,7 @@ useHead({
   background-color: rgb(243, 244, 246);
 }
 
-:global(.dark) .guide-icon-btn:hover {
+.dark .guide-icon-btn:hover {
   background-color: rgb(63, 63, 70);
 }
 
