@@ -1,10 +1,10 @@
-# Charlotte
+# Sharotto
 
-一个基于 Nuxt 3 的 Galgame 资源数据库系统，支持用户协作编辑、资源分享、评分评论等功能。
+一个基于 Nuxt 4 的 Galgame 资源数据库系统，支持用户协作编辑、资源分享、评分评论等功能。
 
 ## 技术栈
 
-- **框架**: Nuxt 3 (Vue 3 + Nitro)
+- **框架**: Nuxt 4 (Vue 3 + Nitro)
 - **样式**: Tailwind CSS + FontAwesome 图标
 - **数据库**: PostgreSQL + Prisma ORM
 - **缓存**: Redis（可选，不配置则使用内存缓存）
